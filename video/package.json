@@ -13,7 +13,10 @@
     "trailer:es": "remotion render src/index.ts TrailerES ../dist/video/go-link-trailer-es.mp4 --codec=h264 --crf=18",
     "trailer:pt": "remotion render src/index.ts TrailerPT ../dist/video/go-link-trailer-pt.mp4 --codec=h264 --crf=18",
     "trailer:subs": "remotion render src/index.ts TrailerEN-subsES ../dist/video/go-link-trailer-en-subs-es.mp4 --codec=h264 --crf=18 && remotion render src/index.ts TrailerEN-subsPT ../dist/video/go-link-trailer-en-subs-pt.mp4 --codec=h264 --crf=18",
-    "trailers": "npm run trailer && npm run trailer:es && npm run trailer:pt && npm run trailer:subs"
+    "trailers": "npm run trailer && npm run trailer:es && npm run trailer:pt && npm run trailer:subs",
+    "demo:es": "remotion render src/index.ts DemoES ../dist/video/go-link-demo-es.mp4 --codec=h264 --crf=18 && npm run srt",
+    "demo:pt": "remotion render src/index.ts DemoPT ../dist/video/go-link-demo-pt.mp4 --codec=h264 --crf=18 && npm run srt",
+    "demos": "npm run demo && npm run demo:es && npm run demo:pt"
   },
   "dependencies": {
     "@fontsource/chakra-petch": "5.3.0",
