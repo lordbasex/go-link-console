@@ -99,7 +99,7 @@ export const docsPt: Docs = {
         { t: "h2", id: "core", text: "Baixe o emulador" },
         {
           t: "p",
-          text: "Em **Meu dispositivo**, ou na janela do app (**Emulators › MAME › ROMs**), clique no botão para baixar o emulador e a lista de jogos dele. O go-link os baixa do servidor oficial do libretro para o seu sistema. Pelo terminal: `go-link-device core download`.",
+          text: "Em **Meu dispositivo**, ou na janela do app (**Core › MAME › ROMs**), clique no botão para baixar o emulador e a lista de jogos dele. O go-link os baixa do servidor oficial do libretro para o seu sistema. Pelo terminal: `go-link-device core download`.",
         },
         { t: "h2", id: "folder", text: "Sua pasta de ROMs" },
         {
@@ -126,7 +126,8 @@ export const docsPt: Docs = {
         },
         { t: "note", tone: "info", text: "Os sets precisam ser do **MAME 0.78**. Um set de um MAME recente costuma ter outros nomes de arquivo e aparece como Faltam arquivos." },
         { t: "h2", id: "hd", text: "Jogos go-link HD (beta)" },
-        { t: "p", text: "O go-link também traz o **go-link HD**, seu próprio motor de jogos 2D, sem nada para baixar. **Nova partida** mostra seus dois jogos integrados, **go-link HD: Platformer** e **go-link HD: Showcase** (um kart numa pista Mode 7, uma estrada, uma caverna com luzes, o mar e efeitos de cor; L e R trocam de cena), e eles abrem salas como qualquer jogo. Os jogos feitos para ele são arquivos `.glhd`: coloque-os na sua pasta de ROMs, junto aos zip. O [Willy Maker](https://maker.go-link.org) os exporta pela aba Exportar." },
+        { t: "p", text: "O go-link também traz o **go-link HD**, seu próprio motor de jogos 2D, sem nada para baixar. **Nova partida** mostra seus dois jogos integrados, **go-link HD: Platformer** e **go-link HD: Showcase** (um kart numa pista Mode 7, uma estrada, uma caverna com luzes, o mar e efeitos de cor; L e R trocam de cena), e eles abrem salas como qualquer jogo. Os jogos feitos para ele são arquivos `.glhd`: coloque-os na pasta de jogos dele (`~/go-link/hd-games`; **Core › go-link HD** na janela do app mostra a pasta e deixa escolher outra; os que estiverem na sua pasta de ROMs continuam funcionando). O [Willy Maker](https://maker.go-link.org) os exporta pela aba Exportar." },
+        { t: "p", text: "**Um jogo grátis para começar:** na primeira vez que você vincula um navegador, o seu go-link baixa o **ANTÍDOTO**, um run-and-gun cooperativo para um ou dois jogadores feito com go-link HD, e abre uma sala com ele, pronta para jogar. Você pode mantê-la, arquivá-la ou excluí-la como qualquer sala. **Core › go-link HD › Jogos** baixa de novo, em 720p ou 1080p, e **Tela** escolhe o tamanho das salas HD (720p por padrão; 1080p precisa de um computador que o codifique a 60 quadros por segundo) e o codec." },
         { t: "h2", id: "rights", text: "Seus jogos, sua responsabilidade" },
         { t: "p", text: "O go-link nunca inclui nem baixa jogos. Use apenas arquivos que você tem o direito de usar; veja os [termos de uso](/terms)." },
       ],
@@ -437,8 +438,9 @@ export const docsPt: Docs = {
           head: ["Seção", "O que você encontra"],
           rows: [
             ["Resumo", "As salas, quem está jogando, CPU, memória, rede, transmissão, jogadores e latência; um aviso para baixar quando sai uma versão nova; Abrir o go-link, Vincular outro navegador e Desvincular todos; e Este computador: hardware, ID do dispositivo e versão."],
-            ["Emuladores › MAME › ROMs", "O estado do emulador, sua pasta de ROMs, uma área para soltar sets .zip e copiá-los para lá, e quantos sets existem, quantos rodam e quanto espaço ocupam. Cada jogo e Jogar estão no site."],
-            ["Emuladores › MAME › Imagens", "Quais jogos têm imagens e onde colocá-las."],
+            ["Core › MAME › ROMs", "O estado do emulador, sua pasta de ROMs, uma área para soltar sets .zip e copiá-los para lá, e quantos sets existem, quantos rodam e quanto espaço ocupam. Cada jogo e Jogar estão no site."],
+            ["Core › MAME › Imagens", "Quais jogos têm imagens e onde colocá-las."],
+            ["Core › go-link HD", "Jogos: a pasta de jogos HD, quantos ela tem e os jogos grátis para baixar (720p ou 1080p). Tela: o tamanho (720p ou 1080p) e o codec das salas HD, para as salas iniciadas depois."],
             ["Ajustes", "Geral (o idioma da janela: inglês, espanhol ou português), qual imagem mostrar, a pasta de imagens, a qualidade de vídeo das salas de jogo (Alta, Normal, Economia), e informações de salas e rede."],
           ],
         },

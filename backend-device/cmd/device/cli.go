@@ -49,6 +49,12 @@ Usage:
                                          show or change which thumbnail is shown
   device video quality [high|normal|saver]
                                          show or change the video quality of game rooms
+  device hd dir [PATH|default]           show or change go-link HD's games folder
+  device hd screen [720p|1080p] [auto|vp8]
+                                         show or change go-link HD rooms' size and codec
+  device hd games                        list go-link HD's free starter games
+  device hd download GAME [--size 720p|1080p]
+                                         download a starter game into the games folder
   device panel token [--new]             show (or replace) the web panel token
   device rec list [--json]               list the recordings of game rooms (~/go-link/rec)
   device rec rm ID...|--all              delete recordings
@@ -107,6 +113,10 @@ func runCommand(args []string) (handled bool, err error) {
 		"thumbnails kind":     cmdThumbnailsKind,
 		"panel token":         cmdPanelToken,
 		"video quality":       cmdVideoQuality,
+		"hd dir":              cmdHDDir,
+		"hd screen":           cmdHDScreen,
+		"hd games":            cmdHDGames,
+		"hd download":         cmdHDDownload,
 		"rec list":            cmdRecList,
 		"rec rm":              cmdRecRm,
 		"telemetry rooms":     cmdTelemetryRooms,

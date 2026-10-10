@@ -28,6 +28,8 @@ type resetParts struct {
 	settings   *services.SettingsService
 	library    *services.LibraryService
 	romsDir    string // the default ROM folder
+	hdDir      string // go-link HD's default games folder
+	hdGames    *services.HDGamesService
 	config     func(change func(*models.Config)) error
 }
 
@@ -57,6 +59,19 @@ func factoryReset(ctx context.Context, p resetParts) error {
 		errs = append(errs, err)
 	} else if err := p.library.SetDir(p.romsDir); err != nil {
 		errs = append(errs, err)
+	}
+	if err := p.settings.SetHDScreen(models.HD720p, models.HDAuto); err != nil {
+		errs = append(errs, err)
+	}
+	if p.hdDir != "" {
+		if err := os.MkdirAll(p.hdDir, 0o755); err != nil {
+			errs = append(errs, err)
+		} else if err := p.library.SetHDDir(p.hdDir); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if p.hdGames != nil {
+		p.hdGames.ResetOffered() // offered again on the next link
 	}
 	if err := p.config(func(c *models.Config) {
 		*c = c.FactoryDefaults()

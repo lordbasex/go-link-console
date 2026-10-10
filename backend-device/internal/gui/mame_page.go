@@ -19,7 +19,7 @@ const (
 	mameTabThumbs
 )
 
-// mamePage is the MAME emulator, under Emulators in the sidebar: a header
+// mamePage is the MAME emulator, under Core in the sidebar: a header
 // with the core's state and two tabs, the ROM sets and their thumbnails.
 type mamePage struct {
 	u        *ui

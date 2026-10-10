@@ -41,7 +41,9 @@ var romNameRE = regexp.MustCompile(`^[a-z0-9_]{1,16}$`)
 type LibraryService struct {
 	dirMu  sync.RWMutex
 	dir    string // guarded by dirMu
+	hdDir  string // go-link HD's games folder ("": none), guarded by dirMu
 	onDir  func(dir string)
+	onHD   func(dir string)
 	status *StatusService
 	log    *slog.Logger
 
@@ -221,12 +223,35 @@ func (l *LibraryService) IsHD(name string) bool {
 	if _, err := os.Stat(filepath.Join(l.Dir(), name+".zip")); err == nil {
 		return false
 	}
-	_, err := os.Stat(filepath.Join(l.Dir(), name+glhd.Ext))
-	if err == nil {
+	if l.hdPackage(name) != "" {
 		return true
 	}
 	_, ok := glhd.FindDemo(name)
 	return ok
+}
+
+// HDPackage is the file of a go-link HD package of the folders, or "".
+func (l *LibraryService) HDPackage(name string) string {
+	if !romNameRE.MatchString(name) {
+		return ""
+	}
+	return l.hdPackage(name)
+}
+
+// hdPackage is the file of a go-link HD package (name.glhd), or "": the
+// HD games folder's first, then the ROM folder's (where packages lived
+// before the HD folder).
+func (l *LibraryService) hdPackage(name string) string {
+	for _, dir := range []string{l.HDDir(), l.Dir()} {
+		if dir == "" {
+			continue
+		}
+		p := filepath.Join(dir, name+glhd.Ext)
+		if fi, err := os.Stat(p); err == nil && !fi.IsDir() {
+			return p
+		}
+	}
+	return ""
 }
 
 // demo returns the engine's built-in game of a name, when no file of the
@@ -236,10 +261,11 @@ func (l *LibraryService) demo(name string) (glhd.Demo, bool) {
 	if !ok {
 		return d, false
 	}
-	for _, ext := range []string{".zip", glhd.Ext} {
-		if _, err := os.Stat(filepath.Join(l.Dir(), name+ext)); err == nil {
-			return d, false
-		}
+	if _, err := os.Stat(filepath.Join(l.Dir(), name+".zip")); err == nil {
+		return d, false
+	}
+	if l.hdPackage(name) != "" {
+		return d, false
 	}
 	return d, true
 }
@@ -302,6 +328,9 @@ func (l *LibraryService) RomPath(name string) string {
 		return glhd.DemoPath(d)
 	}
 	if l.IsHD(name) {
+		if p := l.hdPackage(name); p != "" {
+			return p
+		}
 		return filepath.Join(l.Dir(), name+glhd.Ext)
 	}
 	return filepath.Join(l.Dir(), name+".zip")
@@ -421,6 +450,44 @@ func (l *LibraryService) Dir() string {
 
 // OnDirChange registers a callback that persists a new folder.
 func (l *LibraryService) OnDirChange(fn func(dir string)) { l.onDir = fn }
+
+// HDDir returns go-link HD's games folder ("" when there is none).
+func (l *LibraryService) HDDir() string {
+	l.dirMu.RLock()
+	defer l.dirMu.RUnlock()
+	return l.hdDir
+}
+
+// OnHDDirChange registers a callback that persists a new HD games folder.
+func (l *LibraryService) OnHDDirChange(fn func(dir string)) { l.onHD = fn }
+
+// UseHDDir sets go-link HD's games folder without checking or saving it
+// (at start: the folder is made if it is missing).
+func (l *LibraryService) UseHDDir(dir string) {
+	l.dirMu.Lock()
+	l.hdDir = dir
+	l.dirMu.Unlock()
+}
+
+// SetHDDir switches go-link HD's games folder and rescans. Nothing is
+// copied or moved.
+func (l *LibraryService) SetHDDir(dir string) error {
+	dir = filepath.Clean(strings.TrimSpace(dir))
+	if !filepath.IsAbs(dir) {
+		return ErrBadFolder
+	}
+	info, err := os.Stat(dir)
+	if err != nil || !info.IsDir() {
+		return ErrBadFolder
+	}
+	l.UseHDDir(dir)
+	if l.onHD != nil {
+		l.onHD(dir)
+	}
+	l.log.Info("go-link HD games folder changed", "dir", dir)
+	l.Scan()
+	return nil
+}
 
 // Errors returned when choosing a folder or importing ROMs.
 var (
@@ -628,7 +695,38 @@ func (l *LibraryService) Scan() {
 			zips[name] = true
 		}
 	}
+	// go-link HD's games folder comes first: its package wins over one of
+	// the same name in the ROM folder.
+	type entry struct {
+		dir string
+		f   os.DirEntry
+	}
+	var entries []entry
+	hdDir := l.HDDir()
+	var hdGames int
+	var hdBytes int64
+	seen := map[string]bool{}
+	if hdDir != "" && hdDir != l.Dir() {
+		hdFiles, _ := os.ReadDir(hdDir)
+		for _, f := range hdFiles {
+			if name, ok := strings.CutSuffix(f.Name(), glhd.Ext); ok && !f.IsDir() && romNameRE.MatchString(name) {
+				entries = append(entries, entry{hdDir, f})
+				if info, err := f.Info(); err == nil {
+					hdGames++
+					hdBytes += info.Size()
+				}
+				seen[name] = true
+			}
+		}
+	}
 	for _, f := range files {
+		if name, ok := strings.CutSuffix(f.Name(), glhd.Ext); ok && seen[name] {
+			continue
+		}
+		entries = append(entries, entry{l.Dir(), f})
+	}
+	for _, e := range entries {
+		f := e.f
 		name, ok := strings.CutSuffix(f.Name(), ".zip")
 		hd := false
 		if !ok {
@@ -648,7 +746,7 @@ func (l *LibraryService) Scan() {
 		if hd {
 			// go-link HD's packages tell their own title and players
 			rom.Kind = models.KindHD
-			m, err := glhd.Read(filepath.Join(l.Dir(), f.Name()))
+			m, err := glhd.Read(filepath.Join(e.dir, f.Name()))
 			if err != nil {
 				rom.Check = &romcheck.Result{Status: romcheck.StatusBadZip}
 			} else {
@@ -725,7 +823,8 @@ func (l *LibraryService) Scan() {
 	}
 	ix := newRomIndex(roms)
 	l.index.Store(ix)
-	lib := models.Library{Dir: l.Dir(), Roms: roms, Summary: ix.summary(l.revision.Add(1)), Core: core, ThumbnailsDir: thumbsDir, ThumbKind: string(l.ThumbnailKind()), ThumbnailsBytes: thumbnails.Size(thumbsDir)}
+	lib := models.Library{Dir: l.Dir(), Roms: roms, Summary: ix.summary(l.revision.Add(1)), Core: core, ThumbnailsDir: thumbsDir, ThumbKind: string(l.ThumbnailKind()), ThumbnailsBytes: thumbnails.Size(thumbsDir),
+		HDDir: hdDir, HDGames: hdGames, HDBytes: hdBytes}
 	if d, ok := sysinfo.DiskOf(l.Dir()); ok {
 		lib.Disk = &d
 	}

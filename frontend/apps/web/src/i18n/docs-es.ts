@@ -99,7 +99,7 @@ export const docsEs: Docs = {
         { t: "h2", id: "core", text: "Descarga el emulador" },
         {
           t: "p",
-          text: "En **Mi dispositivo**, o en la ventana de la app (**Emulators › MAME › ROMs**), haz clic en el botón para descargar el emulador y su lista de juegos. go-link los descarga del servidor oficial de libretro para tu sistema. Desde una terminal: `go-link-device core download`.",
+          text: "En **Mi dispositivo**, o en la ventana de la app (**Core › MAME › ROMs**), haz clic en el botón para descargar el emulador y su lista de juegos. go-link los descarga del servidor oficial de libretro para tu sistema. Desde una terminal: `go-link-device core download`.",
         },
         { t: "h2", id: "folder", text: "Tu carpeta de ROMs" },
         {
@@ -126,7 +126,8 @@ export const docsEs: Docs = {
         },
         { t: "note", tone: "info", text: "Los sets tienen que ser de **MAME 0.78**. Un set de un MAME reciente suele tener otros nombres de archivo y aparece como Faltan archivos." },
         { t: "h2", id: "hd", text: "Juegos go-link HD (beta)" },
-        { t: "p", text: "go-link también trae **go-link HD**, su propio motor de juegos 2D, sin nada que descargar. **Nueva partida** muestra sus dos juegos integrados, **go-link HD: Platformer** y **go-link HD: Showcase** (un kart en una pista Mode 7, una ruta, una cueva con luces, el mar y efectos de color; L y R cambian de escena), y abren salas como cualquier juego. Los juegos hechos para él son archivos `.glhd`: ponlos en tu carpeta de ROMs, junto a los zip. [Willy Maker](https://maker.go-link.org) los exporta desde su pestaña Exportar." },
+        { t: "p", text: "go-link también trae **go-link HD**, su propio motor de juegos 2D, sin nada que descargar. **Nueva partida** muestra sus dos juegos integrados, **go-link HD: Platformer** y **go-link HD: Showcase** (un kart en una pista Mode 7, una ruta, una cueva con luces, el mar y efectos de color; L y R cambian de escena), y abren salas como cualquier juego. Los juegos hechos para él son archivos `.glhd`: ponlos en su propia carpeta de juegos (`~/go-link/hd-games`; **Core › go-link HD** en la ventana de la app la muestra y te deja elegir otra; los que estén en tu carpeta de ROMs siguen funcionando). [Willy Maker](https://maker.go-link.org) los exporta desde su pestaña Exportar." },
+        { t: "p", text: "**Un juego gratis para empezar:** la primera vez que vinculas un navegador, tu go-link descarga **ANTÍDOTO**, un run-and-gun cooperativo para uno o dos jugadores hecho con go-link HD, y abre una sala con él, lista para jugar. Puedes conservarla, archivarla o eliminarla como cualquier sala. **Core › go-link HD › Juegos** lo vuelve a descargar, en 720p o 1080p, y **Pantalla** elige el tamaño de las salas HD (720p por defecto; 1080p necesita una computadora que lo codifique a 60 cuadros por segundo) y su códec." },
         { t: "h2", id: "rights", text: "Tus juegos, tu responsabilidad" },
         { t: "p", text: "go-link nunca incluye ni descarga juegos. Usa solo archivos que tengas derecho a usar; mira los [términos de uso](/terms)." },
       ],
@@ -437,8 +438,9 @@ export const docsEs: Docs = {
           head: ["Sección", "Qué encuentras"],
           rows: [
             ["Resumen", "Las salas, quién juega, CPU, memoria, red, transmisión, jugadores y latencia; un aviso para descargar cuando hay una versión nueva; Abrir go-link, Vincular otro navegador y Desvincular todos; y Esta computadora: hardware, ID del dispositivo y versión."],
-            ["Emuladores › MAME › ROMs", "El estado del emulador, tu carpeta de ROMs, una zona para soltar sets .zip y copiarlos ahí, y cuántos sets hay, cuántos funcionan y cuánto ocupan. Cada juego y Jugar están en el sitio."],
-            ["Emuladores › MAME › Imágenes", "Qué juegos tienen imágenes y dónde ponerlas."],
+            ["Core › MAME › ROMs", "El estado del emulador, tu carpeta de ROMs, una zona para soltar sets .zip y copiarlos ahí, y cuántos sets hay, cuántos funcionan y cuánto ocupan. Cada juego y Jugar están en el sitio."],
+            ["Core › MAME › Imágenes", "Qué juegos tienen imágenes y dónde ponerlas."],
+            ["Core › go-link HD", "Juegos: la carpeta de juegos HD, cuántos tiene y los juegos gratis para descargar (720p o 1080p). Pantalla: el tamaño (720p o 1080p) y el códec de las salas HD, para las salas que se inicien después."],
             ["Ajustes", "General (el idioma de la ventana: inglés, español o portugués), qué imagen mostrar, la carpeta de imágenes, la calidad de video de las salas de juego (Alta, Normal, Ahorro), e información de salas y red."],
           ],
         },

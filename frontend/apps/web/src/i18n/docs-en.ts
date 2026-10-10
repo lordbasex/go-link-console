@@ -99,7 +99,7 @@ export const docsEn: Docs = {
         { t: "h2", id: "core", text: "Download the emulator" },
         {
           t: "p",
-          text: "In **My device**, or in the app window (**Emulators › MAME › ROMs**), click the button to download the emulator and its game list. go-link downloads them from the official libretro build server for your system. From a terminal: `go-link-device core download`.",
+          text: "In **My device**, or in the app window (**Core › MAME › ROMs**), click the button to download the emulator and its game list. go-link downloads them from the official libretro build server for your system. From a terminal: `go-link-device core download`.",
         },
         { t: "h2", id: "folder", text: "Your ROM folder" },
         {
@@ -126,7 +126,8 @@ export const docsEn: Docs = {
         },
         { t: "note", tone: "info", text: "Sets must match **MAME 0.78**. A set from a recent MAME often has other file names and shows as Missing files." },
         { t: "h2", id: "hd", text: "go-link HD games (beta)" },
-        { t: "p", text: "go-link also comes with **go-link HD**, its own 2D game engine, with nothing to download. **New game** lists its two built-in games, **go-link HD: Platformer** and **go-link HD: Showcase** (a kart on a Mode 7 track, a road, a cave with lights, the sea and color effects; L and R change the scene), and they open rooms like any game. Games made for it are `.glhd` files: put them in your ROM folder, next to the zips. [Willy Maker](https://maker.go-link.org) exports them from its Export tab." },
+        { t: "p", text: "go-link also comes with **go-link HD**, its own 2D game engine, with nothing to download. **New game** lists its two built-in games, **go-link HD: Platformer** and **go-link HD: Showcase** (a kart on a Mode 7 track, a road, a cave with lights, the sea and color effects; L and R change the scene), and they open rooms like any game. Games made for it are `.glhd` files: put them in its own games folder (`~/go-link/hd-games`; **Core › go-link HD** in the app window shows it and lets you choose another; packages in your ROM folder still work). [Willy Maker](https://maker.go-link.org) exports them from its Export tab." },
+        { t: "p", text: "**A free game to start:** the first time you link a browser, your go-link downloads **ANTÍDOTO**, a cooperative run-and-gun for one or two players made with go-link HD, and opens a room with it, ready to play. It is yours to keep, archive or delete like any room. **Core › go-link HD › Games** downloads it again, in 720p or 1080p, and **Screen** sets the size of HD rooms (720p by default; 1080p needs a computer that encodes it at 60 frames a second) and their codec." },
         { t: "h2", id: "rights", text: "Your games, your responsibility" },
         { t: "p", text: "go-link never includes or downloads games. Use only files you have the right to use; see the [terms of use](/terms)." },
       ],
@@ -437,8 +438,9 @@ export const docsEn: Docs = {
           head: ["Section", "What you find"],
           rows: [
             ["Overview", "The rooms, people playing, CPU, memory, network, streaming, players and latency; a download notice when a new version is out; Open go-link, Link another browser and Unlink all; and This computer: hardware, device ID and version."],
-            ["Emulators › MAME › ROMs", "The emulator status, your ROM folder, a drop zone to copy .zip sets into it, and how many sets there are, how many run and how much space they take. Every game and Play are on the website."],
-            ["Emulators › MAME › Thumbnails", "Which games have pictures, and where to put them."],
+            ["Core › MAME › ROMs", "The emulator status, your ROM folder, a drop zone to copy .zip sets into it, and how many sets there are, how many run and how much space they take. Every game and Play are on the website."],
+            ["Core › MAME › Thumbnails", "Which games have pictures, and where to put them."],
+            ["Core › go-link HD", "Games: the HD games folder, how many games it has and the free games to download (720p or 1080p). Screen: the size (720p or 1080p) and codec of HD rooms, for the rooms started afterwards."],
             ["Settings", "General (the window's language: English, Spanish or Portuguese), which picture to show, the thumbnails folder, the video quality of game rooms (High, Normal, Saver), rooms and network information."],
           ],
         },

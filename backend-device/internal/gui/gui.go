@@ -38,6 +38,7 @@ type Options struct {
 	Status   *services.StatusService
 	Library  *services.LibraryService
 	Games    *services.GameService     // nil when rooms are disabled
+	HDGames  *services.HDGamesService  // go-link HD's starter games; nil (tests) hides them
 	Links    *services.LinkService     // remembered browsers; nil (tests) means linked
 	Settings *services.SettingsService // host preferences; nil (tests) shows them read-only
 	WebURL   string                    // where hosts type the pairing code
@@ -61,12 +62,14 @@ type section struct {
 const (
 	pageOverview = iota
 	pageMAME
+	pageHD
 	pageSettings
 )
 
 var sections = []section{
 	pageOverview: {"Overview", "device", violet, ""},
-	pageMAME:     {"MAME", "arcade", magenta, "Emulators"},
+	pageMAME:     {"MAME", "arcade", magenta, "Core"},
+	pageHD:       {"go-link HD", "gamepad", azure, "Core"},
 	pageSettings: {"Settings", "gear", emerald, ""},
 }
 
@@ -86,6 +89,7 @@ type ui struct {
 	onboarding *onboardingView
 	overview   *overviewPage
 	mame       *mamePage
+	hd         *hdPage
 	roms       *romsTab
 	thumbs     *thumbnailsTab
 	settings   *settingsPage
@@ -190,8 +194,9 @@ func (u *ui) build() {
 	u.roms = newRomsTab(u)
 	u.thumbs = newThumbnailsTab(u)
 	u.mame = newMamePage(u)
+	u.hd = newHDPage(u)
 	u.settings = newSettingsPage(u)
-	u.pages = []fyne.CanvasObject{pageOverview: u.overview.content, pageMAME: u.mame.content, pageSettings: u.settings.content}
+	u.pages = []fyne.CanvasObject{pageOverview: u.overview.content, pageMAME: u.mame.content, pageHD: u.hd.content, pageSettings: u.settings.content}
 	u.page = container.NewStack()
 	u.rows, u.headings = nil, nil
 
@@ -316,6 +321,7 @@ func (u *ui) render(st models.Status) {
 	u.onboarding.render(st)
 	u.overview.render(st)
 	u.mame.render(st)
+	u.hd.render(st)
 	u.roms.render(st)
 	u.thumbs.render(st)
 	u.settings.render(st)

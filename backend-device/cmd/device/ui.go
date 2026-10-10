@@ -18,6 +18,7 @@ type uiOptions struct {
 	library  *services.LibraryService
 	settings *services.SettingsService
 	games    *services.GameService // nil when rooms are disabled
+	hdGames  *services.HDGamesService
 	links    *services.LinkService
 	webURL   string // where hosts type the pairing code
 	// language is the window's language; setLanguage saves a new one.
