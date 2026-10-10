@@ -4,6 +4,8 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-10-10
+
 ### Added (device)
 
 - **go-link HD has its own page in the device window:** the sidebar's group is now **Core**, with **MAME** and **go-link HD**. go-link HD's page has two tabs: **Games** (the engine's state, its own games folder, how many games it has, and its free games to download in 720p or 1080p with their progress) and **Screen** (the size, 720p or 1080p, and the codec, automatic or VP8, of its rooms, used by the rooms started afterwards). From a terminal: `device hd dir`, `device hd screen`, `device hd games`, `device hd download`.
