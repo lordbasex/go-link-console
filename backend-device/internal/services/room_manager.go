@@ -75,6 +75,9 @@ const (
 	// typingFor is how long "is typing…" lasts after the last keystroke
 	// notice; browsers repeat it every few seconds while typing.
 	typingFor = 6 * time.Second
+	// handEvery is how often a spectator may raise a hand to ask the host
+	// to play: often enough to be seen, not enough to pester.
+	handEvery = time.Minute
 )
 
 // seatKey is one local player of one browser.
@@ -95,6 +98,12 @@ type member struct {
 	controlN  int
 	// typingUntil: the member is typing a chat message until then.
 	typingUntil time.Time
+	// hand: a spectator raised a hand to ask the host to play (zero: down);
+	// handAt is the last time it went up (one raise per handEvery).
+	hand, handAt time.Time
+	// held: the host moved this guest to watching, so the guest asks (a
+	// raised hand) instead of joining the queue alone.
+	held bool
 }
 
 // pendingSwap is a seated player asking another one to swap controllers
@@ -163,6 +172,7 @@ type RoomManager struct {
 	hostLinked bool
 	pauseAsks  []pauseAsk
 	onAsk      func(PauseAskEvent) // set by OnPauseAsk; called on the actor goroutine
+	onRemove   func(peer string)   // set by OnRemove; called on its own goroutine
 
 	ports atomic.Pointer[map[seatKey]int]
 }
@@ -338,6 +348,12 @@ func (m *RoomManager) OnPause(fn func(paused bool)) {
 // requests for a pause.
 func (m *RoomManager) OnPauseAsk(fn func(PauseAskEvent)) {
 	m.do(func() { m.onAsk = fn })
+}
+
+// OnRemove registers who takes a guest out of the room when the host asks
+// (remove_guest): it stops the stream and ends the guest's return token.
+func (m *RoomManager) OnRemove(fn func(peer string)) {
+	m.do(func() { m.onRemove = fn })
 }
 
 // MarkOwner records that a peer of the room is the host's own browser (it
@@ -575,21 +591,28 @@ func (m *RoomManager) refuse(peer, code, text string) {
 const (
 	EventRecordingStarted = "recording_started"
 	EventRecordingStopped = "recording_stopped"
-	EventGamePaused       = "game_paused"   // name (and name2: the host, when name asked for it)
-	EventGameResumed      = "game_resumed"  // name
-	EventNowWatching      = "now_watching"  // name
-	EventMoved            = "moved"         // name, port
-	EventSwapAsked        = "swap_asked"    // name, port, name2, port2
-	EventKeptSeat         = "kept_seat"     // name, port
-	EventSwapped          = "swapped"       // name, port, name2, port2
-	EventLeftSeat         = "left_seat"     // name, port
-	EventSeatFree         = "seat_free"     // port
-	EventTookSeat         = "took_seat"     // name, port
-	EventSentToQueue      = "sent_to_queue" // name (the host), name2, port
-	EventSentToWatch      = "sent_to_watch" // name (the host), name2, port
+	EventGamePaused       = "game_paused"    // name (and name2: the host, when name asked for it)
+	EventGameResumed      = "game_resumed"   // name
+	EventNowWatching      = "now_watching"   // name
+	EventMoved            = "moved"          // name, port
+	EventSwapAsked        = "swap_asked"     // name, port, name2, port2
+	EventKeptSeat         = "kept_seat"      // name, port
+	EventSwapped          = "swapped"        // name, port, name2, port2
+	EventLeftSeat         = "left_seat"      // name, port
+	EventSeatFree         = "seat_free"      // port
+	EventTookSeat         = "took_seat"      // name, port
+	EventSentToQueue      = "sent_to_queue"  // name (the host), name2, port
+	EventSentToWatch      = "sent_to_watch"  // name (the host), name2, port
+	EventLetQueue         = "let_queue"      // name (the host), name2: from watching to the queue
+	EventPlayNow          = "play_now"       // name (the host), name2, port: seated at once
+	EventFirstInQueue     = "first_in_queue" // name, port: gave the seat up for play_now
+	EventRemoved          = "removed"        // name (the host), name2: taken out of the room
 	// EventPauseDeclined goes only to the guest whose request for a pause
 	// the host declined (name, port: the requester's own).
 	EventPauseDeclined = "pause_declined"
+	// EventHandLater goes only to the spectator whose raised hand the host
+	// answered with "not now".
+	EventHandLater = "hand_later"
 )
 
 // chatArgs are the values of a chat event, for the web to put into the
@@ -642,7 +665,8 @@ type controlIn struct {
 	Accept bool            `json:"accept"`
 	On     bool            `json:"on"`
 	Cancel bool            `json:"cancel"`
-	// release_seat: the seat and where its player goes ("queue" or "watch").
+	// release_seat: the seat and where its player goes ("queue" or "watch");
+	// promote: "queue" or "play" (at Port).
 	Port int    `json:"port"`
 	Mode string `json:"mode"`
 }
@@ -706,9 +730,33 @@ func (m *RoomManager) HandleControl(peerID string, data []byte) {
 			}
 		case "queue":
 			if mem.spectator {
+				if mem.held && !m.owners[peerID] {
+					m.refuse(peerID, "queue_ask_host", "The host moved you to watching: raise your hand to play")
+					return
+				}
 				mem.spectator = false
 				m.reconcile()
 			}
+		case "hand":
+			m.raiseHand(mem, msg.On)
+		case "hand_later":
+			if m.owners[peerID] {
+				m.handLater(msg.fromPeer())
+			}
+		case "promote":
+			// Only the host lets a spectator into the queue or seats someone
+			// at once (a friend: "play now").
+			if !m.owners[peerID] {
+				m.refuse(peerID, "promote_owner_only", "Only the host lets people play")
+				return
+			}
+			m.promote(mem.name, msg.fromPeer(), msg.Mode, msg.Port)
+		case "remove_guest":
+			if !m.owners[peerID] {
+				m.refuse(peerID, "remove_owner_only", "Only the host takes someone out of the room")
+				return
+			}
+			m.removeGuest(mem.name, msg.fromPeer())
 		case "pause":
 			// The game is the host's: only the host's own browsers pause
 			// it; the others ask (pause_request).
@@ -760,6 +808,7 @@ func (m *RoomManager) releaseSeat(host string, port int, mode string) {
 		m.teleLog("seat_released", k.peer, fmt.Sprintf("%s sent %s from P%d to the queue", host, name, port), map[string]any{"port": port, "mode": "queue"})
 	} else {
 		mem.spectator = true
+		mem.held = true // back to playing through the host: a raised hand
 		// The seat is freed here, as in the queue mode: reconcile would add a
 		// "left P<port>" line to the chat that says the same thing again.
 		m.seats[port-1] = nil
@@ -770,6 +819,118 @@ func (m *RoomManager) releaseSeat(host string, port int, mode string) {
 		m.teleLog("seat_released", k.peer, fmt.Sprintf("%s moved %s from P%d to watching", host, name, port), map[string]any{"port": port, "mode": "watch"})
 	}
 	m.reconcile()
+}
+
+// raiseHand raises (or lowers) a spectator's hand: the host sees it and
+// answers with promote (queue or play) or hand_later. One raise per
+// handEvery, and only while the host can see it.
+func (m *RoomManager) raiseHand(mem *member, up bool) {
+	if !up {
+		if !mem.hand.IsZero() {
+			mem.hand = time.Time{}
+			m.broadcastState()
+		}
+		return
+	}
+	if !mem.spectator || m.owners[mem.peer] || !mem.hand.IsZero() {
+		return
+	}
+	if !m.hostOnline() {
+		m.refuse(mem.peer, "hand_no_host", "The host is not here to see your hand")
+		return
+	}
+	now := m.cfg.Now()
+	if !mem.handAt.IsZero() && now.Sub(mem.handAt) < handEvery {
+		m.refuse(mem.peer, "hand_too_soon", "You can raise your hand once a minute")
+		return
+	}
+	mem.hand, mem.handAt = now, now
+	m.teleLog("hand", mem.peer, "raised a hand", map[string]any{"name": mem.name})
+	m.broadcastState()
+}
+
+// handLater is the host's "not now" to a raised hand: the hand goes down
+// and only that guest is told, kindly.
+func (m *RoomManager) handLater(peer string) {
+	mem := m.members[peer]
+	if mem == nil || mem.hand.IsZero() {
+		return
+	}
+	mem.hand = time.Time{}
+	b, err := json.Marshal(chatOut{Type: "chat", System: "The host will let you play later", Event: EventHandLater, Args: &chatArgs{Name: mem.name}, TS: m.cfg.Now().UnixMilli()})
+	if err == nil {
+		m.out.SendControl(peer, b)
+	}
+	m.broadcastState()
+}
+
+// promote is the host moving someone toward playing: a spectator to the
+// end of the queue (mode "queue"), or a spectator or someone in the queue
+// straight to seat port (mode "play", a friend who should not wait). A
+// taken seat's player goes first in the queue, so nobody loses a turn.
+func (m *RoomManager) promote(host, peer, mode string, port int) {
+	mem := m.members[peer]
+	if mem == nil {
+		return
+	}
+	switch mode {
+	case "queue":
+		if !mem.spectator {
+			return
+		}
+		mem.spectator, mem.held = false, false
+		m.event(EventLetQueue, fmt.Sprintf("%s let %s into the queue", host, mem.name), chatArgs{Name: host, Name2: mem.name})
+		m.teleLog("promote", peer, "to the queue", map[string]any{"name": mem.name, "mode": "queue"})
+		m.reconcile()
+	case "play":
+		if port < 1 || port > len(m.seats) {
+			return
+		}
+		if cur := m.seats[port-1]; cur != nil && cur.peer == peer {
+			return // already there
+		}
+		i := slices.IndexFunc(m.seatable(mem), func(l uint8) bool { return m.portIndex(seatKey{peer, l}) < 0 })
+		if i < 0 {
+			return // every controller of that browser already plays
+		}
+		k := seatKey{peer, m.seatable(mem)[i]}
+		mem.spectator, mem.held = false, false
+		m.queue = slices.DeleteFunc(m.queue, func(q seatKey) bool { return q == k })
+		old := m.seats[port-1]
+		m.seats[port-1] = &k
+		m.event(EventPlayNow, fmt.Sprintf("%s seated %s at P%d", host, m.displayName(k), port), chatArgs{Name: host, Name2: m.displayName(k), Port: port})
+		m.teleLog("promote", peer, fmt.Sprintf("to P%d", port), map[string]any{"name": mem.name, "mode": "play", "port": port})
+		if old != nil {
+			m.queue = append([]seatKey{*old}, slices.DeleteFunc(m.queue, func(q seatKey) bool { return q == *old })...)
+			if !slices.ContainsFunc(m.seats, func(s *seatKey) bool { return s != nil && s.peer == old.peer }) {
+				if j := slices.IndexFunc(m.pauseAsks, func(a pauseAsk) bool { return a.peer == old.peer }); j >= 0 {
+					m.dropPauseAsk(j)
+				}
+			}
+			m.event(EventFirstInQueue, fmt.Sprintf("%s goes first in the queue", m.displayName(*old)), chatArgs{Name: m.displayName(*old), Port: port})
+		}
+		m.reconcile()
+	}
+}
+
+// removeGuest takes a guest out of the room for good: the host's own
+// browsers stay. The stream stops and the guest's way back in ends
+// (OnRemove).
+func (m *RoomManager) removeGuest(host, peer string) {
+	mem := m.members[peer]
+	if mem == nil || m.owners[peer] {
+		return
+	}
+	delete(m.members, peer)
+	m.event(EventRemoved, fmt.Sprintf("%s took %s out of the room", host, mem.name), chatArgs{Name: host, Name2: mem.name})
+	m.teleLog("removed", peer, "taken out of the room", map[string]any{"name": mem.name})
+	m.reconcile()
+	if m.cfg.Now().Before(mem.typingUntil) {
+		m.broadcastTyping()
+	}
+	if fn := m.onRemove; fn != nil {
+		go fn(peer)
+	}
 }
 
 // askSwap moves a seated player from port from to port to. A free port is
@@ -880,6 +1041,11 @@ func (m *RoomManager) reconcile() {
 		}
 	}
 	m.queue = slices.DeleteFunc(m.queue, func(k seatKey) bool { return !wants(k) })
+	for _, mem := range m.members {
+		if !mem.spectator {
+			mem.hand = time.Time{} // a hand asks to play: only spectators raise one
+		}
+	}
 
 	// New wishes join the queue in arrival order.
 	ordered := make([]*member, 0, len(m.members))
@@ -979,22 +1145,31 @@ func (m *RoomManager) summary() RoomSummary {
 	return s
 }
 
+// Peer (in seats, queue and spectators) is the person's peer id, sent only
+// to the host's own browsers: what promote, hand_later and remove_guest name.
 type seatOut struct {
 	Port        int    `json:"port"`
 	Name        string `json:"name"`
 	LocalPlayer int    `json:"local_player"`
 	You         bool   `json:"you"`
+	Peer        string `json:"peer,omitempty"`
 }
 
 type queueOut struct {
 	Position int    `json:"position"`
 	Name     string `json:"name"`
 	You      bool   `json:"you"`
+	Peer     string `json:"peer,omitempty"`
 }
 
 type personOut struct {
 	Name string `json:"name"`
 	You  bool   `json:"you"`
+	Peer string `json:"peer,omitempty"`
+	// Hand: this spectator raised a hand to play (everyone sees it); HandAt
+	// (owners only) orders the hands.
+	Hand   bool       `json:"hand,omitempty"`
+	HandAt *time.Time `json:"hand_at,omitempty"`
 }
 
 type youOut struct {
@@ -1012,6 +1187,12 @@ type youOut struct {
 	Owner      bool           `json:"owner"`
 	PauseAsks  *[]pauseAskOut `json:"pause_asks,omitempty"`
 	PauseAsked *pauseAskedOut `json:"pause_asked"`
+	// Hand: your hand is up. HandAgain: when you may raise it again (only
+	// while that is still ahead). Held: the host moved you to watching, so
+	// you raise a hand instead of joining the queue alone.
+	Hand      bool       `json:"hand"`
+	HandAgain *time.Time `json:"hand_again,omitempty"`
+	Held      bool       `json:"held"`
 }
 
 type pauseAskOut struct {
@@ -1054,6 +1235,7 @@ type stateOut struct {
 // broadcastState sends each member its own view of the room.
 func (m *RoomManager) broadcastState() {
 	online := m.hostOnline()
+	now := m.cfg.Now()
 	var asks []pauseAskOut
 	for _, a := range m.pauseAsks {
 		asks = append(asks, pauseAskOut{From: a.peer, Name: a.name, Port: a.port, ExpiresAt: a.expires})
@@ -1061,8 +1243,19 @@ func (m *RoomManager) broadcastState() {
 	for peer, mem := range m.members {
 		st := stateOut{Type: "room_state", MaxPlayers: m.cfg.MaxPlayers, Voice: !m.voiceOff, Chat: !m.chatOff, InputHUD: m.inputHUD, Picture: m.picture, Info: m.info, Seats: make([]*seatOut, len(m.seats)), Queue: []queueOut{}, Spectators: []personOut{},
 			Pausable: m.pausable, Paused: m.paused, PausedBy: m.pausedBy, Controls: m.controls, Recording: m.recording, HostOnline: online}
-		st.You = youOut{Name: mem.name, Ports: []int{}, QueuePositions: []int{}, Spectator: mem.spectator, SwapOffers: []swapOut{}, SwapAsked: []swapOut{}, Owner: m.owners[peer]}
-		if st.You.Owner {
+		owner := m.owners[peer]
+		peerFor := func(p string) string {
+			if owner {
+				return p
+			}
+			return ""
+		}
+		st.You = youOut{Name: mem.name, Ports: []int{}, QueuePositions: []int{}, Spectator: mem.spectator, SwapOffers: []swapOut{}, SwapAsked: []swapOut{}, Owner: owner,
+			Hand: !mem.hand.IsZero(), Held: mem.held && mem.spectator}
+		if again := mem.handAt.Add(handEvery); !mem.handAt.IsZero() && now.Before(again) {
+			st.You.HandAgain = &again
+		}
+		if owner {
 			list := append([]pauseAskOut{}, asks...)
 			st.You.PauseAsks = &list
 		}
@@ -1084,21 +1277,26 @@ func (m *RoomManager) broadcastState() {
 				continue
 			}
 			you := s.peer == peer
-			st.Seats[i] = &seatOut{Port: i + 1, Name: m.displayName(*s), LocalPlayer: int(s.local), You: you}
+			st.Seats[i] = &seatOut{Port: i + 1, Name: m.displayName(*s), LocalPlayer: int(s.local), You: you, Peer: peerFor(s.peer)}
 			if you {
 				st.You.Ports = append(st.You.Ports, i+1)
 			}
 		}
 		for i, k := range m.queue {
 			you := k.peer == peer
-			st.Queue = append(st.Queue, queueOut{Position: i + 1, Name: m.displayName(k), You: you})
+			st.Queue = append(st.Queue, queueOut{Position: i + 1, Name: m.displayName(k), You: you, Peer: peerFor(k.peer)})
 			if you {
 				st.You.QueuePositions = append(st.You.QueuePositions, i+1)
 			}
 		}
 		for _, other := range m.members {
 			if other.spectator {
-				st.Spectators = append(st.Spectators, personOut{Name: other.name, You: other.peer == peer})
+				p := personOut{Name: other.name, You: other.peer == peer, Peer: peerFor(other.peer), Hand: !other.hand.IsZero()}
+				if owner && p.Hand {
+					at := other.hand
+					p.HandAt = &at
+				}
+				st.Spectators = append(st.Spectators, p)
 			}
 		}
 		slices.SortFunc(st.Spectators, func(a, b personOut) int { return strings.Compare(a.Name, b.Name) })

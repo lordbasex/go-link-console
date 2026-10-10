@@ -13,6 +13,8 @@ export interface SeatCard {
   tone: "speaking" | "muted" | "normal";
   /** Live only: the listener silenced this player locally. */
   silenced?: boolean;
+  /** The host's view only: the player's peer id. */
+  peer?: string;
 }
 
 /** Live voice state used to decorate the seats. */
@@ -30,6 +32,23 @@ export interface QueueRow {
   name: string;
   you: boolean;
   note: string;
+  /** The host's view only: the person's peer id. */
+  peer?: string;
+}
+
+/** Someone watching; peer only in the host's view. */
+export interface SpectatorRow {
+  name: string;
+  you: boolean;
+  peer?: string;
+  hand?: boolean;
+}
+
+/** A raised hand, for the host: oldest first. */
+export interface HandRow {
+  peer: string;
+  name: string;
+  at: number;
 }
 
 /** The device's notices come in English; the ones it marks are translated. */
@@ -78,6 +97,16 @@ function systemText(c: ChatLine & { kind: "system" }): string {
       return e.sentToQueue(n, n2, p);
     case "sent_to_watch":
       return e.sentToWatch(n, n2, p);
+    case "let_queue":
+      return e.letQueue(n, n2);
+    case "play_now":
+      return e.playNow(n, n2, p);
+    case "first_in_queue":
+      return e.firstInQueue(n);
+    case "removed":
+      return e.removed(n, n2);
+    case "hand_later":
+      return t.hand.later;
     case "pause_declined":
       return t.pauseAsk.declined;
     default:
@@ -87,12 +116,19 @@ function systemText(c: ChatLine & { kind: "system" }): string {
 
 export type ChatRow = { system: string } | { name: string; port: number | null; role: string; text: string; you: boolean };
 
-export type Me = { kind: "player"; ports: number[] } | { kind: "queue"; position: number } | { kind: "spectator" } | { kind: "unknown" };
+export type Me =
+  | { kind: "player"; ports: number[] }
+  | { kind: "queue"; position: number }
+  /** held: the host moved you to watching (you raise a hand to play); hand: yours is up. */
+  | { kind: "spectator"; held?: boolean; hand?: boolean }
+  | { kind: "unknown" };
 
 export interface RoomModel {
   seats: (SeatCard | null)[];
   queue: QueueRow[];
-  spectators: { name: string; you: boolean }[];
+  spectators: SpectatorRow[];
+  /** The host's view: raised hands, oldest first. */
+  hands: HandRow[];
   chat: ChatRow[];
   me: Me;
   /** "off" when the host created the room without voice. */
@@ -111,6 +147,7 @@ export function demoModel(isPlayer: boolean, micOn: boolean, hearVoice: boolean)
     })),
     queue: DEMO_QUEUE.map((q, i) => ({ pos: q.pos, name: q.name, you: i === 0 && !isPlayer, note: q.note })),
     spectators: DEMO_SPECTATORS.map((name) => ({ name, you: false })),
+    hands: [],
     chat: DEMO_MESSAGES.map((m) => ("system" in m ? { system: m.system } : { name: m.name, port: m.port, role: m.role, text: m.text, you: m.name === you })),
     me: isPlayer ? { kind: "player", ports: [1] } : { kind: "queue", position: 1 },
     voice: isPlayer ? "player" : "spectator",
@@ -132,6 +169,7 @@ export function liveModel(room: RoomStateView | null, chat: ChatLine[], voice: V
           silenced,
           status: speaking ? t.room.speaking : silenced ? t.room.silenced : micOff ? t.room.muted : t.room.seatPlaying,
           tone: speaking ? "speaking" : silenced || micOff ? "muted" : "normal",
+          ...(s.peer ? { peer: s.peer } : {}),
         };
       })
     : [null, null, null, null];
@@ -139,7 +177,7 @@ export function liveModel(room: RoomStateView | null, chat: ChatLine[], voice: V
   if (room) {
     if (room.you.ports.length > 0) me = { kind: "player", ports: room.you.ports };
     else if (room.you.queuePositions.length > 0) me = { kind: "queue", position: Math.min(...room.you.queuePositions) };
-    else me = { kind: "spectator" };
+    else me = { kind: "spectator", held: room.you.held, hand: room.you.hand };
   }
   return {
     seats,
@@ -148,8 +186,17 @@ export function liveModel(room: RoomStateView | null, chat: ChatLine[], voice: V
       name: localName(q.name),
       you: q.you,
       note: q.position === 1 ? t.room.queueNext : t.room.queueWaiting,
+      ...(q.peer ? { peer: q.peer } : {}),
     })),
-    spectators: (room?.spectators ?? []).map((sp) => ({ ...sp, name: localName(sp.name) })),
+    spectators: (room?.spectators ?? []).map((sp) => ({
+      name: localName(sp.name),
+      you: sp.you,
+      ...(sp.peer ? { peer: sp.peer } : {}),
+      ...(sp.hand ? { hand: true } : {}),
+    })),
+    hands: (room?.spectators ?? [])
+      .flatMap((sp) => (sp.hand && sp.peer ? [{ peer: sp.peer, name: localName(sp.name), at: sp.handAt ?? 0 }] : []))
+      .sort((a, b) => a.at - b.at),
     chat: chat.map((c) => (c.kind === "system" ? { system: systemText(c) } : { name: localName(c.name), port: c.port, role: c.role, text: c.text, you: !!room && c.name === room.you.name })),
     me,
     voice: room?.voice === false ? "off" : me.kind === "player" ? "player" : "spectator",

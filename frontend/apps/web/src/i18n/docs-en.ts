@@ -184,6 +184,17 @@ export const docsEn: Docs = {
           ],
         },
         { t: "note", tone: "info", text: "The group's key goes after # in the link: browsers never send that part to a server, so only the people with the link have it." },
+        { t: "h2", id: "hand", text: "Raise your hand to play" },
+        { t: "p", text: "Someone watching can ask you to play without interrupting the game." },
+        {
+          t: "list",
+          items: [
+            "A spectator taps the **hand** button on the video (or **Raise your hand to play** in their place). They can do it once a minute, and only while you are in the room.",
+            "You hear a sound and see a hand with a count on the players. Open it: **Play now** seats them at once (on a free seat, or in someone's seat: that player goes first in the queue, so nobody loses a turn), **To the queue** puts them at the end of the line, and **Not now** lowers the hand with a kind notice.",
+            "Someone you made a spectator comes back by raising a hand, not by joining the queue alone.",
+            "The **…** beside each person in the Queue and Spectators lists does the same any time, hand or not, and has **Remove from the room**, also in a player's menu. A removed guest can only come back with a new invitation.",
+          ],
+        },
         { t: "h2", id: "guest", text: "What a guest sees" },
         { t: "p", text: "A guest types the code (or opens the link) and the PIN, accepts the terms the first time, and joins. Guests see the game, the players, the chat and the controls, but not the room settings." },
         { t: "h2", id: "name", text: "Your name" },

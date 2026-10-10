@@ -545,6 +545,76 @@ test("only the host pauses: a player asks, the host accepts or declines, a guest
   await context.close();
 });
 
+test("a spectator raises a hand: the host says not now, then seats them at once; the host takes someone out for good", async ({ browser }) => {
+  test.setTimeout(180_000);
+  // E2E_HAND_SHOTS=dir keeps screenshots of each step.
+  const shot = async (p: Page, name: string) => {
+    if (process.env.E2E_HAND_SHOTS) await p.screenshot({ path: `${process.env.E2E_HAND_SHOTS}/${name}.png` });
+  };
+  const inv = await newInvitation();
+  const sol = await joinAsGuest(browser, inv.code, inv.pin);
+  await enterName(sol.page, "Sol");
+  await expectVideoPlaying(sol.page);
+  // The host moves Sol to watching: Sol can no longer just join the queue.
+  await wake(page);
+  await page.getByRole("button", { name: /^P2 · Sol/ }).click();
+  await page.getByRole("menuitem", { name: "Make Sol a spectator" }).click();
+  // "Your place" is in the side panel's Chat tab (it opens on Controls while a game streams).
+  await sol.page.getByRole("tablist", { name: "Room panel" }).getByRole("tab", { name: "Chat" }).click();
+  const place = sol.page.locator(".side-status");
+  await expect(place.getByText("The host moved you to watching: raise your hand to play again")).toBeVisible();
+  await expect(place.getByRole("button", { name: "Join the queue" })).toHaveCount(0);
+
+  // Sol raises a hand from the dock; the host hears it and sees it on the players.
+  await wake(sol.page);
+  await sol.page.locator(".video-hand").dispatchEvent("click");
+  await expect(place.getByText("Your hand is up: the host will see it")).toBeVisible();
+  await shot(sol.page, "1-spectator-hand-up");
+  await wake(page);
+  const hands = page.getByRole("button", { name: "1 raised hand" });
+  await expect(hands).toBeVisible();
+  await expect(page.getByText("Sol raised a hand")).toBeVisible();
+  await shot(page, "2-host-sees-hand");
+  await hands.click();
+  await expect(page.getByRole("group", { name: "Sol raised a hand" })).toBeVisible();
+  await shot(page, "3-host-hand-list");
+  await expectAccessible(page, "host's raised hands");
+  await page.getByRole("menuitem", { name: "Not now" }).click();
+  await expect(sol.page.getByText("The host will let you play later")).toBeVisible();
+  await expect(hands).toHaveCount(0);
+  await shot(sol.page, "4-spectator-not-now");
+  // Again at once: once a minute.
+  await wake(sol.page);
+  await sol.page.locator(".video-hand").dispatchEvent("click");
+  await expect(sol.page.getByText(/You can raise it again in \d+ s/)).toBeVisible();
+
+  // The host seats Sol right away from the spectators' list: a free seat, no one loses a turn.
+  await page.getByRole("tablist", { name: "Room", exact: true }).getByRole("tab", { name: /Spectators/ }).click();
+  await page.getByRole("button", { name: "What to do with Sol" }).click();
+  await shot(page, "5-host-guest-menu");
+  await page.getByRole("menuitem", { name: "Play now" }).click();
+  await expect(place.getByText("You are playing")).toBeVisible();
+  await expect(sol.page.getByText(/seated Sol at P\d/).first()).toBeVisible();
+  await shot(sol.page, "6-spectator-plays");
+
+  // Leo comes in, and the host takes Leo out: the stream stops and a reload does not bring Leo back.
+  const inv2 = await newInvitation();
+  const leo = await joinAsGuest(browser, inv2.code, inv2.pin);
+  await enterName(leo.page, "Leo");
+  await expectVideoPlaying(leo.page);
+  await wake(page);
+  await page.getByRole("button", { name: /· Leo/ }).click();
+  await page.getByRole("menuitem", { name: "Remove Leo from the room" }).click();
+  await expect(leo.page.getByRole("heading", { name: "The host took you out of this room" })).toBeVisible();
+  await shot(leo.page, "7-removed");
+  await expect(sol.page.getByText("took Leo out of the room").first()).toBeVisible();
+  await leo.page.reload();
+  await expect(leo.page.getByRole("heading", { name: "The host took you out of this room" })).toBeVisible({ timeout: 30_000 });
+  await expectVideoPlaying(sol.page);
+  await sol.context.close();
+  await leo.context.close();
+});
+
 test("the controller test page lights the keyboard's buttons", async ({ browser }) => {
   const context = await browser.newContext();
   const p = await context.newPage();

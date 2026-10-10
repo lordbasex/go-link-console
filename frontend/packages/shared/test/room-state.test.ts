@@ -78,3 +78,33 @@ describe("pause requests", () => {
     });
   });
 });
+
+describe("raised hands", () => {
+  const base = { type: "room_state", max_players: 2, seats: [null, null] };
+  it("reads the host's view: peers, hands and when they went up", () => {
+    const st = parseRoomState({
+      ...base,
+      seats: [{ name: "Ana", local_player: 0, you: true, peer: "p-ana" }, null],
+      queue: [{ position: 1, name: "Cid", you: false, peer: "p-cid" }],
+      spectators: [{ name: "Sol", you: false, peer: "p-sol", hand: true, hand_at: "2026-10-10T21:00:00Z" }, { name: "Dan", you: false }],
+      you: { name: "Ana", owner: true },
+    })!;
+    expect(st.seats[0]?.peer).toBe("p-ana");
+    expect(st.queue[0]?.peer).toBe("p-cid");
+    expect(st.spectators[0]).toEqual({ name: "Sol", you: false, peer: "p-sol", hand: true, handAt: Date.parse("2026-10-10T21:00:00Z") });
+    expect(st.spectators[1]).toEqual({ name: "Dan", you: false });
+  });
+  it("reads a spectator's own hand", () => {
+    const st = parseRoomState({ ...base, you: { spectator: true, hand: true, held: true, hand_again: "2026-10-10T21:01:00Z" } })!;
+    expect(st.you.hand).toBe(true);
+    expect(st.you.held).toBe(true);
+    expect(st.you.handAgain).toBe(Date.parse("2026-10-10T21:01:00Z"));
+    const none = parseRoomState({ ...base, you: { spectator: true } })!;
+    expect([none.you.hand, none.you.held, none.you.handAgain]).toEqual([false, false, 0]);
+  });
+  it("knows the new chat events", () => {
+    for (const event of ["let_queue", "play_now", "first_in_queue", "removed", "hand_later"]) {
+      expect(parseChat({ type: "chat", system: "x", event, ts: 1 })).toMatchObject({ event });
+    }
+  });
+});

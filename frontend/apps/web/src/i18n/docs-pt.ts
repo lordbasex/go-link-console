@@ -184,6 +184,17 @@ export const docsPt: Docs = {
           ],
         },
         { t: "note", tone: "info", text: "A chave do grupo vai depois do # no link: os navegadores nunca enviam essa parte a um servidor, então só quem tem o link a tem." },
+        { t: "h2", id: "hand", text: "Levantar a mão para jogar" },
+        { t: "p", text: "Quem está assistindo pode pedir para jogar sem interromper a partida." },
+        {
+          t: "list",
+          items: [
+            "Um espectador toca o botão da **mão** sobre o vídeo (ou **Levante a mão para jogar** no seu lugar). Pode fazer isso uma vez por minuto, e só enquanto você está na sala.",
+            "Você ouve um som e vê uma mão com um número sobre os jogadores. Abra: **Jogar agora** coloca a pessoa na hora (num lugar livre, ou no de alguém: esse jogador fica em primeiro na fila, assim ninguém perde a vez), **Para a fila** coloca no fim da fila, e **Agora não** abaixa a mão com um aviso gentil.",
+            "Quem você passou para espectador volta levantando a mão, não entrando sozinho na fila.",
+            "Os **…** ao lado de cada pessoa nas listas de Fila e Espectadores fazem o mesmo a qualquer momento, com ou sem mão, e têm **Tirar da sala**, que também está no menu de cada jogador. Quem você tira só volta com um convite novo.",
+          ],
+        },
         { t: "h2", id: "guest", text: "O que um convidado vê" },
         { t: "p", text: "O convidado digita o código (ou abre o link) e o PIN, aceita os termos na primeira vez e entra. Os convidados veem o jogo, os jogadores, o chat e os controles, mas não as configurações da sala." },
         { t: "h2", id: "name", text: "Seu nome" },

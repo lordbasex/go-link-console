@@ -2,7 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import { t } from "../i18n";
 import type { SeatCard } from "../pages/roomModel";
-import { EyeIcon, GamepadIcon, MicOffIcon, SoundOffIcon, SoundOnIcon, SwapIcon, UserIcon } from "./Icons";
+import { RaisedHands, type HostTools } from "./GuestMenu";
+import { EyeIcon, GamepadIcon, LogOutIcon, MicOffIcon, SoundOffIcon, SoundOnIcon, SwapIcon, UserIcon } from "./Icons";
 import { portStyle } from "./Seats";
 
 /** Swapping controllers with a seat: move there, or ask its player. */
@@ -27,7 +28,8 @@ const initials = (name: string) =>
  * video call: the seat's color as a ring, a glow while speaking and a badge
  * when muted. Tapping an avatar opens its actions (press that seat's
  * Start, swap controllers, move to a free seat, silence and, for the host,
- * free the seat: to the end of the queue or to watching).
+ * free the seat: to the end of the queue or to watching, or take the player
+ * out of the room). The host also gets the raised hands at the end.
  */
 export function PlayersCapsule({
   seats,
@@ -36,6 +38,8 @@ export function PlayersCapsule({
   onStart,
   onRelease,
   queueWaiting = false,
+  hands = [],
+  hostTools,
 }: {
   seats: (SeatCard | null)[];
   swapFor: (port: number) => SeatSwap | undefined;
@@ -46,6 +50,10 @@ export function PlayersCapsule({
   onRelease?: (port: number, mode: "queue" | "watch") => void;
   /** Someone waits in the queue (sending to the queue frees the seat for them). */
   queueWaiting?: boolean;
+  /** The host's view: spectators with a raised hand, oldest first. */
+  hands?: { peer: string; name: string }[];
+  /** The host's actions on people (raised hands, take out of the room). */
+  hostTools?: HostTools;
 }) {
   const [open, setOpen] = useState<number | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -74,7 +82,8 @@ export function PlayersCapsule({
           : `P${port} · ${t.room.freeSeat}`;
         const start = seat && onStart ? () => onStart(port) : undefined;
         const release = seat && onRelease ? onRelease : undefined;
-        const hasMenu = !!swap || !!silence || !!start || !!release;
+        const remove = seat && !seat.you && seat.peer && hostTools ? () => hostTools.onRemove(seat.peer!) : undefined;
+        const hasMenu = !!swap || !!silence || !!start || !!release || !!remove;
         const avatar = (
           <>
             <span className="capsule-port">P{port}</span>
@@ -180,11 +189,26 @@ export function PlayersCapsule({
                     {seat.you ? t.room.watchMyself : t.room.makeSpectator(seat.name)}
                   </button>
                 )}
+                {remove && seat && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="is-danger"
+                    onClick={() => {
+                      remove();
+                      setOpen(null);
+                    }}
+                  >
+                    <LogOutIcon size={15} />
+                    {t.hand.removeOne(seat.name)}
+                  </button>
+                )}
               </div>
             )}
           </div>
         );
       })}
+      {hostTools && <RaisedHands hands={hands} tools={hostTools} />}
     </div>
   );
 }

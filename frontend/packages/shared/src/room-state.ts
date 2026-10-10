@@ -11,6 +11,28 @@ export interface SeatView {
   name: string;
   localPlayer: number;
   you: boolean;
+  /** The player's peer id: sent only to the host's own browsers. */
+  peer?: string;
+}
+
+/** Someone in the queue. peer is sent only to the host's own browsers. */
+export interface QueueView {
+  position: number;
+  name: string;
+  you: boolean;
+  peer?: string;
+}
+
+/** Someone watching. */
+export interface SpectatorView {
+  name: string;
+  you: boolean;
+  /** The host's own browsers only: what promote, hand_later and remove_guest name. */
+  peer?: string;
+  /** A raised hand: this spectator asks the host to play. */
+  hand?: boolean;
+  /** The host's own browsers only: when the hand went up (ms since the epoch). */
+  handAt?: number;
 }
 
 export interface RoomStateView {
@@ -25,8 +47,8 @@ export interface RoomStateView {
   info: RoomInfoView;
   /** Index 0 is P1; null means a free seat. */
   seats: (SeatView | null)[];
-  queue: { position: number; name: string; you: boolean }[];
-  spectators: { name: string; you: boolean }[];
+  queue: QueueView[];
+  spectators: SpectatorView[];
   you: {
     name: string;
     ports: number[];
@@ -42,6 +64,12 @@ export interface RoomStateView {
     pauseAsks: PauseAskView[];
     /** Your own request for a pause, while it waits, or null. */
     pauseAsked: { expiresAt: number } | null;
+    /** Your hand is up (a spectator asking the host to play). */
+    hand: boolean;
+    /** When you may raise your hand again (ms since the epoch), or 0. */
+    handAgain: number;
+    /** The host moved you to watching: you raise a hand instead of joining the queue alone. */
+    held: boolean;
   };
   /** A game is running: the host may pause it (the others ask). */
   pausable: boolean;
@@ -126,7 +154,12 @@ export type ChatEvent =
   | "took_seat"
   | "sent_to_queue"
   | "sent_to_watch"
-  | "pause_declined";
+  | "let_queue"
+  | "play_now"
+  | "first_in_queue"
+  | "removed"
+  | "pause_declined"
+  | "hand_later";
 const CHAT_EVENTS: readonly ChatEvent[] = [
   "recording_started",
   "recording_stopped",
@@ -142,7 +175,12 @@ const CHAT_EVENTS: readonly ChatEvent[] = [
   "took_seat",
   "sent_to_queue",
   "sent_to_watch",
+  "let_queue",
+  "play_now",
+  "first_in_queue",
+  "removed",
   "pause_declined",
+  "hand_later",
 ];
 
 /** The values of a chat event (who and which seat). */
@@ -211,7 +249,10 @@ export function parseRoomState(msg: unknown): RoomStateView | null {
   arr(m.seats).forEach((s, i) => {
     if (i >= maxPlayers || s === null) return;
     const o = obj(s);
-    seats[i] = { port: i + 1, name: str(o.name, 40), localPlayer: num(o.local_player), you: o.you === true };
+    const seat: SeatView = { port: i + 1, name: str(o.name, 40), localPlayer: num(o.local_player), you: o.you === true };
+    const peer = str(o.peer, 80);
+    if (peer) seat.peer = peer;
+    seats[i] = seat;
   });
   const you = obj(m.you);
   return {
@@ -223,11 +264,20 @@ export function parseRoomState(msg: unknown): RoomStateView | null {
     seats,
     queue: arr(m.queue).slice(0, 64).map((q) => {
       const o = obj(q);
-      return { position: num(o.position), name: str(o.name, 40), you: o.you === true };
+      const row: QueueView = { position: num(o.position), name: str(o.name, 40), you: o.you === true };
+      const peer = str(o.peer, 80);
+      if (peer) row.peer = peer;
+      return row;
     }),
     spectators: arr(m.spectators).slice(0, 64).map((p) => {
       const o = obj(p);
-      return { name: str(o.name, 40), you: o.you === true };
+      const row: SpectatorView = { name: str(o.name, 40), you: o.you === true };
+      const peer = str(o.peer, 80);
+      if (peer) row.peer = peer;
+      if (o.hand === true) row.hand = true;
+      const at = time(o.hand_at);
+      if (at) row.handAt = at;
+      return row;
     }),
     you: {
       name: str(you.name, 40),
@@ -239,6 +289,9 @@ export function parseRoomState(msg: unknown): RoomStateView | null {
       owner: you.owner === true,
       pauseAsks: parsePauseAsks(you.pause_asks),
       pauseAsked: time(obj(you.pause_asked).expires_at) ? { expiresAt: time(obj(you.pause_asked).expires_at) } : null,
+      hand: you.hand === true,
+      handAgain: time(you.hand_again),
+      held: you.held === true,
     },
     pausable: m.pausable === true,
     hostOnline: m.host_online === true,

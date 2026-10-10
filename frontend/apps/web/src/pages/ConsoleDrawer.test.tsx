@@ -20,6 +20,7 @@ const model = (over: Partial<RoomModel> = {}): RoomModel => ({
   ],
   queue: [{ pos: "1st", name: "Cleo", you: false, note: "Gets the next free seat" }],
   spectators: [{ name: "Dan", you: false }],
+  hands: [],
   chat: [{ name: "Bob", port: 2, role: "P2", text: "Ready?", you: false }],
   me: { kind: "player", ports: [1] },
   voice: "player",

@@ -18,6 +18,8 @@ import {
   PanelCloseIcon,
   SendIcon,
 } from "../components/Icons";
+import { GuestMenu, type HostTools } from "../components/GuestMenu";
+import { HandIcon } from "../components/Icons";
 import { NameField } from "../components/NameField";
 import { portStyle } from "../components/Seats";
 import { localName, type RoomModel } from "./roomModel";
@@ -43,6 +45,10 @@ export interface SideActions {
   onChatSwitch?: (on: boolean) => void;
   onSpectate?: () => void;
   onQueue?: () => void;
+  /** A spectator raises or lowers a hand to ask the host to play. */
+  onHand?: (up: boolean) => void;
+  /** The host's actions on people in the queue or watching. */
+  hostTools?: HostTools;
   chatEnabled: boolean;
   name: string;
   onName?: (name: string) => void;
@@ -167,7 +173,11 @@ export function MyPlace({
               : t.room.inQueue(t.ordinal(me.position)),
             t.room.nextInQueueNote,
           ]
-        : [t.room.watching, t.room.watchingNote];
+        : me.kind === "spectator" && me.hand
+          ? [t.room.watching, t.hand.up]
+          : me.kind === "spectator" && me.held
+            ? [t.room.watching, t.hand.askHost]
+            : [t.room.watching, t.room.watchingNote];
   return (
     <div className="side-status-row spread">
       <div className="side-status-row">
@@ -204,10 +214,16 @@ export function placeAction(
     return actions.onSpectate
       ? { label: t.room.leaveQueue, onClick: actions.onSpectate }
       : undefined;
-  if (me.kind === "spectator")
+  if (me.kind === "spectator") {
+    // Sent to watch by the host: back to playing through a raised hand.
+    if ((me.held || me.hand) && actions.onHand) {
+      const up = !!me.hand;
+      return { label: up ? t.hand.lower : t.hand.raise, primary: !up, onClick: () => actions.onHand?.(!up) };
+    }
     return actions.onQueue
       ? { label: t.room.joinQueue, primary: true, onClick: actions.onQueue }
       : undefined;
+  }
   return undefined;
 }
 
@@ -372,7 +388,7 @@ export function ChatForm({
   );
 }
 
-export function QueueList({ model }: { model: RoomModel }) {
+export function QueueList({ model, tools }: { model: RoomModel; tools?: HostTools }) {
   return (
     <>
       <p className="small-plus muted">{t.room.queueNote}</p>
@@ -386,21 +402,30 @@ export function QueueList({ model }: { model: RoomModel }) {
             </span>
             <span className="small muted">{q.note}</span>
           </div>
+          {tools && q.peer && !q.you && <GuestMenu tools={tools} peer={q.peer} name={q.name} spectator={false} />}
         </div>
       ))}
     </>
   );
 }
 
-export function SpectatorList({ model }: { model: RoomModel }) {
+export function SpectatorList({ model, tools }: { model: RoomModel; tools?: HostTools }) {
   return (
     <>
       <p className="small-plus muted">{t.room.spectatorsNote}</p>
       {model.spectators.map((s, i) => (
         <div key={`${s.name}-${i}`} className="viewer-row">
           <span className="viewer-avatar">{s.name.charAt(0).toUpperCase()}</span>
-          {s.name}
-          {s.you ? t.room.youSuffix : ""}
+          <span className="grow">
+            {s.name}
+            {s.you ? t.room.youSuffix : ""}
+          </span>
+          {s.hand && (
+            <span className="viewer-hand" role="img" aria-label={t.hand.raised(s.name)} title={t.hand.raised(s.name)}>
+              <HandIcon size={15} />
+            </span>
+          )}
+          {tools && s.peer && !s.you && <GuestMenu tools={tools} peer={s.peer} name={s.name} spectator hand={s.hand} />}
         </div>
       ))}
     </>
@@ -576,8 +601,8 @@ function RoomTalk({ model, actions }: { model: RoomModel; actions: SideActions }
         ref={listRef}
       >
         {tab === "chat" && <ChatLog model={model} actions={actions} />}
-        {tab === "queue" && <QueueList model={model} />}
-        {tab === "spectators" && <SpectatorList model={model} />}
+        {tab === "queue" && <QueueList model={model} tools={actions.hostTools} />}
+        {tab === "spectators" && <SpectatorList model={model} tools={actions.hostTools} />}
       </div>
 
       {!actions.chatOff && <ChatForm actions={actions} />}

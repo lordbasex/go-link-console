@@ -44,6 +44,7 @@ type TestRoomService struct {
 	sender  Sender
 	roomID  string
 	guests  map[string]bool
+	tokens  map[string]string // the return token each guest came in with
 	summary RoomSummary
 	extra   map[string]any // more lobby fields (paused, art)
 	closed  bool           // closed for good: never reopened
@@ -136,11 +137,36 @@ func (t *TestRoomService) Answer(peer string, accept bool) error {
 		PinResult
 	}{"pin_result", res})
 	if res.OK {
-		t.admit(peer)
+		t.admitWith(peer, res.Token)
 	}
 	t.log.Info("host answered a guest", "peer_id", peer, "accept", accept, "reason", res.Reason)
 	t.admissionChanged()
 	return nil
+}
+
+// Remove takes a guest out of the room for good (the host's "remove from
+// the room"): the stream to it stops and its return token no longer opens
+// the room; the guest is told with pin_result reason "removed". It reports
+// whether the peer was in the room.
+func (t *TestRoomService) Remove(peer string) bool {
+	t.mu.Lock()
+	guest := t.guests[peer]
+	token := t.tokens[peer]
+	delete(t.guests, peer)
+	delete(t.tokens, peer)
+	t.mu.Unlock()
+	if !guest {
+		return false
+	}
+	t.pin.Revoke(token)
+	t.signal(peer, struct {
+		Kind string `json:"kind"`
+		PinResult
+	}{"pin_result", PinResult{Reason: "removed"}})
+	t.viewers.RemoveViewer(peer)
+	t.log.Info("host removed a guest", "peer_id", peer)
+	t.publish()
+	return true
 }
 
 // SetPrivate makes guests need an invitation's PIN. Guests already in
@@ -187,9 +213,16 @@ func (t *TestRoomService) signal(to string, payload any) {
 }
 
 // admit turns a guest into a viewer.
-func (t *TestRoomService) admit(peer string) {
+func (t *TestRoomService) admit(peer string) { t.admitWith(peer, "") }
+
+// admitWith is admit for a guest that came in with a return token (kept so
+// the host can take the guest out for good).
+func (t *TestRoomService) admitWith(peer, token string) {
 	t.mu.Lock()
 	t.guests[peer] = true
+	if token != "" {
+		t.tokens[peer] = token
+	}
 	delete(t.pending, peer)
 	t.mu.Unlock()
 	t.log.Info("viewer joined", "peer_id", peer)
@@ -236,7 +269,7 @@ func (t *TestRoomService) checkPin(peer string, payload json.RawMessage) {
 		if res.Owner {
 			t.markOwner(peer)
 		}
-		t.admit(peer)
+		t.admitWith(peer, res.Token)
 		if msg.Key != "" || wasWaiting {
 			t.admissionChanged() // one more place used, or one less waiting
 		}
@@ -401,6 +434,9 @@ func (t *TestRoomService) SetManager(m *RoomManager) {
 	t.mu.Lock()
 	t.manager = m
 	t.mu.Unlock()
+	if m != nil {
+		m.OnRemove(func(peer string) { t.Remove(peer) })
+	}
 }
 
 // OnSummary receives the Room Manager's counts and updates the lobby.
@@ -423,7 +459,7 @@ func NewTestRoomService(status *StatusService, viewers Viewers, hostName string,
 	if logger == nil {
 		logger = slog.Default()
 	}
-	return &TestRoomService{log: logger, status: status, viewers: viewers, hostName: hostName, title: "Test pattern", game: "Test pattern", public: true, guests: make(map[string]bool), pin: NewPinGate(nil), pending: make(map[string]bool)}
+	return &TestRoomService{log: logger, status: status, viewers: viewers, hostName: hostName, title: "Test pattern", game: "Test pattern", public: true, guests: make(map[string]bool), tokens: make(map[string]string), pin: NewPinGate(nil), pending: make(map[string]bool)}
 }
 
 // SetSender wires the signaling client.
@@ -535,6 +571,7 @@ func (t *TestRoomService) OnMessage(env signalclient.Envelope) {
 		t.mu.Lock()
 		guest := t.guests[env.From]
 		delete(t.guests, env.From)
+		delete(t.tokens, env.From)
 		_, waiting := t.pending[env.From]
 		delete(t.pending, env.From)
 		t.mu.Unlock()

@@ -96,6 +96,14 @@ export interface HostStreamView {
   releaseSeat: (port: number, mode: "queue" | "watch") => void;
   /** Answers a request to swap controllers. */
   answerSwap: (from: number, to: number, accept: boolean) => void;
+  /** A spectator raises (or lowers) a hand to ask the host to play. */
+  raiseHand: (up: boolean) => void;
+  /** The host: someone watching to the queue, or anyone straight to a seat ("play"). */
+  promote: (peer: string, mode: "queue" | "play", port?: number) => void;
+  /** The host's "not now" to a raised hand. */
+  handLater: (peer: string) => void;
+  /** The host takes someone out of the room for good. */
+  removeGuest: (peer: string) => void;
   /** Voice of the other players, by port (1-4). */
   voiceStreams: Record<number, MediaStream>;
   /** Sends (or stops, with null) the microphone. */
@@ -499,6 +507,10 @@ export function useHostStream(
     swapSeat: (from, to) => send({ type: "swap_seat", from, to }),
     releaseSeat: (port, mode) => send({ type: "release_seat", port, mode }),
     answerSwap: (from, to, accept) => send({ type: "swap_answer", from, to, accept }),
+    raiseHand: (up) => send({ type: "hand", on: up }),
+    promote: (peer, mode, port) => send(mode === "play" ? { type: "promote", from: peer, mode, port } : { type: "promote", from: peer, mode }),
+    handLater: (peer) => send({ type: "hand_later", from: peer }),
+    removeGuest: (peer) => send({ type: "remove_guest", from: peer }),
     voiceStreams,
     setMicTrack: (track) => streamRef.current?.setMicTrack(track),
     typing,

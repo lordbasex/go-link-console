@@ -7,6 +7,7 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 ### Added (device and website)
 
 - **One QR code for a group:** the Invite dialog has two kinds of invitation, **One person** (a PIN for one person, as before) and **Group**: one link and QR code for several people (2 to 50, valid for 1, 6 or 24 hours), its key after # in the link so no server sees it. With **Ask me first** (on by default) each person types a name and waits, and the host sees "Ana wants to come in" on any page, with Let in, Not now and Let everyone in. **Stop this QR code** ends the link at once; people already inside stay.
+- **Raise your hand to play:** a spectator raises a hand (from the video's controls or "Your place"), once a minute and only while the host is in the room. The host hears a sound, sees "Sol raised a hand" and a hand button with a count on the players, and answers **Play now** (on a free seat at once, or in someone's seat: that player goes first in the queue, so nobody loses a turn), **To the queue** or **Not now**. A player the host made a spectator comes back through a raised hand, not by joining the queue alone. The host's "…" beside each person in the queue and watching does the same, and **Remove from the room** (also in a player's menu) takes someone out for good: the stream stops and their way back in no longer works, even after a reload.
 
 ### Added (device)
 

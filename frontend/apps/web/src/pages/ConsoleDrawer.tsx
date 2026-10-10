@@ -349,9 +349,9 @@ function PlayersTab({
         )}
       </div>
       <h3 className="drawer-section-title">{t.room.tabs.queue}</h3>
-      <QueueList model={model} />
+      <QueueList model={model} tools={actions.hostTools} />
       <h3 className="drawer-section-title">{t.room.tabs.spectators}</h3>
-      <SpectatorList model={model} />
+      <SpectatorList model={model} tools={actions.hostTools} />
     </div>
   );
 }

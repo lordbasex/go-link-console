@@ -49,6 +49,7 @@ import {
   MicIcon,
   MicOffIcon,
   PauseIcon,
+  HandIcon,
   PictureIcon,
   ChevronRightIcon,
   PlayIcon,
@@ -80,6 +81,7 @@ import { PauseAskDialog } from "../components/PauseAskDialog";
 import { useLinkedPauseAsks } from "../signal/useLinkedPauseAsks";
 import { StreamInfo } from "../components/StreamInfo";
 import { PlayersCapsule, type SeatSwap } from "../components/PlayersCapsule";
+import type { HostTools } from "../components/GuestMenu";
 import { TermsCheck } from "../components/legal/TermsCheck";
 import { acceptTerms, termsAccepted } from "../legal";
 import { HelpDialog } from "../components/HelpDialog";
@@ -816,6 +818,46 @@ export function RoomPage() {
   useEffect(() => {
     if (live.refused?.code === "pause_owner_only") setPauseNote(t.pauseAsk.ownerOnly);
   }, [live.refused]);
+  // A raised hand: the spectator's notices, and the host's sound and notice
+  // for each new hand.
+  const [handNote, setHandNote] = useState("");
+  useEffect(() => {
+    if (!handNote) return;
+    const id = window.setTimeout(() => setHandNote(""), 4000);
+    return () => window.clearTimeout(id);
+  }, [handNote]);
+  useEffect(() => {
+    const code = live.refused?.code;
+    if (code === "hand_too_soon") {
+      const again = live.room?.you.handAgain ?? 0;
+      const s = Math.ceil((again - Date.now()) / 1000);
+      setHandNote(s > 0 && s <= 60 ? t.hand.again(s) : t.hand.tooSoon);
+    } else if (code === "hand_no_host") setHandNote(t.hand.noHost);
+    else if (code === "queue_ask_host") setHandNote(t.hand.askHost);
+    // the room state only matters at the moment of the refusal
+  }, [live.refused]);
+  useEffect(() => {
+    if (lastChat?.kind === "system" && lastChat.event === "hand_later") setHandNote(t.hand.later);
+  }, [lastChat]);
+  const handPeers = useRef(new Set<string>());
+  const handsKey = (live.room?.you.owner ? live.room.spectators : [])
+    .filter((sp) => sp.hand && sp.peer)
+    .map((sp) => `${sp.peer}\u0000${sp.name}`)
+    .join("\u0001");
+  useEffect(() => {
+    const now = new Map(handsKey ? handsKey.split("\u0001").map((x) => x.split("\u0000") as [string, string]) : []);
+    const fresh = [...now].filter(([peer]) => !handPeers.current.has(peer));
+    handPeers.current = new Set(now.keys());
+    const first = fresh[0];
+    if (!first) return;
+    playDing();
+    setHandNote(t.hand.raised(localName(first[1])));
+  }, [handsKey]);
+  // The host took this browser out of the room: say so, for good.
+  const [removed, setRemoved] = useState(false);
+  useEffect(() => {
+    if (live.pin.last?.reason === "removed") setRemoved(true);
+  }, [live.pin.last]);
   const [dockOpen, setDockOpen] = useState(false);
   // The device asks every browser for a PIN, the owner's too (its room
   // page is another connection than the device's link). Before showing the
@@ -874,6 +916,9 @@ export function RoomPage() {
     }
     if (pin.busy) return;
     if (pin.last?.reason === "waiting") return; // the host decides
+    // Taken out by the host: the token now answers "removed" (a reload
+    // says so again); nothing else is tried.
+    if (pin.last?.reason === "removed") return;
     if (pin.last && knocking.current) {
       // The group invitation did not let this person in: say why.
       knocking.current = false;
@@ -1165,6 +1210,7 @@ export function RoomPage() {
       default:
         break;
     }
+    if (removed) return <RoomProblem title={t.hand.removedTitle} text={t.hand.removedText} />;
   }
 
   const streaming = live.media !== null;
@@ -1179,6 +1225,14 @@ export function RoomPage() {
         params.get("spectatorsHearVoice") === "true",
       )
     : liveModel(live.room, live.chat, { speaking, silenced, talking });
+  // The host (its browser came in with the owner key) moves people toward
+  // playing and takes them out of the room; the device checks it is the host.
+  const hostTools: HostTools | null =
+    !demo && live.room?.you.owner
+      ? { seats: model.seats, onPromote: live.promote, onLater: live.handLater, onRemove: live.removeGuest }
+      : null;
+  // A spectator's raised hand (null: no hand to raise here).
+  const spectatorHand = model.me.kind === "spectator" && !live.room?.you.owner ? !!model.me.hand : null;
   const actions: SideActions = demo
     ? { chatEnabled: false, name: "" }
     : {
@@ -1186,6 +1240,8 @@ export function RoomPage() {
         onChat: live.sendChat,
         onSpectate: live.spectate,
         onQueue: live.joinQueue,
+        onHand: live.raiseHand,
+        hostTools: hostTools ?? undefined,
         onTyping: live.sendTyping,
         typing: live.typing,
         sound: chatSound,
@@ -1618,6 +1674,8 @@ export function RoomPage() {
                 onStart={streaming && playing && !touchOn ? pressStart : undefined}
                 onRelease={!demo && streaming && (ownsRoom || ownTest) ? live.releaseSeat : undefined}
                 queueWaiting={model.queue.length > 0}
+                hands={model.hands}
+                hostTools={streaming ? (hostTools ?? undefined) : undefined}
               />
             )}
             {streaming && pauseAsked && (
@@ -1638,6 +1696,12 @@ export function RoomPage() {
               <p className="video-chip pause-note" role="status">
                 <PauseIcon size={14} />
                 {pauseNote}
+              </p>
+            )}
+            {streaming && handNote && !(pauseNote && !pauseAsked) && (
+              <p className="video-chip pause-note hand-note" role="status">
+                <HandIcon size={14} />
+                {handNote}
               </p>
             )}
             {hostAsks.map(({ ask, answer }) => (
@@ -1717,6 +1781,21 @@ export function RoomPage() {
               {dockOpen ? <CloseIcon size={16} /> : <SlidersIcon />}
             </button>
             <div className={`video-toolbar${dockOpen ? " is-open" : ""}`}>
+              {!demo && streaming && spectatorHand !== null && (
+                <button
+                  type="button"
+                  className={`icon-button video-hand${spectatorHand ? " is-on" : ""}`}
+                  aria-label={spectatorHand ? t.hand.lower : t.hand.raise}
+                  aria-pressed={spectatorHand}
+                  data-tip={spectatorHand ? t.hand.lower : t.hand.raise}
+                  onClick={() => {
+                    if (!spectatorHand && live.room?.hostOnline !== true) setHandNote(t.hand.noHost);
+                    else live.raiseHand(!spectatorHand);
+                  }}
+                >
+                  <HandIcon />
+                </button>
+              )}
               <button
                 type="button"
                 className={`icon-button video-fullscreen${fullscreen.active ? " is-on" : ""}`}

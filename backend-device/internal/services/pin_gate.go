@@ -102,6 +102,7 @@ type pass struct {
 	pin     string
 	expires time.Time
 	token   string // set once someone came in with it
+	revoked bool   // its person was taken out of the room: the token is dead
 }
 
 // PinGate checks the PINs of one room session.
@@ -120,6 +121,7 @@ type PinGate struct {
 	groupTokens []string         // return tokens of people it let in
 	knocks      map[string]knock // peer -> waiting for the host
 	declined    map[string]bool  // peers the host said no to, this session
+	removed     []string         // tokens of people the host took out of the room
 }
 
 type groupPass struct {
@@ -206,13 +208,18 @@ func (g *PinGate) Check(peer, pin, token string) PinResult {
 	// The host's key and the tokens of guests already in come first: someone
 	// guessing PINs can lock the PIN path, but never lock them out.
 	if token != "" {
+		for _, tk := range g.removed {
+			if equal(token, tk) {
+				return PinResult{Reason: "removed"}
+			}
+		}
 		if equal(token, g.owner) {
 			delete(g.tries, peer)
 			delete(g.knocks, peer)
 			return PinResult{OK: true, Owner: true}
 		}
 		for _, p := range g.passes {
-			if p.token != "" && equal(token, p.token) {
+			if p.token != "" && !p.revoked && equal(token, p.token) {
 				delete(g.tries, peer)
 				delete(g.knocks, peer)
 				return PinResult{OK: true, Token: p.token}
@@ -432,6 +439,27 @@ func (g *PinGate) letInByGroup() PinResult {
 		g.groupTokens = g.groupTokens[len(g.groupTokens)-maxGroupTokens:]
 	}
 	return PinResult{OK: true, Token: tk}
+}
+
+// Revoke ends a guest's return token: the host took that person out of
+// the room, so the token gets "removed" instead of a way back in (it never
+// counts as a wrong try). The owner's key is never revoked.
+func (g *PinGate) Revoke(token string) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	if token == "" || equal(token, g.owner) {
+		return
+	}
+	for _, p := range g.passes {
+		if equal(token, p.token) {
+			p.revoked = true // the PIN stays used, its token no longer opens
+		}
+	}
+	g.groupTokens = slices.DeleteFunc(g.groupTokens, func(tk string) bool { return equal(token, tk) })
+	g.removed = append(g.removed, token)
+	if len(g.removed) > maxGroupTokens {
+		g.removed = g.removed[len(g.removed)-maxGroupTokens:]
+	}
 }
 
 // cleanName keeps a guest's name short and printable, for the host's list.
