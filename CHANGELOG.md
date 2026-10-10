@@ -4,6 +4,10 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 
 ## [Unreleased]
 
+### Changed (core patches)
+
+- **X-Men resumes exactly, and 13 more games resume better:** the missing state was the input ports' values latched at VBLANK (`0019`, generic: Snow Bros., Superman, Puzzle Bobble, Marvel Super Heroes, Slam Masters and others now resume with the same picture), the register each YM2151 writes to (`0020`) and X-Men's EEPROM count (`0021`); with `0015`, X-Men gives 600/600 identical pictures and sound frames. Sent to libretro as #2053 and #2054.
+
 ## [0.3.1] - 2026-10-10
 
 ### Changed (go-link HD)

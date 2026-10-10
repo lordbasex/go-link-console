@@ -1,0 +1,24 @@
+diff --git a/src/inptport.c b/src/inptport.c
+index e21fb1a..e2ea10e 100644
+--- a/src/inptport.c
++++ b/src/inptport.c
+@@ -43,6 +43,7 @@ be specified by a CODE_NOT (for example, ALT-TAB on a windows machine).
+ #include "driver.h"
+ #include "config.h"
+ #include "cpuexec.h"
++#include "state.h"
+ 
+ 
+ /***************************************************************************
+@@ -703,6 +704,11 @@ getout:
+ 
+ 	init_analog_seq();
+ 
++	/* the values the board latched at the last VBLANK: the game reads them
++	   until the next one, so a loaded state must bring them back */
++	state_save_register_UINT16("input", 0, "port values", input_port_value, MAX_INPUT_PORTS);
++	state_save_register_UINT16("input", 0, "vblank",      input_vblank,     MAX_INPUT_PORTS);
++
+ 	update_input_ports();
+ 
+ 	/* if we didn't find a saved config, return 0 so the main core knows that it */
