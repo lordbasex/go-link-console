@@ -95,9 +95,9 @@ func TestWindowShowsCodeAndChecks(t *testing.T) {
 	if u.showing != "main" {
 		t.Fatal("without a LinkService the window is the full one")
 	}
-	// Sidebar: Overview, then MAME under an Emulators heading, then
-	// Settings (the computer's details live in the Overview).
-	if len(u.rows) != 3 || sections[pageSettings].title != "Settings" || sections[pageMAME].title != "MAME" || len(u.headings) != 1 || u.headings[0].Text != "EMULATORS" {
+	// Sidebar: Overview, then MAME and go-link HD under a Core heading,
+	// then Settings (the computer's details live in the Overview).
+	if len(u.rows) != 4 || sections[pageSettings].title != "Settings" || sections[pageMAME].title != "MAME" || sections[pageHD].title != "go-link HD" || len(u.headings) != 1 || u.headings[0].Text != "CORE" {
 		t.Fatalf("sidebar: %d rows, headings %v", len(u.rows), u.headings)
 	}
 	test.Tap(u.rows[pageMAME])
@@ -419,6 +419,9 @@ func guiKeys(t *testing.T) []string {
 	for _, k := range kindLabels[1:] {
 		add(k)
 	}
+	for _, k := range hdCodecLabels {
+		add(k)
+	}
 	add(languages[0].label)
 	add(thumbHelp)
 	for _, s := range []string{"connected", "connecting", "disconnected"} {
@@ -439,5 +442,33 @@ func TestSettingsChangeTheVideoQuality(t *testing.T) {
 	test.Tap(u.settings.quality.segments[1]) // Normal
 	if q := u.opts.Settings.VideoQuality(); q != "normal" || u.settings.quality.Selected != "Normal" {
 		t.Fatalf("quality %q, selected %q", q, u.settings.quality.Selected)
+	}
+}
+
+func TestTheGoLinkHDPageChangesTheScreen(t *testing.T) {
+	u, status, _ := newTestUI(t)
+	hd := services.NewHDGamesService(services.HDGamesConfig{Library: u.opts.Library, Status: status, Settings: u.opts.Settings, Offered: true})
+	u.opts.HDGames = hd
+	u.render(status.Snapshot())
+	test.Tap(u.rows[pageHD])
+	if u.current != pageHD || u.page.Objects[0] != u.hd.content {
+		t.Fatal("the go-link HD row opens its page")
+	}
+	if u.hd.roomSize.Selected != "720p" || u.hd.codec.Selected != "Automatic" {
+		t.Fatalf("defaults %q %q", u.hd.roomSize.Selected, u.hd.codec.Selected)
+	}
+	row := u.hd.starter["antidoto"]
+	if row == nil || row.state.Text != "Not installed" || row.sizes["720p"].Disabled() {
+		t.Fatalf("starter row %+v", row)
+	}
+	test.Tap(u.hd.tabs[hdTabScreen])
+	test.Tap(u.hd.roomSize.segments[1]) // 1080p
+	test.Tap(u.hd.codec.segments[1])    // VP8
+	if got := u.opts.Settings.HD(); got.RoomSize != "1080p" || got.Codec != "vp8" {
+		t.Fatalf("saved %+v", got)
+	}
+	u.render(status.Snapshot())
+	if st := status.Snapshot().HD; st == nil || st.RoomSize != "1080p" || st.Codec != "vp8" {
+		t.Fatalf("status %+v", st)
 	}
 }

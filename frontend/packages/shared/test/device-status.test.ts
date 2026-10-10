@@ -144,3 +144,23 @@ describe("a device before 0.2.9", () => {
     expect(parseDeviceStatus({ type: "device_status", device_id: "d", library: { dir: "/r", roms: [{ name: "x" }], summary: { total: 9 } } })!.library!.legacyRoms).toBeUndefined();
   });
 });
+
+describe("go-link HD in device_status", () => {
+  it("reads its screen, folder and starter games", () => {
+    const st = parseDeviceStatus({
+      type: "device_status",
+      device_id: "d",
+      library: { dir: "/r", hd_dir: "/h", hd_games: 1, hd_bytes: 117389971, core: {} },
+      hd: { room_size: "1080p", codec: "vp8", starter: [{ name: "antidoto", title: "ANTÍDOTO", installed: true, size: "720p", downloading: "1080p", done: 10, total: 100 }, { title: "no name" }] },
+    });
+    expect(st?.hd).toEqual({
+      roomSize: "1080p",
+      codec: "vp8",
+      starter: [{ name: "antidoto", title: "ANTÍDOTO", installed: true, size: "720p", downloading: "1080p", done: 10, total: 100, error: undefined }],
+    });
+    expect([st?.library?.hdDir, st?.library?.hdGames, st?.library?.hdBytes]).toEqual(["/h", 1, 117389971]);
+    // An older device: no hd, unknown values fall back to the defaults.
+    expect(parseDeviceStatus({ type: "device_status", device_id: "d" })?.hd).toBeUndefined();
+    expect(parseDeviceStatus({ type: "device_status", device_id: "d", hd: { room_size: "4k" } })?.hd).toEqual({ roomSize: "720p", codec: "auto", starter: [] });
+  });
+});

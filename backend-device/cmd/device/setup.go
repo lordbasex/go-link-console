@@ -111,6 +111,23 @@ func openLibrary(store *repositories.ConfigFile, cfg *models.Config, target, cor
 		return updateConfig(store, cfg, func(c *models.Config) { c.VideoQuality = q })
 	})
 	status.SetVideoQuality(settings.VideoQuality())
+	// go-link HD's games, in their own folder (made the first time).
+	settings.UseHD(cfg.HD, func(h models.HDSettings) error {
+		return updateConfig(store, cfg, func(c *models.Config) { c.HD = h })
+	})
+	hdDir := cfg.HD.GamesDir
+	if hdDir == "" {
+		hdDir = filepath.Join(base, "hd-games")
+		if err := os.MkdirAll(hdDir, 0o755); err != nil {
+			logger.Warn("cannot make go-link HD's games folder", "err", err)
+		}
+	}
+	library.UseHDDir(hdDir)
+	library.OnHDDirChange(func(dir string) {
+		if err := settings.SetHDGamesDir(dir); err != nil {
+			logger.Warn("cannot save go-link HD's games folder", "err", err)
+		}
+	})
 	library.OnDirChange(func(dir string) {
 		if err := updateConfig(store, cfg, func(c *models.Config) { c.RomsDir = dir }); err != nil {
 			logger.Warn("cannot save the ROM folder", "err", err)

@@ -136,6 +136,10 @@ export interface DeviceLibrary {
   disk?: { total: number; free: number };
   /** Folder of the host's own thumbnails on the device. */
   thumbnailsDir: string;
+  /** go-link HD's games folder, its packages and their bytes (older devices: "", 0, 0). */
+  hdDir?: string;
+  hdGames?: number;
+  hdBytes?: number;
   /** The kind of thumbnail the host chose to show (device Settings). */
   thumbKind: ThumbKind;
   /** Space the host's thumbnail images take, in bytes. */
@@ -282,6 +286,43 @@ export interface DeviceStatus {
   update?: DeviceUpdate;
   /** The host's video quality for game rooms (older devices: absent). */
   videoQuality?: VideoQuality;
+  /** go-link HD's rooms' screen and its free starter games (older devices: absent). */
+  hd?: DeviceHD;
+}
+
+export interface DeviceHD {
+  roomSize: "720p" | "1080p";
+  codec: "auto" | "vp8";
+  starter: StarterGame[];
+}
+
+/** A free game go-link HD can download into its games folder. */
+export interface StarterGame {
+  name: string;
+  title: string;
+  installed: boolean;
+  /** The installed package's screen size. */
+  size?: string;
+  /** The size being downloaded, with its progress in bytes. */
+  downloading?: string;
+  done: number;
+  total: number;
+  error?: string;
+}
+
+function parseHD(v: unknown): DeviceHD | undefined {
+  if (typeof v !== "object" || v === null) return undefined;
+  const h = v as Record<string, unknown>;
+  const starter = Array.isArray(h.starter)
+    ? h.starter.slice(0, 50).flatMap((g): StarterGame[] => {
+        if (typeof g !== "object" || g === null) return [];
+        const r = g as Record<string, unknown>;
+        const name = text(r.name, 40);
+        if (!name) return [];
+        return [{ name, title: text(r.title, 80) ?? name, installed: r.installed === true, size: text(r.size, 10), downloading: text(r.downloading, 10), done: bytesOf(r.done), total: bytesOf(r.total), error: text(r.error, 200) }];
+      })
+    : [];
+  return { roomSize: h.room_size === "1080p" ? "1080p" : "720p", codec: h.codec === "vp8" ? "vp8" : "auto", starter };
 }
 
 export interface DeviceUpdate {
@@ -320,6 +361,7 @@ export function parseDeviceStatus(msg: unknown): DeviceStatus | null {
     savesBytes: bytesOf(m.saves_bytes),
     update: parseUpdate(m.update),
     videoQuality: parseVideoQuality(m.video_quality),
+    hd: parseHD(m.hd),
   };
 }
 
@@ -342,6 +384,9 @@ function parseLibrary(v: unknown): DeviceLibrary | undefined {
     thumbnailsDir: text(l.thumbnails_dir, 300) ?? "",
     thumbKind: l.thumb_kind === "title" || l.thumb_kind === "snap" ? l.thumb_kind : "boxart",
     thumbnailsBytes: bytesOf(l.thumbnails_bytes),
+    hdDir: text(l.hd_dir, 300) ?? "",
+    hdGames: bytesOf(l.hd_games),
+    hdBytes: bytesOf(l.hd_bytes),
     ...(() => {
       // A device before 0.2.9: the whole list instead of a summary.
       if (Array.isArray(l.roms) && (typeof l.summary !== "object" || l.summary === null)) {

@@ -58,7 +58,33 @@ type Config struct {
 	// VideoQuality of game rooms: high, normal or saver (see VideoHigh);
 	// empty means DefaultVideoQuality.
 	VideoQuality string `json:"video_quality,omitempty"`
+	// HD is go-link HD's settings: its games folder and its rooms' screen.
+	HD HDSettings `json:"hd,omitempty"`
+	// StarterGames is set once the free starter games were offered (on the
+	// first link): a game the host deletes is never downloaded again.
+	StarterGames bool `json:"starter_games,omitempty"`
 }
+
+// HDSettings are go-link HD's settings. Empty fields mean the defaults.
+type HDSettings struct {
+	GamesDir string `json:"games_dir,omitempty"` // default ~/go-link/hd-games
+	RoomSize string `json:"room_size,omitempty"` // 720p (default) or 1080p
+	Codec    string `json:"codec,omitempty"`     // auto (default) or vp8
+}
+
+// go-link HD rooms' screen sizes and codecs (HDSettings).
+const (
+	HD720p  = "720p"
+	HD1080p = "1080p"
+	HDAuto  = "auto"
+	HDVP8   = "vp8"
+)
+
+// HDRoomSizes and HDCodecs are the choices of HDSettings, the default first.
+var (
+	HDRoomSizes = []string{HD720p, HD1080p}
+	HDCodecs    = []string{HDAuto, HDVP8}
+)
 
 // Link is one browser linked to this device.
 type Link struct {
@@ -78,8 +104,8 @@ type Link struct {
 // linked again right away: its identity (device_id, device_secret), its
 // signaling server, its network settings (udp_port, announce_ips) and the
 // local panel's token. Links, rooms, the ROM and thumbnail folders, the
-// room limit, the website, the language and the video quality go back to
-// their defaults.
+// room limit, the website, the language, the video quality and go-link HD's
+// settings go back to their defaults (the starter games are offered again).
 func (c Config) FactoryDefaults() Config {
 	return Config{
 		DeviceID: c.DeviceID, DeviceSecret: c.DeviceSecret, SignalURL: c.SignalURL,

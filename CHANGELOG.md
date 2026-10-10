@@ -4,6 +4,16 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 
 ## [Unreleased]
 
+### Added (device)
+
+- **go-link HD has its own page in the device window:** the sidebar's group is now **Core**, with **MAME** and **go-link HD**. go-link HD's page has two tabs: **Games** (the engine's state, its own games folder, how many games it has, and its free games to download in 720p or 1080p with their progress) and **Screen** (the size, 720p or 1080p, and the codec, automatic or VP8, of its rooms, used by the rooms started afterwards). From a terminal: `device hd dir`, `device hd screen`, `device hd games`, `device hd download`.
+- **go-link HD games have their own folder:** `~/go-link/hd-games` by default (`hd.games_dir` in `device.json`, changed from the window or `device hd dir`). Packages in the ROM folder keep working; the HD folder's wins over one of the same name.
+- **A free game to start:** the first time a linked browser connects, the device downloads **ANTÍDOTO** (published with go-link HD's engine, checked by its size and SHA-256 before it is used) in the size of its HD rooms and opens a room with it, ready to play; the host keeps, archives or deletes it like any room. It is offered once (`starter_games` in `device.json`; a factory reset offers it again), and a game the host deletes is never downloaded again by itself.
+
+### Changed (device)
+
+- **go-link HD rooms' size and codec are settings:** `hd.room_size` and `hd.codec` in `device.json` (go-link HD › Screen in the window), read as each room starts; `--hd-room-size` and `--hd-room-codec` now only override them for one run.
+
 ### Added
 
 - **The demo video in Spanish and Portuguese:** `npm run demos` renders the three-minute demo in English, Spanish and Portuguese, each with the app recorded in its language, the narrator and burned-in subtitles, plus SubRip files; chapter titles and narration translated.

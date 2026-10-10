@@ -19,6 +19,7 @@ func runUI(o uiOptions) {
 		Status:      o.status,
 		Library:     o.library,
 		Games:       o.games,
+		HDGames:     o.hdGames,
 		Links:       o.links,
 		Settings:    o.settings,
 		WebURL:      o.webURL,

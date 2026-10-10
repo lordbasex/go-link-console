@@ -46,7 +46,10 @@ type Manifest struct {
 	Version string `json:"version"`
 	Genre   string `json:"genre"`
 	Players int    `json:"players"`
-	Level   string `json:"level"`
+	// Resolution is format 3's screen the pictures were painted for:
+	// 360p (empty), 720p or 1080p.
+	Resolution string `json:"resolution"`
+	Level      string `json:"level"`
 	// Levels is format 3's game of several levels, in place of Level.
 	Levels []struct {
 		Level string `json:"level"`
