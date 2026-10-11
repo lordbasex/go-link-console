@@ -145,7 +145,7 @@ release:
 # is signed.
 device-dmg: device-darwin-universal
 	CODESIGN_IDENTITY="$(CODESIGN_IDENTITY)" $(DEVICE_DIR)/build/macos/make-dmg.sh $(DEVICE_OUT)/darwin-universal/go-link-console.app \
-		$(DEVICE_OUT)/go-link-$(VERSION)-macos-universal.dmg
+		$(DEVICE_OUT)/go-link-console-$(VERSION)-macos-universal.dmg
 
 # The local web panel of headless devices: the rooms' website (play), built
 # and copied into the device, which embeds it (backend-device/web). `make
