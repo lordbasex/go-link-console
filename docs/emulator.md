@@ -14,7 +14,7 @@ The device is a libretro **frontend**, like RetroArch: it loads a **core** (the 
 
 ## Where ROMs come from
 
-go-link is based on MAME: the engine is mame2003-plus, which plays **MAME 0.78** sets.
+go-link Console is based on MAME: the engine is mame2003-plus, which plays **MAME 0.78** sets.
 
 - The project **does not** include, host, proxy or download ROMs or thumbnails, in the repository, the binaries or the website, and does not point to any site that offers them.
 - The host gets compatible sets on their own and puts them in the device's ROM folder (`~/go-link-console/roms` by default), or drops them on the device window or on the linked website (they go straight to the device over WebRTC).

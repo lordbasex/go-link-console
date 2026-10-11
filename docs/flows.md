@@ -2,7 +2,7 @@
 
 ## 1. First run of the device
 
-1. The host downloads and opens go-link (double click, no terminal).
+1. The host downloads and opens go-link Console (double click, no terminal).
 2. The device creates `device.json` with its `device_id` and `device_secret`, and opens its **window**.
 3. It connects to the signaling server and gets a **9-digit pairing code**, shown in the window, in the tray panel and (headless) in the log.
 4. The host opens the website (`https://play.go-link.org/device` by default) and types the code.

@@ -161,7 +161,7 @@ Controls never shrink below a finger's size, so on a small screen they may reach
 
 Give it this page, [skin.schema.json](skin.schema.json) and one built-in skin as an example, then ask, for example:
 
-> Make 5 go-link gamepad skins as separate JSON files following this schema: a retro beige one, a translucent teal one, a black and gold one, a Game Boy green one and a white one. Keep the built-in layout, change the colors, `style.menu`, `style.controls` and the decor. New ids, names in en, es and pt.
+> Make 5 go-link Console gamepad skins as separate JSON files following this schema: a retro beige one, a translucent teal one, a black and gold one, a Game Boy green one and a white one. Keep the built-in layout, change the colors, `style.menu`, `style.controls` and the decor. New ids, names in en, es and pt.
 
 Check each file with any JSON Schema validator before copying it to the Skins folder; the app skips a file it cannot read.
 

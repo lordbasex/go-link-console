@@ -65,7 +65,7 @@ Every run is a start state plus one input per frame, so any finding replays exac
 | Training per level, from the level's start or from a checkpoint | Base | A long level trains in parts |
 | Training continues from the last saved network when the game changes a little | Base | A small edit does not mean training from zero |
 | A time or quality limit, chosen by the user (Quick, Normal, Thorough) | Base | |
-| Training on the linked go-link device instead of the browser | Later | For long trainings or slow computers; the device runs the real core |
+| Training on the linked go-link Console device instead of the browser | Later | For long trainings or slow computers; the device runs the real core |
 | Training across games of the same genre (a general platformer player) | Idea | Faster start on a new game |
 
 ## 3. The report

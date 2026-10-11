@@ -85,7 +85,7 @@ The engine's own rules (the platformer, and the genres of phase 4B) stay in C; a
 | A debugger: breakpoints, step frame by frame, watch variables | Later | The debug view's frame step already planned for go-link HD |
 | Sharing scripts between games, a library of behaviors | Idea | |
 
-## In go-link
+## In go-link Console
 
 Nothing changes for rooms: a scripted game is a `.glhd` package like any other, and the device runs it with the same engine. Validation level 4 (the power-on test on the linked device) covers scripted games, and a script that stops a game shows its message in the room as well.
 

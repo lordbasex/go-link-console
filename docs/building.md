@@ -155,7 +155,7 @@ Before every web picture the page's computer name, user name and local paths are
 
 ### Trailer and demo video
 
-`video/` makes go-link's trailer (about 50 s) and its demo (about 3 minutes, seven chapters) with Remotion, from takes of the real app:
+`video/` makes go-link Console's trailer (about 50 s) and its demo (about 3 minutes, seven chapters) with Remotion, from takes of the real app:
 
 1. **Takes:** `cd e2e && npm run video` (`VIDEO_LANG=es|pt` for the other languages) records the website with the `video` Playwright project, with the invented ROM library of the screenshots, into `video/public/takes/<lang>/` (landing, linking, the test pattern room, a guest, the phone console, Willy Maker and the network report).
 2. **Narrator:** `scripts/voice.py` (Kokoro, `KOKORO_DIR`) turns `src/narration.json` (trailer) or `src/demo-narration.json` (demo, `VOICE_SET=demo`) into one WAV per line at -16 LUFS, and writes how long each line lasts; the scenes stretch to fit their line.

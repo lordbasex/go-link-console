@@ -8,7 +8,7 @@ If a delivery follows this page, the build accepts it or says exactly which rule
 
 | Fact | Value |
 |---|---|
-| Screen | **384 × 224** pixels (CPS-1), shown 2× in go-link rooms (768 × 448) |
+| Screen | **384 × 224** pixels (CPS-1), shown 2× in go-link Console rooms (768 × 448) |
 | Frame rate | 60 frames per second |
 | Grid | everything snaps to **16 px** (the playfield's tile size) |
 | Hero height | **44 px** = 19.6 % of the screen height (Metal Slug's soldiers are about 40 px of 224) |

@@ -1,6 +1,6 @@
 # CPS-1 hardware facts for the prototype
 
-What go-link's own ROM relies on, read from the driver of the core the device runs (mame2003-plus, MAME 0.78) and confirmed by the prototype where marked **(tested)**. Source: [libretro/mame2003-plus-libretro](https://github.com/libretro/mame2003-plus-libretro) at commit `0d9a325c`; links point to that commit.
+What go-link Console's own ROM relies on, read from the driver of the core the device runs (mame2003-plus, MAME 0.78) and confirmed by the prototype where marked **(tested)**. Source: [libretro/mame2003-plus-libretro](https://github.com/libretro/mame2003-plus-libretro) at commit `0d9a325c`; links point to that commit.
 
 - `cps1.c` = [src/drivers/cps1.c](https://github.com/libretro/mame2003-plus-libretro/blob/0d9a325c96aa96460be7b2fe4310a7096981ff75/src/drivers/cps1.c)
 - `cps1_vidhrdw.c` = [src/vidhrdw/cps1_vidhrdw.c](https://github.com/libretro/mame2003-plus-libretro/blob/0d9a325c96aa96460be7b2fe4310a7096981ff75/src/vidhrdw/cps1_vidhrdw.c)
@@ -91,7 +91,7 @@ ROM layout (`cps1.c` L6219-6246, `ROM_START( captcomm )`). Only names and sizes 
 | CPU2 (Z80, 0x18000) | `cc_09.rom` | 0x10000 | first 0x8000 at 0x0000, `ROM_CONTINUE` 0x8000 at 0x10000 (banked) |
 | SOUND1 (OKI samples) | `cc_18.rom`, `cc_19.rom` | 0x20000 each | at 0x00000 and 0x20000 |
 
-ROM loading (`common.c` L1301-1385) **(tested)**: a file with the right name and a **wrong CRC or length is a warning** ("WRONG CHECKSUMS", a 180-frame on-screen message), not an error; only a **missing** file stops the game. go-link's own check (`backend-device/pkg/romcheck`, `Checker.has`) follows the same rule: a file counts when its name is there.
+ROM loading (`common.c` L1301-1385) **(tested)**: a file with the right name and a **wrong CRC or length is a warning** ("WRONG CHECKSUMS", a 180-frame on-screen message), not an error; only a **missing** file stops the game. go-link Console's own check (`backend-device/pkg/romcheck`, `Checker.has`) follows the same rule: a file counts when its name is there.
 
 ## 68000 memory map (`cps1.c` L327-363)
 
