@@ -133,7 +133,7 @@ fi
 # gh may live in a PATH only the login shell knows (Homebrew, ~/.local/bin).
 GH="$(command -v gh || /bin/zsh -lc 'command -v gh' 2>/dev/null || true)"
 if [[ -n "$GH" && "${GITHUB_RELEASE:-1}" == "1" ]]; then
-  flags=(--repo "$REPO" --title "go-link $VERSION" --generate-notes)
+  flags=(--repo "$REPO" --title "go-link Console $VERSION" --generate-notes)
   [[ "$DEV" == "1" ]] && flags+=(--prerelease)
   echo "▶ Creating the GitHub release $TAG on $REPO"
   "$GH" release create "$TAG" "$OUT"/* "${flags[@]}" \
