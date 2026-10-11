@@ -91,6 +91,10 @@ test("the test pattern room streams video", async () => {
   await page.getByRole("link", { name: "Test pattern" }).click();
   await expect(page).toHaveURL(/\/r\/[0-9a-f-]{36}$/);
   await expectVideoPlaying(page);
+  // The host plays too, so it is asked about the voice; it keeps listening.
+  const ask = page.getByRole("dialog", { name: "Do you want to join the voice?" });
+  await ask.getByRole("button", { name: "Not now" }).click();
+  await expect(ask).toHaveCount(0);
   await expectAccessible(page, "owner's room");
   // The same room in the light theme (the video keeps its dark colors).
   await switchTheme(page, "Light mode");
@@ -210,7 +214,7 @@ async function expectPictureStyles(p: Page) {
 /** The room's Output list (the site's Select) opens inside the voice settings, passes the checker and closes alone. */
 async function expectOutputList(p: Page, theme: string) {
   await clickControl(p, "Volume and voice");
-  const settings = p.getByRole("dialog", { name: /voice/i });
+  const settings = p.getByRole("dialog", { name: "Game voice" });
   const output = settings.getByRole("combobox", { name: "Output" });
   await output.click();
   await expect(p.getByRole("listbox", { name: "Output" })).toBeVisible();
@@ -728,6 +732,52 @@ test("a spectators' QR code lets people in to watch, each one let in by the host
   await dialog.getByRole("button", { name: "Got it" }).click();
   await expectVideoPlaying(ana);
   await context.close();
+});
+
+test("joining as a player asks \"Do you want to join the voice?\", and so does moving from watching to playing", async ({ browser }) => {
+  test.setTimeout(150_000);
+  const shot = async (p: Page, name: string) => {
+    if (process.env.E2E_ASK_SHOTS) await p.screenshot({ path: `${process.env.E2E_ASK_SHOTS}/${name}.png` });
+  };
+  const join = async (name: string) => {
+    const inv = await newInvitation();
+    const g = await joinAsGuest(browser, inv.code, inv.pin);
+    await enterName(g.page, name);
+    await expectVideoPlaying(g.page);
+    return g;
+  };
+  const ask = (p: Page) => p.getByRole("dialog", { name: "Do you want to join the voice?" });
+  // Tom says yes: his microphone turns on.
+  const tom = await join("Tom");
+  await expect(ask(tom.page)).toBeVisible();
+  await shot(tom.page, "1-asked");
+  await expectAccessible(tom.page, "the voice question");
+  await ask(tom.page).getByRole("button", { name: "Turn on my microphone" }).click();
+  await expect(ask(tom.page)).toHaveCount(0);
+  await wake(tom.page);
+  await expect(tom.page.getByRole("button", { name: "microphone on" })).toBeVisible();
+  await shot(tom.page, "2-microphone-on");
+  // Uma says not now: her microphone stays off.
+  const uma = await join("Uma");
+  await ask(uma.page).getByRole("button", { name: "Not now" }).click();
+  await expect(ask(uma.page)).toHaveCount(0);
+  await wake(uma.page);
+  await expect(uma.page.getByRole("button", { name: "microphone muted" })).toBeVisible();
+  // Watching, Uma is not asked; seated again by the host, she is.
+  await wake(page);
+  await page.getByRole("button", { name: /· Uma/ }).click();
+  await page.getByRole("menuitem", { name: "Make Uma a spectator" }).click();
+  await uma.page.getByRole("tablist", { name: "Room panel" }).getByRole("tab", { name: "Chat" }).click();
+  await expect(uma.page.locator(".side-status").getByText("You are watching", { exact: true })).toBeVisible();
+  await expect(ask(uma.page)).toHaveCount(0);
+  await page.getByRole("tablist", { name: "Room", exact: true }).getByRole("tab", { name: /Spectators/ }).click();
+  await page.getByRole("button", { name: "What to do with Uma" }).click();
+  await page.getByRole("menuitem", { name: "Play now" }).click();
+  await expect(uma.page.locator(".side-status").getByText("You are playing")).toBeVisible();
+  await expect(ask(uma.page)).toBeVisible();
+  await shot(uma.page, "3-asked-again");
+  await tom.context.close();
+  await uma.context.close();
 });
 
 test("the controller test page lights the keyboard's buttons", async ({ browser }) => {

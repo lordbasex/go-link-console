@@ -1316,6 +1316,11 @@ export const pt: Messages = {
       locked: "Esta sala não aceita convites por alguns minutos. Tente mais tarde.",
     },
   },
+  voiceAsk: {
+    title: "Quer participar da voz?",
+    yes: "Ligar meu microfone",
+    no: "Agora não",
+  },
   hand: {
     raise: "Levante a mão para jogar",
     lower: "Abaixe a mão",

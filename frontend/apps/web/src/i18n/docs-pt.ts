@@ -350,6 +350,7 @@ export const docsPt: Docs = {
           t: "list",
           items: [
             "Podem falar os jogadores (P1 a P4) e quem espera na fila. Ligue o microfone no painel da sala, ou segure **V**.",
+            "Quando você entra como jogador ou na fila, e cada vez que passa de assistir para jogar, o go-link pergunta **Quer participar da voz?** **Ligar meu microfone** liga; **Agora não** deixa você ouvindo, e você pode ligar depois no painel.",
             "Os espectadores ouvem o jogo e as vozes, mas não podem falar. O anfitrião pode desligar **Os espectadores ouvem as vozes** em **Volume e voz**.",
             "Até quatro pessoas são ouvidas ao mesmo tempo: quem está falando. Uma quinta voz entra assim que alguém fica em silêncio.",
             "O som do jogo e a voz têm volumes separados, e você pode silenciar um jogador.",

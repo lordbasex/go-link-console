@@ -1326,6 +1326,11 @@ export const en = {
       locked: "This room refuses invitations for a few minutes. Try again later.",
     },
   },
+  voiceAsk: {
+    title: "Do you want to join the voice?",
+    yes: "Turn on my microphone",
+    no: "Not now",
+  },
   hand: {
     raise: "Raise your hand to play",
     lower: "Lower your hand",

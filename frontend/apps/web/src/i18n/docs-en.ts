@@ -350,6 +350,7 @@ export const docsEn: Docs = {
           t: "list",
           items: [
             "The players (P1 to P4) and the people waiting in the queue can talk. Turn the microphone on in the room's dock, or hold **V**.",
+            "When you join as a player or in the queue, and each time you go from watching to playing, go-link asks **Do you want to join the voice?** **Turn on my microphone** turns it on; **Not now** keeps you listening, and you can turn it on later in the dock.",
             "Spectators hear the game and the voices, but cannot talk. The host can turn off **Spectators hear the voices** in **Volume and voice**.",
             "Up to four people are heard at once: whoever is speaking. A fifth voice comes in as soon as someone goes quiet.",
             "Game sound and voice have separate volumes, and you can silence one player.",

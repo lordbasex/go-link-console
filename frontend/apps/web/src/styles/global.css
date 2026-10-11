@@ -3086,3 +3086,9 @@ body .video-stage.has-touchpad.is-console .picture-layer { inset: auto; left: va
 .video-hand.is-on { border-color: var(--color-accent); color: var(--color-accent-text); }
 .queue-speaking { display: inline-flex; margin-left: auto; color: var(--color-voice); }
 .knock-watch { font-weight: 400; }
+
+/* "Do you want to join the voice?": under the picture, never over the game's middle. */
+.voice-ask { top: auto; bottom: 14px; gap: 10px; flex-wrap: nowrap; white-space: nowrap; max-width: calc(100% - 28px); }
+@media (max-width: 560px) { .voice-ask { flex-wrap: wrap; white-space: normal; border-radius: 18px; justify-content: flex-end; } .voice-ask .grow { flex-basis: 70%; } }
+.voice-ask svg { color: var(--color-voice); flex-shrink: 0; }
+body .video-stage.has-touchpad.is-console .voice-ask { top: calc(var(--sy) + var(--sh) - 64px); bottom: auto; }

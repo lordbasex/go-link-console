@@ -730,6 +730,23 @@ export function RoomPage() {
   const seated = !demo && (live.room?.you.ports.length ?? 0) > 0;
   const talker = seated || (!demo && (live.room?.you.queuePositions.length ?? 0) > 0);
   const talking = talker && (micOn || ptt);
+  // "Do you want to join the voice?": asked each time this browser becomes
+  // able to talk (it joins as a player or in the queue, or is moved there
+  // from watching), unless its microphone is already on. Yes turns the
+  // microphone (and the sound) on; Not now keeps listening only.
+  const roomVoice = live.room?.voice !== false;
+  const [voiceAsk, setVoiceAsk] = useState(false);
+  const wasTalker = useRef(false);
+  useEffect(() => {
+    if (talker && !wasTalker.current && roomVoice && !micOn) setVoiceAsk(true);
+    if (!talker || !roomVoice) setVoiceAsk(false);
+    wasTalker.current = talker;
+    // micOn matters only at the moment this browser becomes a talker
+    // (its later changes answer the question themselves)
+  }, [talker, roomVoice]);
+  useEffect(() => {
+    if (micOn) setVoiceAsk(false);
+  }, [micOn]);
   // The microphone and output chosen for this browser; the settings open
   // the microphone too, so the person can test it before talking.
   const audio = useAudioDevices();
@@ -1746,6 +1763,28 @@ export function RoomPage() {
                 onAnswer={answer}
               />
             ))}
+            {streaming && voiceAsk && !askName && !demo && (
+              <div className="swap-offer swap-toast voice-ask" role="dialog" aria-labelledby="voice-ask-title">
+                <MicIcon size={16} />
+                <span className="grow" id="voice-ask-title">
+                  {t.voiceAsk.title}
+                </span>
+                <button
+                  type="button"
+                  className="button button-primary button-small"
+                  onClick={() => {
+                    setSoundOn(true); // talking implies listening
+                    setMicOn(true);
+                    setVoiceAsk(false);
+                  }}
+                >
+                  {t.voiceAsk.yes}
+                </button>
+                <button type="button" className="button button-secondary button-small" onClick={() => setVoiceAsk(false)}>
+                  {t.voiceAsk.no}
+                </button>
+              </div>
+            )}
             {askName && !demo && (
               <div className="name-overlay">
                 <NameStep
