@@ -6,7 +6,7 @@ import { Gallery } from "./Gallery";
 import { Shot } from "./Shot";
 
 /**
- * The go-link Player app for invited players (Android now, iPhone later),
+ * The go-link Console Player app for invited players (Android now, iPhone later),
  * with two real screenshots, and below it the gallery of real screenshots
  * of the website, the device's window and the app.
  */

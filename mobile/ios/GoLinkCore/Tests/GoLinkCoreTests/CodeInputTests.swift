@@ -63,7 +63,7 @@ final class CodeInputTests: XCTestCase {
     }
 
     func testPasteALinkIsLeftAlone() {
-        let link = "https://go-link.org/g/AbCdEfGhIjKlMnOpQrStUv"
+        let link = "https://play.go-link.org/g/AbCdEfGhIjKlMnOpQrStUv"
         let r = CodeInput.edit(text: "", start: 0, end: 0, insert: link)
         XCTAssertEqual(r.text, link)
         XCTAssertEqual(r.caret, link.count)

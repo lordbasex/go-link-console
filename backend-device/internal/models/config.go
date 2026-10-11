@@ -6,7 +6,7 @@ package models
 import "time"
 
 // App is the signalhub namespace of this project.
-const App = "go-link"
+const App = "go-link-console"
 
 // DefaultSignalURL is the public signalhub operated by the project. Users
 // who run their own server override it with --server-signaling or with
@@ -15,7 +15,7 @@ const App = "go-link"
 const DefaultSignalURL = "wss://signal.go-link.org/ws"
 
 // DefaultWebURL is the website where hosts type the pairing code: the rooms'
-// site (the landing, go-link.org, sends its /device there too).
+// site (the landing, console.go-link.org, sends its /device there too).
 const DefaultWebURL = "https://play.go-link.org"
 
 // Config is persisted in device.json with 0600 permissions.
@@ -67,7 +67,7 @@ type Config struct {
 
 // HDSettings are go-link HD's settings. Empty fields mean the defaults.
 type HDSettings struct {
-	GamesDir string `json:"games_dir,omitempty"` // default ~/go-link/hd-games
+	GamesDir string `json:"games_dir,omitempty"` // default ~/go-link-console/hd-games
 	RoomSize string `json:"room_size,omitempty"` // 720p (default) or 1080p
 	Codec    string `json:"codec,omitempty"`     // auto (default) or vp8
 }
@@ -132,7 +132,7 @@ func (c Config) EffectiveSignalURL() string {
 // ThumbnailSettings say where the host's thumbnails are and which kind to
 // show. Empty fields mean the defaults.
 type ThumbnailSettings struct {
-	Dir  string `json:"dir,omitempty"`  // default ~/go-link/thumbnails/MAME
+	Dir  string `json:"dir,omitempty"`  // default ~/go-link-console/thumbnails/MAME
 	Kind string `json:"kind,omitempty"` // boxart (default), title or snap
 	Size string `json:"size,omitempty"` // small (default), medium or large, in the device window
 }

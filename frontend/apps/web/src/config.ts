@@ -13,7 +13,7 @@ export const DEMO_DATA = import.meta.env.VITE_DEMO_DATA === "true";
 export const LOBBY_REFRESH_MS = 15_000;
 
 /** The project's source repository. */
-export const REPO_URL = "https://github.com/lordbasex/go-link";
+export const REPO_URL = "https://github.com/lordbasex/go-link-console";
 
 /** This build of the website (git describe, set by `make web-build`), and its date. */
 export const APP_VERSION = import.meta.env.VITE_APP_VERSION || "dev";

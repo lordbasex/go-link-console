@@ -17,15 +17,15 @@ For go-link, set in its `deploy/.env`:
 
 | Variable | Value for go-link |
 |---|---|
-| `ALLOWED_ORIGINS` | The rooms' site origin, for example `https://play.go-link.org` (plus `http://localhost:5180` for development). Keep the landing's (`https://go-link.org`) while browsers may still have its older build open |
-| `ALLOWED_APPS` | Must include `go-link` |
+| `ALLOWED_ORIGINS` | The rooms' site origin, for example `https://play.go-link.org` (plus `http://localhost:5180` for development). The landing (`https://console.go-link.org`) never talks to signaling |
+| `ALLOWED_APPS` | Must include `go-link-console` |
 | `MAX_ROOMS_PER_SESSION` | More than 1: each game room of a device is a room of the same session |
 
 Then point the website (`SIGNAL_URL` at build time) and the devices (`--server-signaling` or `signal_url`) at `wss://<your domain>/ws`.
 
 ## Website
 
-The website is a static single-page app built twice ([two sites](web.md#two-sites)): the landing, guide and tools (go-link.org) and the rooms and My device (play.go-link.org):
+The website is a static single-page app built twice ([two sites](web.md#two-sites)): the landing, guide and tools (console.go-link.org) and the rooms and My device (play.go-link.org):
 
 ```bash
 make web-build                                      # frontend/apps/web/dist-site and dist-play
@@ -33,7 +33,9 @@ SIGNAL_URL=wss://signal.example.com/ws make web-build   # for your own signaling
 SITE_URL=https://example.org PLAY_URL=https://play.example.org make web-build   # your own host names
 ```
 
-Each site trusts the other's address for the handoff, and the landing sends the rooms' paths there, so both are built together with `SITE_URL` and `PLAY_URL`. Upload the rooms' site first. The landing keeps `.well-known/` (the apps' invitation links stay on its `/g/<invite>`); the rooms' site sends `noindex`.
+Each site trusts the other's address for the handoff, and the landing sends the rooms' paths there, so both are built together with `SITE_URL` and `PLAY_URL`. Upload the rooms' site first. The rooms' site keeps `.well-known/` (the apps' invitation links are its `/g/<invite>`; iOS needs `apple-app-site-association` served as `application/json`) and sends `noindex`.
+
+Since 2026-10-11, go-link.org (and www) is an index of go-link's WebRTC projects, deployed apart from this repository; it sends every other address to the landing at console.go-link.org.
 
 Whatever serves them must:
 
@@ -63,7 +65,7 @@ SITE_URL=https://go-link.example.org make maker-build   # with your own website
 make maker-deploy                                   # build and upload (deploy/local/hosting.mk)
 ```
 
-- It reaches the owner's go-link through the rooms' site `/maker-bridge` tab, so each must know the other: Willy Maker is built with the rooms' address (`PLAY_URL`, default `https://play.go-link.org`) and the landing's (`SITE_URL`, default `https://go-link.org`, for the games made there before it moved), and the website with Willy Maker's (`VITE_MAKER_URL`, default `https://maker.go-link.org`).
+- It reaches the owner's go-link through the rooms' site `/maker-bridge` tab, so each must know the other: Willy Maker is built with the rooms' address (`PLAY_URL`, default `https://play.go-link.org`) and the landing's (`SITE_URL`, default `https://console.go-link.org`, for the games made there before it moved), and the website with Willy Maker's (`VITE_MAKER_URL`, default `https://maker.go-link.org`).
 - Serve it like the website: `index.html` for unknown paths (a game's address is `/<id>`), `index.html` with `no-cache` and `assets/` cached for a year, HTTPS only, and the same security headers (`frame-ancestors 'none'` and the rest, [security.md](security.md)).
 - `hosting.mk` can define `maker-deploy` the same way as `web-deploy`; without it, `make maker-deploy` only builds the site.
 

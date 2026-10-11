@@ -8,7 +8,7 @@ import * as A from "../android";
 import { enterAlias, freshApp, invite, joinWithPin, ownerOpensTestPattern, pointAppAt, trackedContext } from "../android-owner";
 import { PORTS } from "../ports";
 
-// The go-link Player app scans a real QR code with the emulator's back
+// The go-link Console Player app scans a real QR code with the emulator's back
 // camera (npm run test:android:camera, opt-in: it restarts the emulator).
 //
 // The emulator's "virtualscene" camera renders a 3D room with a poster on
@@ -158,7 +158,7 @@ test("the scanner reads the invitation's QR code with the camera, then the PIN j
   const foreign = join(OUT, "qr-site-link.png");
   const real = join(OUT, "qr-invitation.png");
   await qrPng(inv.url, foreign);
-  const link = `https://go-link.org/g/${inv.invite}`;
+  const link = `https://play.go-link.org/g/${inv.invite}`;
   await qrPng(link, real);
 
   // The virtual device faces the wall poster.

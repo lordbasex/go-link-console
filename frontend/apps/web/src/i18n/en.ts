@@ -117,8 +117,8 @@ export const en = {
   /** The startup intro's coin sound (header tools). */
   androidApp: {
     title: "Playing on Android?",
-    text: "The go-link Player app has the on-screen gamepad, controllers and voice. Open this link again with the app installed and type your PIN there.",
-    get: "Get the go-link Player app",
+    text: "The go-link Console Player app has the on-screen gamepad, controllers and voice. Open this link again with the app installed and type your PIN there.",
+    get: "Get the go-link Console Player app",
     browser: "Or play right here in the browser.",
   },
   ordinal: (n: number) => {
@@ -248,7 +248,7 @@ export const en = {
       { main: "The go-link window right after installing: the address to open and a 9 digit code", inset: "" },
       { main: "The My device page of the website with the 9 digit code typed", inset: "The go-link window showing the same code" },
       { main: "The My device page of the website: the computer live and its ROMs", inset: "The ROM folder page of the go-link window" },
-      { main: "The Invite dialog with a QR code, the code and a one-person PIN", inset: "A friend's phone with the PIN typed in the go-link Player app" },
+      { main: "The Invite dialog with a QR code, the code and a one-person PIN", inset: "A friend's phone with the PIN typed in the go-link Console Player app" },
     ],
   },
   downloads: {
@@ -967,7 +967,7 @@ export const en = {
     copyLog: "Copy log",
     moreEvents: "More events",
     cols: { when: "When", level: "Level", event: "Event", who: "Who", detail: "Detail" },
-    cliHint: (target: string) => `On the host's computer: go-link-device telemetry export ${target} writes everything recorded.`,
+    cliHint: (target: string) => `On the host's computer: go-link-console telemetry export ${target} writes everything recorded.`,
   },
   history: {
     tab: "History",
@@ -1016,15 +1016,15 @@ export const en = {
   playerApp: {
     eyebrow: "Player app",
     title: "Your controller fits in your pocket",
-    text: "go-link Player: scan the QR code, type your PIN and play with chat, voice and the on-screen pad or a real controller.",
+    text: "go-link Console Player: scan the QR code, type your PIN and play with chat, voice and the on-screen pad or a real controller.",
     noteStrong: "Only for invited players.",
     note: "To host games, use go-link on your computer.",
     android: "Download for Android",
     ios: "iPhone and iPad · Coming soon",
     meta: (version: string, mb: number) => `Signed APK · ${version} · ${mb} MB · Android 8 or newer`,
     metaNoSize: "Signed APK · Android 8 or newer",
-    roomAlt: "The go-link Player app in the test pattern room, with the on-screen pad and the microphone on",
-    chatAlt: "The room chat in the go-link Player app",
+    roomAlt: "The go-link Console Player app in the test pattern room, with the on-screen pad and the microphone on",
+    chatAlt: "The room chat in the go-link Console Player app",
   },
   guestPath: {
     eyebrow: "Invited to play?",
@@ -1034,17 +1034,17 @@ export const en = {
       {
         title: "Scan the QR code",
         text: "With the app it opens by itself; without it, it offers the download or the browser.",
-        alt: "The go-link Player app's home screen: scan a QR code or type the code",
+        alt: "The go-link Console Player app's home screen: scan a QR code or type the code",
       },
       {
         title: "Type your PIN",
         text: "The host gives it to you. It is for one person and never goes in the link.",
-        alt: "The PIN screen of the go-link Player app, with the invitation filled in",
+        alt: "The PIN screen of the go-link Console Player app, with the invitation filled in",
       },
       {
         title: "Play and talk",
         text: "On-screen pad or Bluetooth, voice with the other players and chat.",
-        alt: "The test pattern room in the go-link Player app, with the on-screen pad and the microphone on",
+        alt: "The test pattern room in the go-link Console Player app, with the on-screen pad and the microphone on",
       },
     ],
     browser: "No app? Play from the phone's browser too.",
@@ -1080,10 +1080,10 @@ export const en = {
       "web-room": { caption: "A live room (the test pattern)", alt: "The test pattern room playing in a desktop browser, with the players, the controls and the chat" },
       "web-invite": { caption: "Invite with a QR code and a PIN", alt: "The Invite dialog with the link, a QR code, a 9 digit code and a one-person PIN" },
       "win-overview": { caption: "The go-link window", alt: "The go-link window on the computer, on its Overview page" },
-      "app-home": { caption: "Home", alt: "The go-link Player app's home screen: scan a QR code or type the code" },
-      "app-pin": { caption: "PIN", alt: "The PIN screen of the go-link Player app with the invitation filled in" },
-      "app-room": { caption: "Voice", alt: "The test pattern room in the go-link Player app with the on-screen pad and the microphone on" },
-      "app-chat": { caption: "Chat", alt: "The room chat in the go-link Player app" },
+      "app-home": { caption: "Home", alt: "The go-link Console Player app's home screen: scan a QR code or type the code" },
+      "app-pin": { caption: "PIN", alt: "The PIN screen of the go-link Console Player app with the invitation filled in" },
+      "app-room": { caption: "Voice", alt: "The test pattern room in the go-link Console Player app with the on-screen pad and the microphone on" },
+      "app-chat": { caption: "Chat", alt: "The room chat in the go-link Console Player app" },
     },
   },
   landing: {
@@ -1127,7 +1127,7 @@ export const en = {
       { title: "Your games stay home", text: "ROMs never leave your computer: only the picture and the sound travel." },
       { title: "Record and share", text: "The host records the game with everyone's voices and exports an MP4 ready for WhatsApp, with the mix set by ear. Screenshots in one tap." },
       { title: "A console in your pocket", text: "On a phone the room becomes a handheld: a Game Boy held upright, a Switch held sideways, with the controls out of the way." },
-      { title: "An app for Android", text: "go-link Player: scan the invitation's QR code with the camera, type the PIN and play, with chat, voice, the on-screen pad or a real controller." },
+      { title: "An app for Android", text: "go-link Console Player: scan the invitation's QR code with the camera, type the PIN and play, with chat, voice, the on-screen pad or a real controller." },
     ],
     flowEyebrow: "Under the hood",
     flowTitle: "Only the host has the games",
@@ -1958,7 +1958,7 @@ export const en = {
       steps: [
         {
           title: "Design skins for the go-link apps",
-          text: "A skin is the console shell around the game on a phone in the go-link Player apps (iOS and Android): the plastic, the screen's frame, the D-pad, the buttons, Coin, the start buttons and the room's menu.",
+          text: "A skin is the console shell around the game on a phone in the go-link Console Player apps (iOS and Android): the plastic, the screen's frame, the D-pad, the buttons, Coin, the start buttons and the room's menu.",
           points: ["Every skin is a small JSON file: you can make one here, by hand or with an AI.", "Players pick it in the app's Game settings › Skin.", "Nothing leaves your browser: you export the file when you are done."],
         },
         {

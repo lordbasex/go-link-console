@@ -8,7 +8,7 @@ import { enterAlias, freshApp, invite as ownerInvite, joinAsBrowserGuest, joinWi
 import { PORTS } from "../ports";
 import { stack } from "../stack";
 
-// The go-link Player Android app against the test stack (its own signalhub,
+// The go-link Console Player Android app against the test stack (its own signalhub,
 // headless device and website). The owner is a Chromium page that links the
 // device, opens the test pattern room (taking P1, with Chromium's fake
 // microphone tone) and makes invitations; the app, driven through adb and
@@ -152,8 +152,8 @@ test("joins by App Link with the PIN and the terms, takes a seat and shows the p
   usedPins.push(inv.pin);
   const from = probe.mark();
   // The link carries only the invitation; the PIN is typed in the app.
-  A.shell(`am start -a android.intent.action.VIEW -d https://go-link.org/g/${inv.invite} ${A.PACKAGE}`);
-  await A.waitFor({ text: `https://go-link.org/g/${inv.invite}` });
+  A.shell(`am start -a android.intent.action.VIEW -d https://play.go-link.org/g/${inv.invite} ${A.PACKAGE}`);
+  await A.waitFor({ text: `https://play.go-link.org/g/${inv.invite}` });
   snap("app-link-pin-form");
   await joinWithPin(inv.pin);
   appPort = await waitSeated(from);
@@ -310,7 +310,7 @@ test("a wrong PIN and an already used PIN are refused; the new invitation's PIN 
 
   // A new join always asks the PIN (the old return token is not used).
   let mark = probe.mark();
-  A.shell(`am start -a android.intent.action.VIEW -d https://go-link.org/g/${inv.invite} ${A.PACKAGE}`);
+  A.shell(`am start -a android.intent.action.VIEW -d https://play.go-link.org/g/${inv.invite} ${A.PACKAGE}`);
   await A.waitFor({ id: "join-pin" });
   await joinWithPin(wrong);
   const refused = await probe.waitFor((e) => e.ev === "ui" && e.pin_busy === "false" && typeof e.pin_reason === "string", 30_000, mark);
@@ -445,7 +445,7 @@ test("with the four seats taken the app waits in the queue, takes the freed seat
   const inv = await invite();
   usedPins.push(inv.pin);
   let mark = probe.mark();
-  A.shell(`am start -a android.intent.action.VIEW -d https://go-link.org/g/${inv.invite} ${A.PACKAGE}`);
+  A.shell(`am start -a android.intent.action.VIEW -d https://play.go-link.org/g/${inv.invite} ${A.PACKAGE}`);
   await A.waitFor({ id: "join-pin" });
   await joinWithPin(inv.pin);
   await probe.waitFor((e) => e.ev === "ui" && e.phase === "STREAMING" && e.me === "queue:1", 60_000, mark);

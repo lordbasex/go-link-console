@@ -5,7 +5,7 @@ import http2 from "node:http2";
 import { homedir, tmpdir, userInfo } from "node:os";
 import { join } from "node:path";
 
-// Drives the go-link Player Android app on an emulator or a phone with adb
+// Drives the go-link Console Player Android app on an emulator or a phone with adb
 // and UiAutomator, for e2e/tests/android.spec.ts. Controls are found by
 // their Compose test tags (exposed as resource ids) or their text; the
 // app's debug build logs its room events and WebRTC counters with the tag
@@ -88,7 +88,7 @@ export function dump(): UiNode[] {
 }
 
 /** The app's name as Android shows it in system dialogs. */
-const APP_LABEL = "go-link Player";
+const APP_LABEL = "go-link Console Player";
 
 /**
  * Handles a system dialog on screen: an ANR ("X isn't responding") gets

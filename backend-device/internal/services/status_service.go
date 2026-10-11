@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
 )
 
 // StatusService keeps the live device state and notifies listeners (the

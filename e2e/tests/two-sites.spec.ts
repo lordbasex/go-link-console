@@ -2,7 +2,7 @@
 import { expect, test } from "@playwright/test";
 import { PLAY_URL, SITE_URL } from "../ports";
 
-// The website's two builds on their own origins: the landing (go-link.org)
+// The website's two builds on their own origins: the landing (console.go-link.org)
 // and the rooms (play.go-link.org). Each sends the other's pages to the
 // other site, and the rooms can take the device link a browser kept on the
 // landing before the split.
@@ -18,7 +18,7 @@ test("each site sends the other's pages there", async ({ page }) => {
   await page.goto(`${PLAY_URL}/docs/install`);
   await expect(page).toHaveURL(`${SITE_URL}/docs/install`);
 
-  // an invitation shared as go-link.org/g/<invite> opens on the rooms' site
+  // an invitation shared as play.go-link.org/g/<invite> opens on the rooms' site
   await page.goto(`${SITE_URL}/g/AAAAAAAAAAAAAAAAAAAAAA`);
   await expect(page).toHaveURL(`${PLAY_URL}/g/AAAAAAAAAAAAAAAAAAAAAA`);
 

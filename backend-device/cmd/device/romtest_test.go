@@ -13,9 +13,9 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/pkg/cores"
-	"github.com/lordbasex/go-link/backend-device/pkg/romcheck"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/cores"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/romcheck"
 )
 
 func TestLoaderLine(t *testing.T) {
@@ -61,11 +61,11 @@ func TestRomTestHelper(t *testing.T) {
 
 // TestRomTestWithRealCore powers on go-link's own set (rom/build, made by
 // rom/tools/build.mjs) with the real core, then a copy whose program is
-// erased. It needs the mame2003-plus core in ~/go-link and the built set,
+// erased. It needs the mame2003-plus core in ~/go-link-console and the built set,
 // and is skipped otherwise (CI has neither).
 func TestRomTestWithRealCore(t *testing.T) {
 	home, _ := os.UserHomeDir()
-	coresDir := filepath.Join(home, "go-link", "cores")
+	coresDir := filepath.Join(home, "go-link-console", "cores")
 	corePath := filepath.Join(coresDir, cores.FileName(cores.DefaultCore, runtime.GOOS))
 	built := filepath.Join("..", "..", "..", "rom", "build", "slammast.zip")
 	if _, err := os.Stat(corePath); err != nil {

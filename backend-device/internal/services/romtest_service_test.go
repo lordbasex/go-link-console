@@ -17,7 +17,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/emuproc"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/emuproc"
 )
 
 // romTestWorker answers like "romtest --child": with for the run with the

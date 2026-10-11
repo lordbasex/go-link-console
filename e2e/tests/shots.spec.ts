@@ -16,7 +16,7 @@ import { pt } from "../../frontend/apps/web/src/i18n/pt";
 // stack in every language: the device's window (Fyne's test driver, through
 // the Go test TestShots), the website (the code form, the test pattern
 // room, the invitation, My device and its ROMs) and, when an emulator
-// or phone is attached, the go-link Player app. The device's library is an
+// or phone is attached, the go-link Console Player app. The device's library is an
 // invented one (backend-device/internal/shots: made-up games and covers);
 // only the test pattern room is ever played. Before every picture the
 // computer's name, the user name and local paths are replaced on the page,
@@ -42,15 +42,15 @@ const home = homedir();
 const short = hostname().split(".")[0]!;
 const MASK: [string, string][] = [
   [join(here, "..", ".state", "home"), "~"],
-  [root, "~/go-link"],
+  [root, "~/go-link-console"],
   [home, "~"],
   [hostname(), "arcade-pc"],
   [short, "arcade-pc"],
   [userInfo().username, "player"],
   // The test stack's addresses read as the public ones.
   [`ws://127.0.0.1:${PORTS.signal}/ws`, "wss://signal.go-link.org/ws"],
-  [`http://localhost:${PORTS.web}`, "https://go-link.org"],
-  [`localhost:${PORTS.web}`, "go-link.org"],
+  [`http://localhost:${PORTS.web}`, "https://console.go-link.org"],
+  [`localhost:${PORTS.web}`, "console.go-link.org"],
   [`127.0.0.1:${PORTS.signal}`, "signal.go-link.org"],
   // The site's search hint names real games: never in a picture.
   ["Metal Slug, Turtles…", "Sky Pirates, Glacier…"],
@@ -284,7 +284,7 @@ test("My device, its ROMs, the test pattern room and the invitation", async () =
   await expectVideoPlaying(page);
 });
 
-test("the go-link Player app on Android", async () => {
+test("the go-link Console Player app on Android", async () => {
   const serial = A.attachedDevice();
   test.skip(!serial || !existsSync(APK), "no Android device in `adb devices`, or no debug APK");
   if (process.env.ANDROID_SERIAL === undefined) process.env.ANDROID_SERIAL = serial;
@@ -342,7 +342,7 @@ test("the go-link Player app on Android", async () => {
       start(lang);
       const inv = await invite();
       await closeDialog();
-      A.shell(`am start -a android.intent.action.VIEW -d https://go-link.org/g/${inv.invite} ${A.PACKAGE}`);
+      A.shell(`am start -a android.intent.action.VIEW -d https://play.go-link.org/g/${inv.invite} ${A.PACKAGE}`);
       await A.fill({ id: "join-pin" }, inv.pin);
       A.hideKeyboard();
       const terms = await A.waitFor({ id: "terms-check" });

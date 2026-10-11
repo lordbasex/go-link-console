@@ -1,4 +1,4 @@
 /* Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com> */
-"CFBundleDisplayName" = "go-link Player";
-"NSCameraUsageDescription" = "O go-link Player usa a câmera só para ler o código QR do convite. Nada é gravado nem enviado.";
+"CFBundleDisplayName" = "go-link Console Player";
+"NSCameraUsageDescription" = "O go-link Console Player usa a câmera só para ler o código QR do convite. Nada é gravado nem enviado.";
 "NSMicrophoneUsageDescription" = "Os jogadores sentados podem conversar entre si. O microfone só transmite enquanto você o liga na sala.";

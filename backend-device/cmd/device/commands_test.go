@@ -80,7 +80,7 @@ func TestPanelTokenCommand(t *testing.T) {
 func TestRomsDirAndCheckCommands(t *testing.T) {
 	config := sandbox(t)
 	out, err := runCmd(t, config, "roms", "dir")
-	if err != nil || !strings.HasSuffix(strings.TrimSpace(out), filepath.Join("go-link", "roms")) {
+	if err != nil || !strings.HasSuffix(strings.TrimSpace(out), filepath.Join("go-link-console", "roms")) {
 		t.Fatalf("default folder %q %v", out, err)
 	}
 	mine := t.TempDir()
@@ -128,7 +128,7 @@ func TestTheLogGoesToAFileWithoutATerminal(t *testing.T) {
 	t.Setenv("HOME", home)
 	// Under `go test` stderr is not a terminal, like the app opened from the
 	// Finder.
-	path := filepath.Join(home, "go-link", "logs", "device.log")
+	path := filepath.Join(home, "go-link-console", "logs", "device.log")
 	_ = os.MkdirAll(filepath.Dir(path), 0o700)
 	_ = os.WriteFile(path, make([]byte, maxLogSize+1), 0o600)
 	w, done := logOutput()

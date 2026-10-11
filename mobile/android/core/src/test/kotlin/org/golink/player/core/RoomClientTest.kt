@@ -100,7 +100,7 @@ class RoomClientTest {
         assertEquals("wss://signal.example.org/ws?v=1", first.url)
         first.receive("""{"type":"hello","peer_id":"me1","ice_servers":[{"urls":["stun:signal.example.org:3478"]}]}""")
         runCurrent()
-        assertEquals("""{"type":"join","app":"go-link","invite":"$invite"}""", first.sent.single().toString())
+        assertEquals("""{"type":"join","app":"go-link-console","invite":"$invite"}""", first.sent.single().toString())
 
         // The device asks for the PIN right after the join: the typed PIN goes out.
         first.receive("""{"type":"joined","session_id":"s","remote":"dev","room_id":"room-1"}""")
@@ -212,7 +212,7 @@ class RoomClientTest {
         runCurrent()
         sockets.last.receive("""{"type":"hello","peer_id":"me"}""")
         runCurrent()
-        assertEquals("""{"type":"join","app":"go-link","code":"123456789"}""", sockets.last.sent.single().toString())
+        assertEquals("""{"type":"join","app":"go-link-console","code":"123456789"}""", sockets.last.sent.single().toString())
         sockets.last.receive("""{"type":"error","error":"invalid or expired invite"}""")
         runCurrent()
         assertEquals(RoomPhase.NOT_FOUND, room.ui.value.phase)

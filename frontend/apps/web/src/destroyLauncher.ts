@@ -89,7 +89,7 @@ export async function launchDestroy(pathname: string, navigate: (to: string) => 
 }
 
 /**
- * The game's direct link (go-link.org/WillyGorklingo): goes to the landing,
+ * The game's direct link (console.go-link.org/WillyGorklingo): goes to the landing,
  * replacing the link in the history, and opens the mission briefing there.
  */
 export function DestroyLink(): null {

@@ -12,9 +12,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/pkg/glhd"
-	"github.com/lordbasex/go-link/backend-device/pkg/hdgames"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/glhd"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/hdgames"
 )
 
 // ErrUnknownGame is a starter game name that is not in hdgames.Starter.

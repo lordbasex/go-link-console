@@ -334,7 +334,7 @@ export interface DeviceUpdate {
   url: string;
 }
 
-const RELEASES = "https://github.com/lordbasex/go-link/releases/";
+const RELEASES = "https://github.com/lordbasex/go-link-console/releases/";
 
 /** Accepts an update only when it links to go-link's own releases. */
 function parseUpdate(u: unknown): DeviceUpdate | undefined {

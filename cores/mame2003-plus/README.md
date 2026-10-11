@@ -28,7 +28,7 @@ It was offered to libretro, here or in another of its repositories, in [#2047](h
 
 Two measurements, both on this Mac (Intel, macOS) with the user's own sets:
 
-1. **The device's save probe** (`device roms saves --json`, the same code that decides per game whether a room resumes), run over the whole ROM folder (34 sets that pass `romcheck`) once with the official buildbot core and once with the core built from these 8 patches, each with its own temporary `HOME` so the real `~/go-link` was not touched.
+1. **The device's save probe** (`device roms saves --json`, the same code that decides per game whether a room resumes), run over the whole ROM folder (34 sets that pass `romcheck`) once with the official buildbot core and once with the core built from these 8 patches, each with its own temporary `HOME` so the real `~/go-link-console` was not touched.
 2. **A stricter check** (a throwaway harness, not in the repository): boot the game, play it with the probe's coin/start pattern, save at frame 900, 2400 and 4200, and record the next 600 frames. Then boot a second board, load the save after one or two frames and record 600 frames. It counts frames whose picture is identical, frames whose sound is identical (the sum of the samples' sizes), and compares the sound level second by second. A game saved whole gives 600/600 identical frames and the same sound level.
 
 | Game | Official core (probe) | With the patches (probe) | Stricter check with the patches |
@@ -77,7 +77,7 @@ Loading at the same running time instead (`--load-after 2400`) splits the rest. 
 ./build.sh unix       # Linux (also inside Docker)
 ```
 
-The core ends up in `out/`. To try it with the device: `go-link-device --core cores/mame2003-plus/out/mame2003_plus_libretro.dylib`, and `device roms saves` to see which games now resume.
+The core ends up in `out/`. To try it with the device: `go-link-console --core cores/mame2003-plus/out/mame2003_plus_libretro.dylib`, and `device roms saves` to see which games now resume.
 
 ## Life cycle
 
@@ -99,4 +99,4 @@ None of this is used yet: the device downloads the official core from the buildb
 6. **Other games that cannot be saved**, found by the probe: Midway (Mortal Kombat 1-3, NBA Jam, Cruis'n USA: the core refuses to save them) and Hammerin' Harry (Irem M72: its driver does not declare save support, so the probe sees an incomplete save), Shadow Dancer (they lose their sound). Pac-Man and Snow Bros. are fixed by `0009` and `0010` (2026-10-05). One by one, if worth it.
 7. **Distributing the patched core** (if the pull request stalls): build it in CI for macOS, Linux and Windows, publish it in go-link's releases with its SHA-256, and have the device download it from there. This needs changing the "the core only comes from the buildbot" rule and reviewing the MAME license (non-commercial use).
 
-How to measure: `device roms saves` (the whole library; it caches its verdicts per core in `go-link/cores/saves.json`, keyed by the hash in `mame2003_plus_libretro.dylib.sha256`: after copying a new core over by hand, delete both or it reports the old core's results), or `emulate --probe save|load` with `--core` pointing at the patched core. To keep the real `~/go-link` untouched, run `device roms saves` with a temporary `HOME` holding `go-link/cores/` (the patched core plus a copy of `mame2003_plus.romcheck`) and a temporary `--config`.
+How to measure: `device roms saves` (the whole library; it caches its verdicts per core in `go-link/cores/saves.json`, keyed by the hash in `mame2003_plus_libretro.dylib.sha256`: after copying a new core over by hand, delete both or it reports the old core's results), or `emulate --probe save|load` with `--core` pointing at the patched core. To keep the real `~/go-link-console` untouched, run `device roms saves` with a temporary `HOME` holding `go-link/cores/` (the patched core plus a copy of `mame2003_plus.romcheck`) and a temporary `--config`.

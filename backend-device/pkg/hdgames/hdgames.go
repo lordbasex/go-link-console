@@ -20,7 +20,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/glhd"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/glhd"
 )
 
 // File is one screen size of a game.
@@ -108,7 +108,7 @@ func Download(ctx context.Context, client *http.Client, g Game, size, dir string
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("User-Agent", "go-link-device")
+	req.Header.Set("User-Agent", "go-link-console")
 	if client == nil {
 		client = &http.Client{Timeout: 30 * time.Minute}
 	}

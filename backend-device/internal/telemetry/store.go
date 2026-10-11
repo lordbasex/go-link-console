@@ -2,7 +2,7 @@
 
 // Package telemetry keeps what happens in each room while it runs, from
 // its first start, in a SQLite database next to the rooms
-// (~/go-link/telemetry.db): every run (when it was on), a sample per
+// (~/go-link-console/telemetry.db): every run (when it was on), a sample per
 // second of the room and of each participant (frames, gaps, latency,
 // packet loss, input, voice), and a log of raw events. The charts in My
 // device and the incident report are built from it, and `device telemetry

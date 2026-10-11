@@ -13,7 +13,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
 )
 
 // panelTitle names the borderless panel window, so the native code can
@@ -63,7 +63,7 @@ func newTrayPanel(u *ui, win fyne.Window) *trayPanel {
 	p.players = compact(newStatTile("players", L("Players"), violet, false))
 	p.browsers = compact(newStatTile("link", L("Browsers"), violet, false))
 
-	title := container.NewHBox(text("go-link", 17, white, true), p.state)
+	title := container.NewHBox(text("go-link Console", 17, white, true), p.state)
 	header := container.NewBorder(nil, nil, nil, sized(heroTileSmall(), 48, 48), container.NewVBox(title, p.line))
 	p.codeBox = glass(container.NewVBox(
 		text(Lf("Link at %s", u.pairingURL()), 12, textMuted, false),

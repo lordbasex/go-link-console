@@ -21,7 +21,7 @@ Machine used: an Intel Mac on macOS 15.7.3, with Homebrew. Tool versions:
    ```sh
    device core download
    ```
-   The core lands at `~/go-link/cores/mame2003_plus_libretro.dylib`; the core reported Git version `3141930`.
+   The core lands at `~/go-link-console/cores/mame2003_plus_libretro.dylib`; the core reported Git version `3141930`.
 3. Build the ROM set. This compiles the 68000 and Z80 programs, converts the sprites, draws the background and writes the set:
    ```sh
    node rom/tools/build.mjs              # rom/build/slammast.zip (4 players x 3 buttons, the chosen layout)
@@ -34,7 +34,7 @@ Machine used: an Intel Mac on macOS 15.7.3, with Homebrew. Tool versions:
    ```
 5. Run the set in the core and save pictures:
    ```sh
-   /tmp/framelab capture -log -core ~/go-link/cores/mame2003_plus_libretro.dylib \
+   /tmp/framelab capture -log -core ~/go-link-console/cores/mame2003_plus_libretro.dylib \
      -rom rom/build/slammast.zip -out /tmp/rom-run -frames 860 \
      -script "60-63:coin 110-113:start 140-180:right 190-192:right 196-235:right 245-262:right+b2 300-385:right 395-397:b2 500-502:right 506-560:right 570-572:b3 640-642:right 646-760:right" \
      -stills 95,225,258,398,585,800
@@ -142,7 +142,7 @@ brew install m68k-elf-binutils z80asm
 brew install m68k-elf-gcc        # to write the game in C
 node rom/tools/build.mjs
 (cd backend-device && go build -o /tmp/framelab ./cmd/framelab)
-/tmp/framelab capture -log -core ~/go-link/cores/mame2003_plus_libretro.dylib \
+/tmp/framelab capture -log -core ~/go-link-console/cores/mame2003_plus_libretro.dylib \
   -rom rom/build/captcomm.zip -out /tmp/rom-run -frames 300 -stills 10,120,299
 ```
 
@@ -201,7 +201,7 @@ The core logs "WRONG CHECKSUMS" for every file and keeps going. The 180-frame wa
 **Commands:**
 ```sh
 node rom/tools/build.mjs
-/tmp/framelab capture -log -core ~/go-link/cores/mame2003_plus_libretro.dylib \
+/tmp/framelab capture -log -core ~/go-link-console/cores/mame2003_plus_libretro.dylib \
   -rom rom/build/captcomm.zip -out /tmp/rom-run -frames 820 \
   -script "60-63:coin 110-113:start 140-260:right 200-250:right+b1 262-266:b2 270-330:right 340-345:right+b2 346-640:right 641-700:b1" \
   -stills 95,230,275,390,560,660
@@ -274,7 +274,7 @@ The `-script` steps hold buttons for a range of frames on player 1, in the devic
 ```sh
 node rom/tools/build.mjs                 # slammast
 node rom/tools/build.mjs captcomm
-/tmp/framelab capture -log -core ~/go-link/cores/mame2003_plus_libretro.dylib \
+/tmp/framelab capture -log -core ~/go-link-console/cores/mame2003_plus_libretro.dylib \
   -rom rom/build/slammast.zip -out /tmp/rom-run -frames 860 \
   -script "60-63:coin 110-113:start 140-180:right 190-192:right 196-235:right 245-262:right+b2 300-385:right 395-397:b2 500-502:right 506-560:right 570-572:b3 640-642:right 646-760:right" \
   -stills 95,225,258,398,585,800
@@ -501,12 +501,12 @@ Verified in the core and in a go-link room, then installed in the user's own lib
 node rom/tools/build.mjs                  # ROM_DEBUG=1 to show positions
 node rom/tools/quality.mjs                # sizes 40/44/48 and the before/after at 44
 # one player through the whole route
-/tmp/framelab capture -core ~/go-link/cores/mame2003_plus_libretro.dylib -rom rom/build/slammast.zip \
+/tmp/framelab capture -core ~/go-link-console/cores/mame2003_plus_libretro.dylib -rom rom/build/slammast.zip \
   -out /tmp/rom-p1 -frames 1100 \
   -script "60-63:coin 110-113:start 140-142:right 146-470:right 362-364:right+b1 435-437:right+b1 490-492:down+b1 520-522:b3 540-580:left+b2 600-760:right 765-900:up 905-925:right 926-990:right+b2 995-1050:right" \
   -stills 345,400,470,527,560,820,935,1060
 # two players (port 2 with @2)
-/tmp/framelab capture -core ~/go-link/cores/mame2003_plus_libretro.dylib -rom rom/build/slammast.zip \
+/tmp/framelab capture -core ~/go-link-console/cores/mame2003_plus_libretro.dylib -rom rom/build/slammast.zip \
   -out /tmp/rom-2p -frames 700 \
   -script "60-63:coin 70-73:coin 110-113:start 130-133:start@2 140-310:right@2 320-420:up@2 425-445:right@2 446-500:right+b2@2 505-600:right@2 620-622:right 626-690:right" \
   -stills 150,360,470,540
@@ -615,7 +615,7 @@ One player through the whole route:
 ### In your own go-link
 
 How the build reaches the user's library:
-1. **The folder:** the running device reads `roms_dir` from `~/Library/Application Support/go-link/device.json`, here `/Volumes/HD12TB/ROMS/roms/MAME-2003-Plus` (when empty, `~/go-link/roms`).
+1. **The folder:** the running device reads `roms_dir` from `~/Library/Application Support/go-link-console/device.json`, here `/Volumes/HD12TB/ROMS/roms/MAME-2003-Plus` (when empty, `~/go-link-console/roms`).
 2. **No overwrite:** first check that the folder has no `slammast.zip`. If it had one, nothing would be copied: a real set must never be overwritten.
 3. **The copy:** `cp -n rom/build/slammast.zip <roms_dir>/slammast.zip`. Same SHA-256 on both sides; no other file in the folder is touched.
 4. **The library refresh without a restart:** the device rescans its folder when it changes (`LibraryService.SetDir` → `Scan`), so the least invasive way is **My device › ROMs**, field *ROM folder on the device's computer*: the same path, then **Use this folder** (control `set_roms_dir`). Otherwise quit and reopen the app. Dropping the zip on My device › ROMs is the device's own import (`Import`, never overwrites, rescans) and works too, when the file is not already there.

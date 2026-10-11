@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/encoder"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/encoder"
 )
 
 func TestHDCandidatesFollowTheExperiment(t *testing.T) {

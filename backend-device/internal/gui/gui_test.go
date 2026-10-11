@@ -25,10 +25,10 @@ import (
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/test"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/pkg/romcheck"
-	"github.com/lordbasex/go-link/backend-device/pkg/thumbnails"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/romcheck"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/thumbnails"
 )
 
 func writeZip(t *testing.T, path, name, body string) {
@@ -324,7 +324,7 @@ func TestSettingsPage(t *testing.T) {
 		t.Fatalf("network: signal %q", p.signal.Text)
 	}
 	test.Tap(p.cats[settingsRooms])
-	if p.maxRooms.Text != "4 by default" || !strings.HasSuffix(p.saves.Text, filepath.Join("go-link", "saves")) {
+	if p.maxRooms.Text != "4 by default" || !strings.HasSuffix(p.saves.Text, filepath.Join("go-link-console", "saves")) {
 		t.Fatalf("rooms: %q %q", p.maxRooms.Text, p.saves.Text)
 	}
 }

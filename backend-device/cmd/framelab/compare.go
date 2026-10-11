@@ -14,7 +14,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/framelab"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/framelab"
 )
 
 // runCompare prints the metrics of B against the reference A, as JSON

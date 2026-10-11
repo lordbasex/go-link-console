@@ -22,6 +22,6 @@ describe("AndroidAppCard", () => {
 
   it("downloads the release's APK, or opens the latest release without one", () => {
     const url = androidAppUrl();
-    expect(url === ANDROID_APP_URL || /\/releases\/download\/v[\d.]+\/go-link-v[\d.]+-android\.apk$/.test(url)).toBe(true);
+    expect(url === ANDROID_APP_URL || /\/releases\/download\/v[\d.]+\/go-link-console-v[\d.]+-android\.apk$/.test(url)).toBe(true);
   });
 });

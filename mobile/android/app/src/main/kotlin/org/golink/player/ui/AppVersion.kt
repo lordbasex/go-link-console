@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.sp
 import org.golink.player.BuildConfig
 import org.golink.player.R
 
-/** "go-link Player v0.1.4 (build 104)", plus " · debug" in debug builds. */
+/** "go-link Console Player v0.1.4 (build 104)", plus " · debug" in debug builds. */
 @Composable
 fun appVersionText(): String =
     stringResource(R.string.app_version, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE) +
@@ -40,7 +40,7 @@ fun AppVersion(modifier: Modifier = Modifier) {
             .testTag("app-version")
             .combinedClickable(onClick = {}, onLongClick = {
                 val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                cm.setPrimaryClip(ClipData.newPlainText("go-link Player", text))
+                cm.setPrimaryClip(ClipData.newPlainText("go-link Console Player", text))
                 Toast.makeText(context, copied, Toast.LENGTH_SHORT).show()
             }),
     )

@@ -48,7 +48,7 @@ class CodeInputTest {
 
     @Test
     fun aLinkIsLeftAsTyped() {
-        val link = "https://go-link.org/g/AbCdEfGhIjKlMnOpQrStUv"
+        val link = "https://play.go-link.org/g/AbCdEfGhIjKlMnOpQrStUv"
         assertEquals(CodeInput.Edit(link, link.length), type("", 0, link))
         assertEquals(InviteTarget.Link("AbCdEfGhIjKlMnOpQrStUv"), Invites.parseTyped(type("", 0, link).text))
     }

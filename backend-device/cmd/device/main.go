@@ -27,18 +27,18 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/internal/panel"
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/internal/telemetry"
-	"github.com/lordbasex/go-link/backend-device/pkg/encoder"
-	"github.com/lordbasex/go-link/backend-device/pkg/input"
-	"github.com/lordbasex/go-link/backend-device/pkg/instancelock"
-	"github.com/lordbasex/go-link/backend-device/pkg/jsonkeys"
-	"github.com/lordbasex/go-link/backend-device/pkg/libretro"
-	"github.com/lordbasex/go-link/backend-device/pkg/signalclient"
-	"github.com/lordbasex/go-link/backend-device/pkg/thumbnails"
-	"github.com/lordbasex/go-link/backend-device/web"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/panel"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/internal/telemetry"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/encoder"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/input"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/instancelock"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/jsonkeys"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/libretro"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/signalclient"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/thumbnails"
+	"github.com/lordbasex/go-link-console/backend-device/web"
 )
 
 // version is replaced at build time with -ldflags "-X main.version=...".
@@ -84,7 +84,7 @@ func run() error {
 		udpPort    = flag.Int("udp-port", 0, "carry every WebRTC connection on this UDP port, to forward it on a router (default: udp_port in device.json, else random ports)")
 		announce   = flag.String("announce", "", "comma-separated addresses where browsers reach --udp-port through a forwarding router (default: announce_ips in device.json)")
 		webURL     = flag.String("web-url", "", "website shown in the window for linking, for this run (default: web_url in device.json, else "+models.DefaultWebURL+")")
-		corePath   = flag.String("core", "", "libretro core to run games (default: ~/go-link/cores/mame2003_plus_libretro)")
+		corePath   = flag.String("core", "", "libretro core to run games (default: ~/go-link-console/cores/mame2003_plus_libretro)")
 		panelAddr  = flag.String("panel", panel.DefaultAddr, "address of the local web panel, which a headless device opens on the LAN (token: `device panel token`)")
 		noPanel    = flag.Bool("no-panel", false, "do not open the local web panel when running headless")
 	)
@@ -257,7 +257,7 @@ func run() error {
 	links.SetTransport(stream.SendControl, stream.RemoveViewer)
 	pairing.SetAuth(links)
 	stream.SetLinkGate(links.Trusted)
-	// Each room's telemetry (~/go-link/telemetry.db): runs, samples and
+	// Each room's telemetry (~/go-link-console/telemetry.db): runs, samples and
 	// events, kept until the room is deleted for good.
 	tele, err := telemetry.Open(filepath.Join(base, "telemetry.db"))
 	if err != nil {
@@ -325,7 +325,7 @@ func run() error {
 	// run at once. The list lives in device.json.
 	systemDir := filepath.Join(base, "system")
 	history := services.NewHistoryService(filepath.Join(base, "history.json"))
-	// Recordings of game rooms, only for the host (~/go-link/rec).
+	// Recordings of game rooms, only for the host (~/go-link-console/rec).
 	recordings := services.NewRecordingService(filepath.Join(base, "rec"), nil)
 	history.SetRecordings(recordings)
 	probes := saveProbes(library)

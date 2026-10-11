@@ -13,11 +13,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/internal/repositories"
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/pkg/cores"
-	"github.com/lordbasex/go-link/backend-device/pkg/ids"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/repositories"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/cores"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/ids"
 	"golang.org/x/term"
 )
 
@@ -37,9 +37,10 @@ func loadConfig(path string) (*repositories.ConfigFile, models.Config, bool, err
 }
 
 // Folders of the project's former name, MAME WebRTC.
+// The folders' names before the app became go-link-console (2026-10-11).
 const (
-	legacyConfigDir = "mame-webrtc"
-	legacyDataDir   = "MAME-WebRTC"
+	legacyConfigDir = "go-link"
+	legacyDataDir   = "go-link"
 )
 
 // migrateLegacy moves a folder of the former name to the new one, once:
@@ -54,15 +55,28 @@ func migrateLegacy(oldPath, newPath string) bool {
 	return os.Rename(oldPath, newPath) == nil
 }
 
+// movePaths points the folders kept inside the old data folder at the new
+// one, and says whether any moved.
+func movePaths(c *models.Config, old, base string) bool {
+	moved := false
+	for _, p := range []*string{&c.RomsDir, &c.HD.GamesDir, &c.Thumbnails.Dir} {
+		if rel, ok := strings.CutPrefix(*p, old+string(filepath.Separator)); ok {
+			*p = filepath.Join(base, rel)
+			moved = true
+		}
+	}
+	return moved
+}
+
 // dataDir is where the device keeps its cores, system files and default
-// ROM folder: ~/go-link. It does not move with the ROM folder, which
-// can be anywhere on the disk.
+// ROM folder: ~/go-link-console. It does not move with the ROM folder,
+// which can be anywhere on the disk.
 func dataDir() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(home, "go-link"), nil
+	return filepath.Join(home, "go-link-console"), nil
 }
 
 // openLibrary builds the status and the ROM library shared by the device
@@ -73,13 +87,15 @@ func openLibrary(store *repositories.ConfigFile, cfg *models.Config, target, cor
 	if err != nil {
 		return nil, nil, nil, "", err
 	}
-	// Cores, ROMs and system files move with the project's new name, and
-	// a ROM folder inside the old one follows them.
+	// Cores, ROMs and system files move with the app's new name, and the
+	// folders kept inside the old one follow them.
 	old := filepath.Join(filepath.Dir(base), legacyDataDir)
-	if migrateLegacy(old, base) && strings.HasPrefix(cfg.RomsDir, old+string(filepath.Separator)) {
-		moved := filepath.Join(base, strings.TrimPrefix(cfg.RomsDir, old+string(filepath.Separator)))
-		if err := updateConfig(store, cfg, func(c *models.Config) { c.RomsDir = moved }); err != nil {
-			logger.Warn("cannot save the moved ROM folder", "err", err)
+	migrateLegacy(old, base)
+	if _, err := os.Stat(old); err != nil {
+		if moved := *cfg; movePaths(&moved, old, base) {
+			if err := updateConfig(store, cfg, func(c *models.Config) { movePaths(c, old, base) }); err != nil {
+				logger.Warn("cannot save the moved folders", "err", err)
+			}
 		}
 	}
 	// ROM folder: the host's own disk. ROMs never leave it.
@@ -153,7 +169,7 @@ func updateConfig(store *repositories.ConfigFile, cfg *models.Config, change fun
 const maxLogSize = 5 << 20
 
 // logOutput is where the log goes: the terminal when there is one, else
-// (the app opened from the Finder or the Start menu) ~/go-link/logs/device.log,
+// (the app opened from the Finder or the Start menu) ~/go-link-console/logs/device.log,
 // so the pairing code and errors are not lost.
 func logOutput() (io.Writer, func()) {
 	// A real terminal, not /dev/null (where macOS sends an app's output).
@@ -164,7 +180,9 @@ func logOutput() (io.Writer, func()) {
 	if err != nil {
 		return os.Stderr, func() {}
 	}
-	dir := filepath.Join(home, "go-link", "logs")
+	// The log is the first thing written there, so the old folder moves now.
+	migrateLegacy(filepath.Join(home, legacyDataDir), filepath.Join(home, "go-link-console"))
+	dir := filepath.Join(home, "go-link-console", "logs")
 	if os.MkdirAll(dir, 0o700) != nil {
 		return os.Stderr, func() {}
 	}

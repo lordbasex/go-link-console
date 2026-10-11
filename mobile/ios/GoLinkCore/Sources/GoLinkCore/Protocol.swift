@@ -10,7 +10,7 @@ public enum GoLinkProtocol {
     public static let version = "1"
 
     /** signalhub namespace of this project (its ALLOWED_APPS). */
-    public static let app = "go-link"
+    public static let app = "go-link-console"
 
     /** The official signaling server. STUN/TURN are never hardcoded: they come in hello. */
     public static let officialSignalURL = "wss://signal.go-link.org/ws"

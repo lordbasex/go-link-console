@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { defineConfig, searchForWorkspaceRoot, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 
-// Strict Content Security Policy for the production build (go-link.org's).
+// Strict Content Security Policy for the production build (console.go-link.org's).
 // The device is reached through the main site's tab with postMessage, so
 // nothing here connects to it. Not applied in dev: hot reload needs inline scripts.
 const CSP = [
@@ -57,7 +57,7 @@ function originTrials(): Plugin {
 }
 
 // Play mode draws Willy, the robots and the people with the character atlases
-// go-link.org keeps for its own game (apps/web/public/destroy). The maker's
+// console.go-link.org keeps for its own game (apps/web/public/destroy). The maker's
 // site serves the three it needs at the same path, from that one copy.
 const ATLAS_DIR = new URL("../apps/web/public/destroy/", import.meta.url);
 const ATLASES = ["player", "robot", "npcs"].flatMap((n) => [`${n}.json`, `${n}.webp`]);

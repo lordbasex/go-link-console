@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/signalclient"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/signalclient"
 )
 
 func TestNewPINIsSixDigits(t *testing.T) {

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/encoder"
-	"github.com/lordbasex/go-link/backend-device/pkg/libretro"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/encoder"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/libretro"
 )
 
 // Variant is one way of preparing and encoding the picture. The zero

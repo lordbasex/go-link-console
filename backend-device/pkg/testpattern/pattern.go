@@ -15,7 +15,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/input"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/input"
 )
 
 type rgb struct{ r, g, b float64 }

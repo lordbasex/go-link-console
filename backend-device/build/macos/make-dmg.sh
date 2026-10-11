@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com>
 #
-# Packs go-link.app into a drag-to-install disk image. The mounted volume
-# shows the go-link icon, a background with an arrow, go-link.app on the
+# Packs go-link-console.app into a drag-to-install disk image. The mounted volume
+# shows the go-link icon, a background with an arrow, go-link-console.app on the
 # left and an Applications shortcut on the right. It needs only macOS tools
 # (hdiutil, SetFile, osascript, swift). The Finder layout step asks once for
 # permission to automate the Finder; if it is denied the image is still
@@ -16,7 +16,7 @@ APP="${1:?usage: make-dmg.sh APP OUT.dmg}"
 DMG="${2:?usage: make-dmg.sh APP OUT.dmg}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORK="$(dirname "$DMG")/.dmg-work"
-VOLNAME="go-link"
+VOLNAME="go-link Console"
 RW="$WORK/go-link-rw.dmg"
 STAGE="$WORK/root"
 ICON="$APP/Contents/Resources/go-link.icns"
@@ -32,7 +32,7 @@ mkdir -p "$STAGE/.background"
 swift "$HERE/dmg-background.swift" "$WORK/background.tiff" >/dev/null
 
 echo "▶ Staging"
-ditto "$APP" "$STAGE/go-link.app"
+ditto "$APP" "$STAGE/go-link-console.app"
 ln -s /Applications "$STAGE/Applications"
 cp "$WORK/background.tiff" "$STAGE/.background/background.tiff"
 
@@ -57,7 +57,7 @@ tell application "Finder"
     set icon size of opts to 128
     set text size of opts to 13
     set background picture of opts to file ".background:background.tiff"
-    set position of item "go-link.app" of container window to {165, 190}
+    set position of item "go-link-console.app" of container window to {165, 190}
     set position of item "Applications" of container window to {495, 190}
     close
     open

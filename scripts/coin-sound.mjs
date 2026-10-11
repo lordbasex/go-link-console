@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com>
 //
-// Writes the startup coin sound of the go-link Player apps as a WAV file
+// Writes the startup coin sound of the go-link Console Player apps as a WAV file
 // (44.1 kHz, mono, 16-bit). It is an original sound made here, MIT licensed
 // like the rest of the project: three quick square-wave notes, the same
 // synthesis the website plays with Web Audio (frontend/apps/web/src/coin.ts).

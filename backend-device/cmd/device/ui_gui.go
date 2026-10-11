@@ -4,7 +4,7 @@
 
 package main
 
-import "github.com/lordbasex/go-link/backend-device/internal/gui"
+import "github.com/lordbasex/go-link-console/backend-device/internal/gui"
 
 // runUI shows the native window and tray icon, unless the device runs
 // headless. It blocks until the device stops.

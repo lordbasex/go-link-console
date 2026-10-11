@@ -6,7 +6,7 @@
 # with a Developer ID and the hardened runtime (make ... CODESIGN_IDENTITY=...).
 #
 # The release notarizes twice: the app first (its ticket stapled into
-# go-link.app, so the copy in /Applications opens without asking Apple's
+# go-link-console.app, so the copy in /Applications opens without asking Apple's
 # servers, offline too), then the disk image made with that app.
 #
 # One time, before the first release:
@@ -17,7 +17,7 @@
 #        xcrun notarytool store-credentials "go-link-notary" \
 #          --apple-id you@example.com --team-id TEAMID --password <app-specific-password>
 #
-# Usage: NOTARY_PROFILE=go-link-notary build/macos/notarize.sh go-link.app
+# Usage: NOTARY_PROFILE=go-link-notary build/macos/notarize.sh go-link-console.app
 #        NOTARY_PROFILE=go-link-notary build/macos/notarize.sh go-link.dmg
 set -euo pipefail
 

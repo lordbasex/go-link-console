@@ -41,7 +41,7 @@ Template: [`apps/web/.env.example`](../frontend/apps/web/.env.example).
 | `VITE_SIGNAL_URL` | Default signaling server. Local: `ws://127.0.0.1:8090/ws`. Production: `wss://signal.go-link.org/ws` |
 | `VITE_DEMO_DATA` | `true` shows sample data (rooms, players, chat) instead of real data |
 | `VITE_ROLE` | `site` or `play` builds one of the [two sites](#two-sites); empty (development) serves both on one origin |
-| `VITE_SITE_URL`, `VITE_PLAY_URL` | The two sites' addresses. Default: `https://go-link.org` and `https://play.go-link.org` in a build, `http://localhost:5182` and `5183` in development |
+| `VITE_SITE_URL`, `VITE_PLAY_URL` | The two sites' addresses. Default: `https://console.go-link.org` and `https://play.go-link.org` in a build, `http://localhost:5182` and `5183` in development |
 | `VITE_MAKER_URL` | Willy Maker's site, trusted by `/maker-bridge`. Default: `https://maker.go-link.org` in a build, `http://localhost:5181` in development |
 
 STUN and TURN are **not** configured: they arrive in signalhub's `hello` and live only in memory.
@@ -52,13 +52,13 @@ The website is built twice from `apps/web` (`src/role.ts`), each on its own orig
 
 | Build | Address | Pages |
 |---|---|---|
-| `site` (`dist-site`) | go-link.org | The landing, the guide (`/docs`), the tools (`/tools`, skin editor, mini-games), the picture demo, `/handoff` |
+| `site` (`dist-site`) | console.go-link.org | The landing, the guide (`/docs`), the tools (`/tools`, skin editor, mini-games), the picture demo, `/handoff` |
 | `play` (`dist-play`) | play.go-link.org, and the device's local panel | The rooms (`/rooms`, `/create`, `/r/<id>`), invitations (`/g/<invite>`), My device (`/device`) |
 | both | | `/test-controller` (its settings are the ones rooms and mini-games use), `/maker-bridge`, `/terms`, `/privacy` |
 
 - **Why:** the link to the device lives in the rooms' origin storage. The landing, the guide and the tools never see it, and the landing never connects to the signaling server (`SignalProvider offline`), so nothing on those pages can reach the device.
 - **Links between them:** a page of the other site is reached through the router like any page; the catch-all route (`Elsewhere` in `App.tsx`) sends the browser to the other site's same path, query and fragment. On play, the logo and "How it works" go to the landing. Each build's own pages are chosen by the build constant written out in `App.tsx`, so the other site's pages are not in the build at all.
-- **Invitations** are always shared as `go-link.org/g/<invite>` (`invitationUrl`): the Player apps open that address, and the landing sends browsers on to play. "Join a game" on the landing goes to play's join page, because the PIN travels in the page's history state, which never leaves its origin.
+- **Invitations** are shared as `play.go-link.org/g/<invite>` (`invitationUrl`, the rooms' address): the Player apps open that address, and play serves `.well-known/` (the apps' link files). "Join a game" on the landing goes to play's join page, because the PIN travels in the page's history state, which never leaves its origin. go-link.org is the index of go-link's WebRTC projects (its own repository, `go-link-index`) and sends any old address to console.go-link.org.
 - **Handoff:** before the split everything ran on go-link.org, so a browser may still keep its device link, room passes and settings there. While it does, the landing's links to play add `?import=1`, and play offers to bring them: a click opens `go-link.org/handoff`, which posts every `go-link.*` setting except the landing's own (Willy Maker games, skins) to play's origin only; play stores the ones it does not have yet, answers `done`, and the landing then forgets the device link and the passes (`src/handoff.ts`, [security](security.md#the-two-sites-and-the-handoff)).
 - **Development:** `npm run dev` serves both on one origin. `npm run dev:site -w @go-link/web` (5182) and `npm run dev:play -w @go-link/web` (5183) run each build on its own origin.
 
@@ -70,7 +70,7 @@ The website is built twice from `apps/web` (`src/role.ts`), each on its own orig
 | `/WillyGorklingo` | The Destroy game's direct link (any letter case): opens the landing with the mission briefing ([below](#destroy-this-page)) |
 | `/rooms` | Rooms: the host's own games, or the "Join a game" form in guest mode |
 | `/create` | New game (`/create?rom=<set>` preselects a game) |
-| `/g/:invite` | A room by invitation (a link or QR token, or a 9-digit code). On Android it also offers the [go-link Player app](mobile.md) (`components/AndroidAppCard.tsx`) |
+| `/g/:invite` | A room by invitation (a link or QR token, or a 9-digit code). On Android it also offers the [go-link Console Player app](mobile.md) (`components/AndroidAppCard.tsx`) |
 | `/g` | Guest join form (code + PIN) |
 | `/r/:roomId` | A room by id (the owner's own rooms) |
 | `/device` | My device: linking with the code, then the live dashboard |
@@ -138,7 +138,7 @@ The page also gives every connected controller its own card (`tools/PadTester.ts
 
 ## Willy Maker
 
-Willy Maker has its own site since 2026-10-05: [maker.go-link.org](https://maker.go-link.org), the app `frontend/willy-maker` (`make maker-build`, `make maker-deploy`; development: `npm run dev:maker` in `frontend/`, port 5181). Design, architecture and file format: [docs/willy-maker](willy-maker/README.md). What go-link.org keeps of it:
+Willy Maker has its own site since 2026-10-05: [maker.go-link.org](https://maker.go-link.org), the app `frontend/willy-maker` (`make maker-build`, `make maker-deploy`; development: `npm run dev:maker` in `frontend/`, port 5181). Design, architecture and file format: [docs/willy-maker](willy-maker/README.md). What console.go-link.org keeps of it:
 
 - The **Tools card**, which links there (`MAKER_URL`, `VITE_MAKER_URL`; `http://localhost:5181` in development).
 - **`/tools/willy-maker[/:gameId]`** (`pages/MakerRedirect.tsx`) sends old links there, with the game's id; `?import=1` when this browser still has games made here.

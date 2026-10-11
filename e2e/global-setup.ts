@@ -55,17 +55,17 @@ export default async function globalSetup() {
   // npm run shots: an invented ROM library (made-up games and covers) in
   // the device's throwaway HOME, for the landing page's screenshots.
   if (process.env.E2E_SHOTS === "1") {
-    execFileSync("go", ["run", "./cmd/shotseed", "-data", join(state, "home", "go-link")], {
+    execFileSync("go", ["run", "./cmd/shotseed", "-data", join(state, "home", "go-link-console")], {
       cwd: join(root, "backend-device"),
       stdio: "inherit",
     });
   }
 
-  // E2E_CORE_DIR: a folder with the emulator core (like ~/go-link/cores), copied into the
+  // E2E_CORE_DIR: a folder with the emulator core (like ~/go-link-console/cores), copied into the
   // device's throwaway HOME so game rooms can run (tests/maker-room.spec.ts); CI has none.
-  if (process.env.E2E_CORE_DIR) cpSync(process.env.E2E_CORE_DIR, join(state, "home", "go-link", "cores"), { recursive: true });
+  if (process.env.E2E_CORE_DIR) cpSync(process.env.E2E_CORE_DIR, join(state, "home", "go-link-console", "cores"), { recursive: true });
   // E2E_ROMS: files (comma separated) copied into the device's ROM folder, e.g. a go-link HD package (tests/hd-core.spec.ts)
-  for (const rom of (process.env.E2E_ROMS ?? "").split(",").filter(Boolean)) cpSync(rom, join(state, "home", "go-link", "roms", basename(rom)));
+  for (const rom of (process.env.E2E_ROMS ?? "").split(",").filter(Boolean)) cpSync(rom, join(state, "home", "go-link-console", "roms", basename(rom)));
 
   const signalLog = openSync(join(state, "signal.log"), "a");
   const signal = spawn(join(bin, "signal"), [], {
@@ -73,7 +73,7 @@ export default async function globalSetup() {
       ...process.env,
       ADDR: `127.0.0.1:${PORTS.signal}`,
       ALLOWED_ORIGINS: [`http://localhost:${PORTS.web}`, `http://127.0.0.1:${PORTS.web}`, `http://localhost:${PORTS.play}`, `http://127.0.0.1:${PORTS.panel}`].join(","),
-      ALLOWED_APPS: "go-link",
+      ALLOWED_APPS: "go-link-console",
       RATE_LIMIT_PER_MIN: "1000",
       OWNER_RATE_PER_MIN: "1000",
       MAX_ROOMS_PER_SESSION: "8",

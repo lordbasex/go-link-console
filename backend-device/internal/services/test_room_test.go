@@ -10,8 +10,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/pkg/signalclient"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/signalclient"
 )
 
 type fakeViewers struct {

@@ -6,8 +6,8 @@ import (
 	"slices"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/pkg/emuproc"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/emuproc"
 )
 
 // Target bitrates of the video qualities. Measured on real games, a 2x

@@ -6,7 +6,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/testpattern"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/testpattern"
 )
 
 // TestCardSource streams the test card and the 1 kHz reference tone: the

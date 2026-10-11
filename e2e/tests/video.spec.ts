@@ -74,14 +74,14 @@ const home = homedir();
 const short = hostname().split(".")[0]!;
 const MASK: [string, string][] = [
   [join(here, "..", ".state", "home"), "~"],
-  [root, "~/go-link"],
+  [root, "~/go-link-console"],
   [home, "~"],
   [hostname(), "arcade-pc"],
   [short, "arcade-pc"],
   [userInfo().username, "player"],
   [`ws://127.0.0.1:${PORTS.signal}/ws`, "wss://signal.go-link.org/ws"],
-  [`http://localhost:${PORTS.web}`, "https://go-link.org"],
-  [`localhost:${PORTS.web}`, "go-link.org"],
+  [`http://localhost:${PORTS.web}`, "https://console.go-link.org"],
+  [`localhost:${PORTS.web}`, "console.go-link.org"],
   [`127.0.0.1:${PORTS.signal}`, "signal.go-link.org"],
   ["Metal Slug, Turtles…", "Sky Pirates, Glacier…"],
 ].sort((a, b) => b[0].length - a[0].length) as [string, string][];
@@ -340,7 +340,7 @@ test("a phone becomes a console", async ({ browser }) => {
 });
 
 test("Willy Maker: a game made in the browser plays in a room", async ({ browser }) => {
-  const cores = join(here, "..", ".state", "home", "go-link", "cores");
+  const cores = join(here, "..", ".state", "home", "go-link-console", "cores");
   test.skip(!existsSync(cores) || !readdirSync(cores).some((f) => f.startsWith("mame2003_plus_libretro")), "no emulator core: set E2E_CORE_DIR");
   test.setTimeout(600_000);
   await take(browser, "maker", async (p, ctx) => {

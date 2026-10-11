@@ -264,7 +264,7 @@ This is the only level that uses the exact core, so it is the only one that prov
 
 ### What was built, against the proposal below
 
-- **Upload:** `files` `begin` with `purpose: "rom_test"`, written to `~/go-link/tmp/romtest/<id>/<set>.zip` (0600, 16 MB, only the last upload waits), never the library. As proposed.
+- **Upload:** `files` `begin` with `purpose: "rom_test"`, written to `~/go-link-console/tmp/romtest/<id>/<set>.zip` (0600, 16 MB, only the last upload waits), never the library. As proposed.
 - **Request:** `rom_test {id, set, frames?}`. The `expect`, `script` and `snapshots` fields are **not** built: the identity comes from the device's own list (`identity` step and `own` in the result), the script is fixed (Coin at 300, Start at 360, right from 420, buttons 1-3 from 560), and the result carries one picture (`shot`, the last frame).
 - **Runs:** two worker processes (`device romtest --child`), with and without the script, each from power on with its own empty system folder; 60 s for the whole test; one test at a time (`code: "busy"`).
 - **Steps** (`steps[]` of `{name, ok, detail}`): `zip`, `set` (the library's `romcheck`), `identity`, `core.loaded`, `core.files`, `video.picture`, `video.alive`, `audio`, `input.reacts`, `time.realtime`, and `core.run` when a worker crashed or ran out of time. Differences with the table below:
@@ -287,7 +287,7 @@ Only the **linked owner** may use it, the same peers that may upload ROMs (`Stre
    text   {"type":"end","id":"t1"}
    ```
 
-   With `purpose: "rom_test"` the device does **not** import the file into the library. It writes it to `~/go-link/tmp/romtest/t1/slammast.zip` (0600) instead, with a 16 MB cap. It answers `upload_result` as usual. A test set therefore never collides with a real `slammast.zip` in the user's ROM folder, and never shows up in the game list.
+   With `purpose: "rom_test"` the device does **not** import the file into the library. It writes it to `~/go-link-console/tmp/romtest/t1/slammast.zip` (0600) instead, with a 16 MB cap. It answers `upload_result` as usual. A test set therefore never collides with a real `slammast.zip` in the user's ROM folder, and never shows up in the game list.
 
 2. The web asks for the test on `control`:
 
@@ -315,7 +315,7 @@ Only the **linked owner** may use it, the same peers that may upload ROMs (`Stre
     "log":"(the last 4 KB of the core's log)"}
    ```
 
-4. The device deletes `~/go-link/tmp/romtest/t1/` when the test ends, and also at startup.
+4. The device deletes `~/go-link-console/tmp/romtest/t1/` when the test ends, and also at startup.
 
 `rom_test` / `rom_test_result` are added to `docs/protocol.md`, and the `upload` `purpose` field to its files section, when this is built. The CLI gets the same feature for a headless device: `device rom test <zip> [--frames N] [--out DIR]`.
 

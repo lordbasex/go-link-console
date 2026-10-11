@@ -5,7 +5,7 @@ package inputhud
 import (
 	"testing"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/input"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/input"
 )
 
 func blank(w, h int) []byte {

@@ -11,7 +11,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/trayicon"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/trayicon"
 )
 
 func main() {

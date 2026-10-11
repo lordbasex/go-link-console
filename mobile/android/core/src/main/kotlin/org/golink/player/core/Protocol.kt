@@ -14,7 +14,7 @@ object Protocol {
     const val VERSION = "1"
 
     /** signalhub namespace of this project (its ALLOWED_APPS). */
-    const val APP = "go-link"
+    const val APP = "go-link-console"
 
     /** The official signaling server. STUN/TURN are never hardcoded: they come in hello. */
     const val OFFICIAL_SIGNAL_URL = "wss://signal.go-link.org/ws"

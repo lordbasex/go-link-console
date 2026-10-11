@@ -19,10 +19,10 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/test"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/internal/shots"
-	"github.com/lordbasex/go-link/backend-device/pkg/sysinfo"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/internal/shots"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/sysinfo"
 )
 
 // TestShots renders the real window with made-up data (an invented game
@@ -64,7 +64,7 @@ func shotUI(t *testing.T, lang string, pairing bool) (*ui, *services.StatusServi
 	a := test.NewTempApp(t)
 	a.Settings().SetTheme(arcadeTheme{})
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	base := filepath.Join(t.TempDir(), "go-link")
+	base := filepath.Join(t.TempDir(), "go-link-console")
 	if err := shots.Seed(base, true); err != nil {
 		t.Fatal(err)
 	}
@@ -106,8 +106,8 @@ func shotUI(t *testing.T, lang string, pairing bool) (*ui, *services.StatusServi
 	u.settings.background = func(f func()) { f() }
 	u.render(status.Snapshot())
 	// The real folder is a temporary one: show the default path instead.
-	u.roms.dir.SetText("~/go-link/roms")
-	u.hd.dir.SetText("~/go-link/hd-games")
+	u.roms.dir.SetText("~/go-link-console/roms")
+	u.hd.dir.SetText("~/go-link-console/hd-games")
 	u.win.Resize(fyne.NewSize(1240, 800))
 	return u, status
 }

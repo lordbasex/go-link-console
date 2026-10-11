@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/lordbasex/go-link/backend-device/internal/shots"
+	"github.com/lordbasex/go-link-console/backend-device/internal/shots"
 )
 
 func main() {

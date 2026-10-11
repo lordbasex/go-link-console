@@ -2,7 +2,7 @@
 <!-- Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com> -->
 <!-- Same keys as values/strings.xml (English, the reference). -->
 <resources>
-    <string name="app_name">go-link Player</string>
+    <string name="app_name">go-link Console Player</string>
     <string name="app_subtitle">Jogador</string>
     <string name="back">Voltar</string>
     <string name="home_title">Entre em uma partida</string>
@@ -12,27 +12,27 @@
     <string name="home_paste">Colar o link do convite</string>
     <string name="home_paste_invalid">A área de transferência não tem um convite do go-link.</string>
     <string name="home_pin_note">Cada convite tem seu próprio PIN de 6 dígitos, válido para uma pessoa. O PIN nunca vai no link nem no código QR.</string>
-    <string name="home_host_hint">Quer organizar partidas? Instale o go-link no seu computador: go-link.org</string>
+    <string name="home_host_hint">Quer organizar partidas? Instale o go-link no seu computador: console.go-link.org</string>
     <string name="home_custom_server">Servidor de sinalização próprio: %1$s</string>
     <string name="scan_title">Escanear o convite</string>
     <string name="scan_hint">Aponte a câmera para o código QR que o anfitrião te mostra.</string>
     <string name="scan_invalid">Esse código QR não é um convite do go-link.</string>
     <string name="scan_type_instead">Digitar o código</string>
     <string name="perm_camera_title">Câmera para o código QR</string>
-    <string name="perm_camera_text">O go-link Player usa a câmera só nesta tela, para ler o código QR do convite. Nada é gravado nem enviado.</string>
+    <string name="perm_camera_text">O go-link Console Player usa a câmera só nesta tela, para ler o código QR do convite. Nada é gravado nem enviado.</string>
     <string name="perm_camera_denied">A câmera está bloqueada. Você ainda pode digitar o código da sala, ou permitir a câmera nas configurações do sistema.</string>
     <string name="perm_mic_title">Microfone para o chat de voz</string>
     <string name="perm_mic_text">Os jogadores sentados podem conversar entre si. O microfone só envia enquanto você o liga na sala. Sem ele você ainda pode jogar e ouvir.</string>
     <string name="perm_mic_denied">O microfone está bloqueado: você pode jogar e ouvir. Para falar, permita-o nas configurações do sistema.</string>
     <string name="perm_bt_title">Fones de ouvido</string>
-    <string name="perm_bt_text">Permita os dispositivos próximos para que o go-link Player use seus fones Bluetooth para o som do jogo e a sua voz. Fones com fio funcionam sem esta permissão. Sem fones, o som sai pelo alto-falante.</string>
+    <string name="perm_bt_text">Permita os dispositivos próximos para que o go-link Console Player use seus fones Bluetooth para o som do jogo e a sua voz. Fones com fio funcionam sem esta permissão. Sem fones, o som sai pelo alto-falante.</string>
     <string name="perm_allow">Permitir</string>
     <string name="perm_not_now">Agora não</string>
     <string name="perm_open_settings">Abrir configurações</string>
     <string name="join_title">Entrar na partida</string>
     <string name="join_invitation">Convite</string>
     <string name="join_code_label">Código da sala ou link do convite</string>
-    <string name="join_code_hint">O código de 9 dígitos, ou o link go-link.org/g/…</string>
+    <string name="join_code_hint">O código de 9 dígitos, ou o link play.go-link.org/g/…</string>
     <string name="join_pin_label">PIN</string>
     <string name="join_pin_hint">O PIN de 6 dígitos que o anfitrião te deu. Vale para uma pessoa.</string>
     <string name="join_terms">Aceito os termos de uso e a política de privacidade.</string>
@@ -143,7 +143,7 @@
     <string name="settings_perm_bt">Dispositivos próximos (fones Bluetooth)</string>
     <string name="settings_perm_on">Permitido</string>
     <string name="settings_perm_off">Não permitido</string>
-    <string name="settings_about">go-link Player %1$s. Você joga partidas que rodam no computador do anfitrião (baseado no MAME, motor mame2003-plus). Neste celular só se instala o app.</string>
+    <string name="settings_about">go-link Console Player %1$s. Você joga partidas que rodam no computador do anfitrião (baseado no MAME, motor mame2003-plus). Neste celular só se instala o app.</string>
     <string name="alias_title">Qual é o seu nome?</string>
     <string name="alias_subtitle">É o nome que os outros veem na sala e no chat. Você pode mudá-lo durante a partida.</string>
     <string name="alias_label">Seu nome</string>
@@ -188,7 +188,7 @@
     <string name="tester_start">Start</string>
     <string name="tester_offline">Latência: do toque até o próximo quadro nesta tela, então fica perto de um quadro de tela (8 ms a 120 Hz, 17 ms a 60 Hz).</string>
     <string name="tester_card">Padrão de teste</string>
-    <string name="app_version">go-link Player v%1$s (build %2$d)</string>
+    <string name="app_version">go-link Console Player v%1$s (build %2$d)</string>
     <string name="app_version_debug">\u0020· debug</string>
     <string name="app_version_copied">Versão copiada</string>
     <plurals name="pin_wrong">
@@ -245,7 +245,7 @@
     <string name="skin_note">Uma carcaça de console ao redor da imagem. Só neste telefone.</string>
     <string name="skin_folder_hint">Mais skins: copie os arquivos de skin para a pasta Android/data/org.golink.player/files/Skins do telefone (de um computador por USB).</string>
     <string name="skin_install">Instalar skin</string>
-    <string name="skin_install_intro">Cole o JSON de uma skin (feita no editor de skins em go-link.org/tools/skin-editor, ou à mão) para adicioná-la como skin própria. Ela é conferida e mostrada antes de instalar.</string>
+    <string name="skin_install_intro">Cole o JSON de uma skin (feita no editor de skins em console.go-link.org/tools/skin-editor, ou à mão) para adicioná-la como skin própria. Ela é conferida e mostrada antes de instalar.</string>
     <string name="skin_install_field">JSON da skin</string>
     <string name="skin_install_paste">Colar</string>
     <string name="skin_install_check">Conferir</string>

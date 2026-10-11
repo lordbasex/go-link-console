@@ -687,7 +687,7 @@ function markdown(r) {
     L.push(``, `### What each kind means`, ``);
     for (const k of new Set(r.findings.map((x) => x.kind))) L.push(`- **${k}** (${KINDS[k][0]}): ${KINDS[k][1]}.`);
   }
-  L.push(``, `## Replay a finding`, ``, "```sh", `node rom/tools/lab/run.mjs ZIP --out DIR --script findings/ID.min.json --mp4`, `go-link-device romtest --input findings/ID.min.json --frames-dir CORE_DIR ZIP`, "```", ``);
+  L.push(``, `## Replay a finding`, ``, "```sh", `node rom/tools/lab/run.mjs ZIP --out DIR --script findings/ID.min.json --mp4`, `go-link-console romtest --input findings/ID.min.json --frames-dir CORE_DIR ZIP`, "```", ``);
   return L.join("\n");
 }
 

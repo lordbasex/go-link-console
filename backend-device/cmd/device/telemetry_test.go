@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/telemetry"
+	"github.com/lordbasex/go-link-console/backend-device/internal/telemetry"
 )
 
 func TestATelemetryAnswerAlwaysFitsOneMessage(t *testing.T) {

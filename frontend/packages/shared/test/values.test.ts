@@ -56,7 +56,7 @@ describe("room meta", () => {
 describe("invitations", () => {
   it("reads links, bare invites and typed codes", () => {
     const inv = "abcdefghijklmnopqrstu_";
-    expect(parseInvite(`https://go-link.org/g/${inv}`)).toEqual({ invite: inv });
+    expect(parseInvite(`https://play.go-link.org/g/${inv}`)).toEqual({ invite: inv });
     expect(parseInvite(inv)).toEqual({ invite: inv });
     expect(parseInvite(" 123 456-789 ")).toEqual({ code: "123456789" });
     expect(parseInvite("12345678")).toBeNull();

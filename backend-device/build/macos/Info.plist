@@ -4,13 +4,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleName</key>
-	<string>go-link</string>
+	<string>go-link Console</string>
 	<key>CFBundleDisplayName</key>
-	<string>go-link</string>
+	<string>go-link Console</string>
 	<key>CFBundleIdentifier</key>
-	<string>org.go-link.device</string>
+	<string>org.go-link.console</string>
 	<key>CFBundleExecutable</key>
-	<string>go-link-device</string>
+	<string>go-link-console</string>
 	<key>CFBundleIconFile</key>
 	<string>go-link</string>
 	<key>CFBundlePackageType</key>

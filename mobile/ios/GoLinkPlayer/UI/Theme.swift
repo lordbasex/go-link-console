@@ -219,7 +219,7 @@ final class KeyboardHeight: ObservableObject {
     deinit { observers.forEach(NotificationCenter.default.removeObserver) }
 }
 
-/** "go-link Player v0.1.5 (build 105)": the bundle's MARKETING_VERSION and CURRENT_PROJECT_VERSION. */
+/** "go-link Console Player v0.1.5 (build 105)": the bundle's MARKETING_VERSION and CURRENT_PROJECT_VERSION. */
 enum AppVersion {
     static var text: String {
         let info = Bundle.main.infoDictionary ?? [:]

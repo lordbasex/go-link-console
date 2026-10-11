@@ -8,7 +8,7 @@ import UIKit
  * The gamepad skins (Game settings › Skin). Every skin is a JSON file
  * (docs/skins/README.md): the built-in ones ship in the app (docs/skins/builtin,
  * "skin-<id>.json") and more can be added to the app's Skins folder in
- * the Files app (On My iPhone › go-link Player › Skins). The choice is
+ * the Files app (On My iPhone › go-link Console Player › Skins). The choice is
  * kept in Prefs; Smoke until the player picks one.
  */
 @MainActor

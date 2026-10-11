@@ -3,7 +3,7 @@
 package services
 
 import (
-	"github.com/lordbasex/go-link/backend-device/internal/telemetry"
+	"github.com/lordbasex/go-link-console/backend-device/internal/telemetry"
 )
 
 // The quality ladder moves one player between the video tiers of their

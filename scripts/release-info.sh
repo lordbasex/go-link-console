@@ -16,7 +16,7 @@ OUT="$ROOT/frontend/apps/web/src/release.json"
   first=1
   for f in "$DIR"/go-link-"$TAG"-*; do
     [[ -f "$f" ]] || continue
-    key="${f##*/go-link-$TAG-}"
+    key="${f##*/go-link-console-$TAG-}"
     size=$(wc -c < "$f" | tr -d ' ')
     [[ $first == 1 ]] || printf ',\n'
     printf '    "%s": %s' "$key" "$size"

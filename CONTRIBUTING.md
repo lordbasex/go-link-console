@@ -5,8 +5,8 @@ Thanks for wanting to help! go-link is a small, friendly project, and every cont
 ## Ways to help
 
 - **Star the repository** and share it: it helps other people find go-link.
-- **Try it and report what happens.** Open an [issue](https://github.com/lordbasex/go-link/issues/new/choose) with what you did, what you expected and what you saw. Your system (macOS, Windows, Linux, Raspberry Pi, Docker), the browser and the version (in the app's window or `go-link-device --help`) help a lot.
-- **Ideas and questions** go to [Discussions](https://github.com/lordbasex/go-link/discussions).
+- **Try it and report what happens.** Open an [issue](https://github.com/lordbasex/go-link-console/issues/new/choose) with what you did, what you expected and what you saw. Your system (macOS, Windows, Linux, Raspberry Pi, Docker), the browser and the version (in the app's window or `go-link-console --help`) help a lot.
+- **Ideas and questions** go to [Discussions](https://github.com/lordbasex/go-link-console/discussions).
 - **Translations:** the website's texts live in `frontend/apps/web/src/i18n/`. `en.ts` is the reference; each language is one file with the same shape (see `es.ts` and `pt.ts`), plus the user guide (`docs-*.ts`) and the legal pages (`legal-*.ts`). The app window's texts are in `backend-device/internal/gui/i18n_*.go`.
 - **Code, docs and tests:** see below.
 
