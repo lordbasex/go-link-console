@@ -340,17 +340,23 @@ final class PlayerUITests: XCTestCase {
         app.otherElements["pad-button-1"].press(forDuration: 0.5)
         let dpad = app.otherElements["pad-dpad"]
         dpad.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).press(forDuration: 0.5)
+        // This phone's own start joins its hero (a go-link HD game), then it walks a little.
+        if app.otherElements["pad-start-2"].exists { app.otherElements["pad-start-2"].press(forDuration: 0.3) }
+        sleep(2)
+        dpad.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).press(forDuration: 1.2)
+        shot("live-2e-pad")
 
         // Chat.
         app.buttons["dock-chat"].tap()
         let input = app.textFields["chat-input"]
         XCTAssertTrue(input.waitForExistence(timeout: 5))
         input.tap()
-        input.typeText("hello from the iOS app")
+        let line = ["es": "Listos, vamos por el jefe", "pt": "Prontos, vamos vencer o chefe"][lang] ?? "Ready? Let's beat the boss"
+        input.typeText(line)
         app.buttons["chat-send"].tap()
         sleep(2)
         shot("live-3-chat")
-        XCTAssertTrue(app.staticTexts["hello from the iOS app"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts[line].waitForExistence(timeout: 10))
         app.buttons["drawer-players"].tap()
         XCTAssertTrue(app.otherElements["seat-1"].waitForExistence(timeout: 5) || app.staticTexts["P1"].exists)
         shot("live-4-players")

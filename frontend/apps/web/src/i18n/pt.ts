@@ -1016,7 +1016,7 @@ export const pt: Messages = {
     meta: (version: string, mb: number) => `APK assinado · ${version} · ${mb} MB · Android 8 ou mais novo`,
     metaNoSize: "APK assinado · Android 8 ou mais novo",
     roomAlt: "O app go-link Console Player na sala do padrão de teste, com o controle na tela e o microfone ligado",
-    chatAlt: "O chat da sala no app go-link Console Player",
+    chatAlt: "O chat da sala no app go-link Console Player em um iPhone",
   },
   guestPath: {
     eyebrow: "Convidaram você para jogar?",
@@ -1072,8 +1072,8 @@ export const pt: Messages = {
       "win-overview": { caption: "A janela do go-link", alt: "A janela do go-link no computador, na página Resumo" },
       "app-home": { caption: "Início", alt: "A tela inicial do app go-link Console Player: escanear um QR ou digitar o código" },
       "app-pin": { caption: "PIN", alt: "A tela do PIN do app go-link Console Player com o convite já preenchido" },
-      "app-room": { caption: "Voz", alt: "A sala do padrão de teste no app go-link Console Player com o controle na tela e o microfone ligado" },
-      "app-chat": { caption: "Chat", alt: "O chat da sala no app go-link Console Player" },
+      "app-room": { caption: "Voz", alt: "ANTÍDOTO no app go-link Console Player em um iPhone, com o controle na tela" },
+      "app-chat": { caption: "Chat", alt: "O chat da sala no app go-link Console Player em um iPhone" },
     },
   },
   landing: {

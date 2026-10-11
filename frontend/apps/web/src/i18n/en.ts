@@ -1024,7 +1024,7 @@ export const en = {
     meta: (version: string, mb: number) => `Signed APK · ${version} · ${mb} MB · Android 8 or newer`,
     metaNoSize: "Signed APK · Android 8 or newer",
     roomAlt: "The go-link Console Player app in the test pattern room, with the on-screen pad and the microphone on",
-    chatAlt: "The room chat in the go-link Console Player app",
+    chatAlt: "The room chat in the go-link Console Player app on an iPhone",
   },
   guestPath: {
     eyebrow: "Invited to play?",
@@ -1082,8 +1082,8 @@ export const en = {
       "win-overview": { caption: "The go-link window", alt: "The go-link window on the computer, on its Overview page" },
       "app-home": { caption: "Home", alt: "The go-link Console Player app's home screen: scan a QR code or type the code" },
       "app-pin": { caption: "PIN", alt: "The PIN screen of the go-link Console Player app with the invitation filled in" },
-      "app-room": { caption: "Voice", alt: "The test pattern room in the go-link Console Player app with the on-screen pad and the microphone on" },
-      "app-chat": { caption: "Chat", alt: "The room chat in the go-link Console Player app" },
+      "app-room": { caption: "Voice", alt: "ANTÍDOTO in the go-link Console Player app on an iPhone, with the on-screen pad" },
+      "app-chat": { caption: "Chat", alt: "The room chat in the go-link Console Player app on an iPhone" },
     },
   },
   landing: {
