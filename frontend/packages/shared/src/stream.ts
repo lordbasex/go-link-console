@@ -168,6 +168,8 @@ export interface HostStreamOptions {
 export class HostStream {
   private pc: RTCPeerConnection | null = null;
   private pending: RTCIceCandidateInit[] = [];
+  /** The receiver of each voice track (1-4), for its level. */
+  private voiceReceivers = new Map<number, RTCRtpReceiver>();
   private input: RTCDataChannel | null = null;
   private players = new Map<number, { seq: number; pad: Pad; repeat: ReturnType<typeof setInterval> | null }>();
   private offMessage: (() => void) | null = null;
@@ -214,6 +216,7 @@ export class HostStream {
     this.offMessage?.();
     this.players.forEach((p) => p.repeat && clearInterval(p.repeat));
     this.players.clear();
+    this.voiceReceivers.clear();
     this.pc?.close();
     this.pc = null;
     this.opts.onState?.("closed");
@@ -332,6 +335,24 @@ export class HostStream {
   private videoTotals: { emitted: number; buffered: number; decoded: number; decoding: number } | null = null;
   private windowTotals: Record<string, number> | null = null;
   private windowAt = 0;
+
+  /**
+   * How loud each voice track (1-4) is right now, 0 to 1, from the level the
+   * device forwards with the voice (RTCRtpReceiver synchronization sources):
+   * no Web Audio, so it works before any tap and whatever plays the sound.
+   * A track with no packet in the last half second is 0.
+   */
+  voiceLevels(): Record<number, number> {
+    const out: Record<number, number> = {};
+    for (const [slot, receiver] of this.voiceReceivers) {
+      const src = receiver.getSynchronizationSources?.()[0];
+      if (!src) continue;
+      // The timestamp is on performance.now()'s clock (older browsers: the epoch).
+      const now = src.timestamp > 1e12 ? Date.now() : performance.now();
+      out[slot] = now - src.timestamp < 500 ? (src.audioLevel ?? 0) : 0;
+    }
+    return out;
+  }
 
   async stats(): Promise<StreamStats> {
     const result: StreamStats = { fps: null, rttMs: null, path: null, codec: null };
@@ -458,7 +479,10 @@ export class HostStream {
     pc.ontrack = (ev) => {
       const stream = ev.streams[0] ?? new MediaStream([ev.track]);
       const voice = /^voice-p([1-4])$/.exec(stream.id);
-      if (voice) this.opts.onVoiceTrack?.(Number(voice[1]), stream);
+      if (voice) {
+        this.voiceReceivers.set(Number(voice[1]), ev.receiver);
+        this.opts.onVoiceTrack?.(Number(voice[1]), stream);
+      }
       else this.opts.onTrack?.(stream);
     };
     pc.ondatachannel = (ev) => {

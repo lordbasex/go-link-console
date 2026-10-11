@@ -610,6 +610,12 @@ func (r *RoomsService) Action(ctx context.Context, id, action, name string) (int
 		if m := r.managerOf(gr); m != nil {
 			m.SetChat(on)
 		}
+	case "spectators_voice_on", "spectators_voice_off":
+		on := action == "spectators_voice_on"
+		r.update(gr, func(s *models.SavedRoom) { s.SpectatorsVoiceOff = !on })
+		if m := r.managerOf(gr); m != nil {
+			m.SetSpectatorsHear(on)
+		}
 	case "input_hud_on", "input_hud_off":
 		// The host's latency test: the controllers drawn on the picture
 		// while the game runs (not saved, a diagnostic).
@@ -846,7 +852,7 @@ func (r *RoomsService) launch(gr *gameRoom, statePath string) error {
 		r.publish()
 	}}, stream)
 	signal.SetManager(manager)
-	stream.SetRoomHooks(RoomHooks{Opened: manager.Join, Message: manager.HandleControl, Closed: manager.Leave, PortOf: manager.PortOf})
+	stream.SetRoomHooks(manager.Hooks())
 	stream.SetVoiceEnabled(saved.Voice)
 	signal.OnRoomID(func(roomID string) {
 		r.mu.Lock()
@@ -866,6 +872,7 @@ func (r *RoomsService) launch(gr *gameRoom, statePath string) error {
 		once.Do(func() {
 			manager.SetVoice(saved.Voice)
 			manager.SetChat(!saved.ChatOff)
+			manager.SetSpectatorsHear(!saved.SpectatorsVoiceOff)
 			manager.SetPicture(saved.Picture)
 			manager.SetPausable(true)
 			// A room saved paused comes back paused, now that the game can

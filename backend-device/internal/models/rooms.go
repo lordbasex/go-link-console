@@ -35,8 +35,11 @@ type SavedRoom struct {
 	Public bool   `json:"public"`
 	Voice  bool   `json:"voice"`
 	// ChatOff: the host turned the room's chat off (on by default).
-	ChatOff bool   `json:"chat_off,omitempty"`
-	Art     string `json:"art,omitempty"` // lobby picture: boxart, title or snap ("" = Settings)
+	ChatOff bool `json:"chat_off,omitempty"`
+	// SpectatorsVoiceOff: the host does not let spectators hear the
+	// voices (they hear them by default).
+	SpectatorsVoiceOff bool   `json:"spectators_voice_off,omitempty"`
+	Art                string `json:"art,omitempty"` // lobby picture: boxart, title or snap ("" = Settings)
 	// Picture is the host's default picture style for the room's guests
 	// (nil: the website's own default).
 	Picture   *RoomPicture `json:"picture,omitempty"`

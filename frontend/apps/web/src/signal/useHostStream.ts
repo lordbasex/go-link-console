@@ -104,8 +104,10 @@ export interface HostStreamView {
   handLater: (peer: string) => void;
   /** The host takes someone out of the room for good. */
   removeGuest: (peer: string) => void;
-  /** Voice of the other players, by port (1-4). */
+  /** The four voice tracks (1-4): each carries whoever speaks now (room_state.voice_slots). */
   voiceStreams: Record<number, MediaStream>;
+  /** How loud each voice track is now, 0 to 1 (from WebRTC, no Web Audio). */
+  voiceLevels: Record<number, number>;
   /** Sends (or stops, with null) the microphone. */
   setMicTrack: (track: MediaStreamTrack | null) => void;
   /** Buttons held on the on-screen gamepad; they drive the keyboard's player. */
@@ -189,6 +191,7 @@ export function useHostStream(
   const [aspect, setAspect] = useState<number | null>(null);
   const [video, setVideo] = useState<StreamVideo | null>(null);
   const [hud, setHud] = useState<HudRect[]>([]);
+  const [voiceLevels, setVoiceLevels] = useState<Record<number, number>>({});
   const pressEdges = useRef<PressEdge[]>(
     Array.from({ length: MAX_LOCAL_PLAYERS }, () => ({ active: false, at: 0 })),
   );
@@ -207,6 +210,22 @@ export function useHostStream(
   const single = !(opts.multi && room?.you.owner);
   singleRef.current = single;
   const streamRef = useRef<HostStream | null>(null);
+  // The voices' levels, a few times a second while there are voices.
+  const hasVoices = Object.keys(voiceStreams).length > 0;
+  useEffect(() => {
+    if (!hasVoices) return;
+    let last = "";
+    const timer = setInterval(() => {
+      const next = streamRef.current?.voiceLevels() ?? {};
+      // Re-render only when a level moves enough to show.
+      const key = Object.entries(next).map(([k, v]) => `${k}:${Math.round(v * 30)}`).join(",");
+      if (key !== last) {
+        last = key;
+        setVoiceLevels(next);
+      }
+    }, 120);
+    return () => clearInterval(timer);
+  }, [hasVoices]);
   const touchRef = useRef(0);
   const flushRef = useRef<(() => void) | null>(null);
 
@@ -483,6 +502,7 @@ export function useHostStream(
   const send = (msg: unknown) => streamRef.current?.sendControl(msg);
   return {
     hud,
+    voiceLevels,
     pressEdges,
     single,
     media,

@@ -424,3 +424,112 @@ func TestVoiceGoesOnlyToOtherPlayers(t *testing.T) {
 		}
 	}
 }
+
+// The room's voice rule: someone in the queue talks; a spectator hears the
+// voices while the room lets them, and never talks.
+func TestTheQueueTalksAndSpectatorsHear(t *testing.T) {
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	stream, err := services.NewStreamService(services.StreamConfig{Width: 160, Height: 120, IncludeLoopback: true, Logger: logger}, services.NewICEStore())
+	if err != nil {
+		t.Fatal(err)
+	}
+	var hear atomic.Bool
+	hear.Store(true)
+	slots := make(chan [4]string, 16)
+	stream.SetRoomHooks(services.RoomHooks{
+		// alice waits in the queue, bob plays, carol watches.
+		VoiceRole: func(peer string) (bool, bool) {
+			switch peer {
+			case "alice", "bob":
+				return true, true
+			}
+			return false, hear.Load()
+		},
+		VoiceSlots: func(p [4]string) { slots <- p },
+	})
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() { _ = stream.Run(ctx) }()
+
+	alice := newBrowser(t, "alice", stream)
+	bob := newBrowser(t, "bob", stream)
+	carol := newBrowser(t, "carol", stream)
+	stream.SetSender(multiRelay{"alice": alice, "bob": bob, "carol": carol})
+	var mu sync.Mutex
+	got := map[string]int{}
+	for _, b := range []*browserPeer{alice, bob, carol} {
+		b.pc.OnTrack(func(tr *webrtc.TrackRemote, _ *webrtc.RTPReceiver) {
+			for {
+				if _, _, err := tr.ReadRTP(); err != nil {
+					return
+				}
+				if strings.HasPrefix(tr.StreamID(), "voice-") {
+					mu.Lock()
+					got[b.id+"/"+tr.StreamID()]++
+					mu.Unlock()
+				}
+			}
+		})
+	}
+	mics := map[string]*webrtc.TrackLocalStaticSample{}
+	for _, b := range []*browserPeer{alice, carol} {
+		mic, err := webrtc.NewTrackLocalStaticSample(webrtc.RTPCodecCapability{MimeType: webrtc.MimeTypeOpus, ClockRate: 48000, Channels: 2}, "mic", "mic-"+b.id)
+		if err != nil {
+			t.Fatal(err)
+		}
+		mics[b.id] = mic
+		b.beforeAnswer = func() {
+			if _, err := b.pc.AddTrack(mic); err != nil {
+				t.Error(err)
+			}
+		}
+	}
+	for _, id := range []string{"alice", "bob", "carol"} {
+		if err := stream.AddViewer(id); err != nil {
+			t.Fatal(err)
+		}
+	}
+	enc, err := encoder.NewOpus(1, 32000)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer enc.Close()
+	tone := testpattern.NewTone(440)
+	speak := func(until func() bool) {
+		t.Helper()
+		deadline := time.Now().Add(10 * time.Second)
+		for !until() {
+			pkt, _ := enc.Encode(tone.Frame())
+			for _, mic := range mics {
+				_ = mic.WriteSample(media.Sample{Data: pkt, Duration: 20 * time.Millisecond})
+			}
+			time.Sleep(20 * time.Millisecond)
+			if time.Now().After(deadline) {
+				mu.Lock()
+				defer mu.Unlock()
+				t.Fatalf("voice packets: %v", got)
+			}
+		}
+	}
+	count := func(k string) int { mu.Lock(); defer mu.Unlock(); return got[k] }
+	speak(func() bool { return count("bob/voice-p1") >= 20 && count("carol/voice-p1") >= 20 })
+	if p := <-slots; p != [4]string{"alice", "", "", ""} {
+		t.Fatalf("slots %v", p)
+	}
+	// Carol's microphone never reaches anyone, and alice never hears herself.
+	mu.Lock()
+	for k, n := range got {
+		if k != "bob/voice-p1" && k != "carol/voice-p1" && n > 0 {
+			t.Errorf("%s got %d packets", k, n)
+		}
+	}
+	mu.Unlock()
+	// The host stops the spectators hearing: carol gets no more.
+	hear.Store(false)
+	time.Sleep(100 * time.Millisecond)
+	before, bobBefore := count("carol/voice-p1"), count("bob/voice-p1")
+	speak(func() bool { return count("bob/voice-p1") >= bobBefore+20 })
+	if after := count("carol/voice-p1"); after > before+2 {
+		t.Fatalf("carol still hears: %d then %d", before, after)
+	}
+}

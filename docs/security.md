@@ -16,7 +16,7 @@ Details in [signalhub's README](https://github.com/lordbasex/signalhub). In shor
 - **Linked browsers:** only the SHA-256 of each token is stored. On a reconnect the device proves itself first (HMAC challenge), and a browser that has not shown a valid token within 15 s gets nothing and is dropped.
 - **Rooms:** every room is private. One PIN per invitation and per person, a return token per guest, an owner key per room session, all in memory only. 5 tries per guest, and 20 failures in 10 minutes lock the room for 10 minutes. The owner key and return tokens are checked before the lockout, so an attack does not lock out the host or admitted guests.
 - **Room guests never see device data** (hardware, usage, history, IPs); only linked browsers do. The history with guests' IPs is visible only to the owner.
-- **Input and voice rules are enforced on the device:** only seated players' input reaches the game, and only seated players' voice is forwarded.
+- **Input and voice rules are enforced on the device:** only seated players' input reaches the game, and only the players' and the queue's voice is forwarded (spectators hear it only while the host lets them).
 - **Uploads:** strict set names, ZIP signature check, size limit, temporary file + rename, never overwrites.
 - **Thumbnails:** size limits on files and pixels before decoding.
 - `device.json`, `history.json` and the recordings (`rec/`) are `0600`. `device.lock` prevents two devices at once.

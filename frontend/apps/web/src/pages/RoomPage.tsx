@@ -326,6 +326,7 @@ function VoiceControl({
   micTestLevel = null,
   open,
   setOpen,
+  spectatorsHear,
 }: {
   model: RoomModel;
   micOn: boolean;
@@ -337,6 +338,8 @@ function VoiceControl({
   micTestLevel?: number | null;
   open: boolean;
   setOpen: (open: boolean) => void;
+  /** The host's switch: spectators hear the voices too. */
+  spectatorsHear?: { on: boolean; onChange: (on: boolean) => void };
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const popRef = useRef<HTMLDivElement>(null);
@@ -467,6 +470,24 @@ function VoiceControl({
                 onChange={volumes.onVoice}
                 disabled={model.voice !== "player" && !model.hearVoice}
               />
+            </div>
+          )}
+          {spectatorsHear && (
+            <div className="switch-row">
+              <div className="stack-xxs">
+                <span className="strong">{t.room.spectatorsHear}</span>
+                <span className="small muted">{t.room.spectatorsHearDesc}</span>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={spectatorsHear.on}
+                aria-label={t.room.spectatorsHear}
+                className={`switch${spectatorsHear.on ? " is-on" : ""}`}
+                onClick={() => spectatorsHear.onChange(!spectatorsHear.on)}
+              >
+                <span className="switch-knob" />
+              </button>
             </div>
           )}
           {player && !sheet && (
@@ -694,7 +715,9 @@ export function RoomPage() {
   const [voiceVolume, setVoiceVolume] = useState(() =>
     readVolume(VOICE_VOLUME_KEY, 100),
   );
-  const [silenced, setSilenced] = useState<ReadonlySet<number>>(new Set());
+  // Voices silenced in this browser, by the person's name (a voice track
+  // carries whoever is speaking, so a seat or a track is not the person).
+  const [silenced, setSilenced] = useState<ReadonlySet<string>>(new Set());
   const [chatHidden, setChatHidden] = useState(
     () => readStorage(CHAT_HIDDEN_KEY) === "true",
   );
@@ -703,20 +726,21 @@ export function RoomPage() {
   );
   const [ptt, setPtt] = useState(false);
 
-  // Voice: only seated players talk (the device enforces it too).
+  // Voice: the players and the queue talk (the device enforces it too).
   const seated = !demo && (live.room?.you.ports.length ?? 0) > 0;
-  const talking = seated && (micOn || ptt);
+  const talker = seated || (!demo && (live.room?.you.queuePositions.length ?? 0) > 0);
+  const talking = talker && (micOn || ptt);
   // The microphone and output chosen for this browser; the settings open
   // the microphone too, so the person can test it before talking.
   const audio = useAudioDevices();
   const [voiceOpen, setVoiceOpen] = useState(false);
-  const mic = useMicrophone(seated && (micOn || ptt || voiceOpen), talking, audio.micId);
+  const mic = useMicrophone(talker && (micOn || ptt || voiceOpen), talking, audio.micId);
   const micTrack = mic.stream?.getAudioTracks()[0] ?? null;
   // A new microphone replaces the track on the same line (replaceTrack).
   useEffect(() => {
-    live.setMicTrack(seated ? micTrack : null);
+    live.setMicTrack(talker ? micTrack : null);
     // setMicTrack is a stable wrapper around the current stream
-  }, [seated, micTrack, live.media]);
+  }, [talker, micTrack, live.media]);
   // Allowing the microphone reveals the devices' names.
   const { refresh: refreshDevices } = audio;
   useEffect(() => {
@@ -953,7 +977,7 @@ export function RoomPage() {
   }, [live, credentials, roomId, inviteRoom, knock, playerName, sendKnock]);
   // Hold V to talk.
   useEffect(() => {
-    if (!seated) return;
+    if (!talker) return;
     const typing = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement | null;
       return !!el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA");
@@ -967,22 +991,29 @@ export function RoomPage() {
       window.removeEventListener("keydown", down);
       window.removeEventListener("keyup", up);
     };
-  }, [seated]);
+  }, [talker]);
 
-  const levels = useAudioLevels(
-    {
-      mic: talking ? mic.stream : null,
-      p1: live.voiceStreams[1],
-      p2: live.voiceStreams[2],
-      p3: live.voiceStreams[3],
-      p4: live.voiceStreams[4],
-    },
-    soundOn || micOn,
-  );
+  // Your own microphone's level (Web Audio); the others' come from WebRTC.
+  const levels = useAudioLevels({ mic: talking ? mic.stream : null }, micOn || ptt);
+  // The four voice tracks carry whoever speaks now (room_state.voice_slots):
+  // a player lights up their seat, someone in the queue their row.
+  const voiceSlots = live.room?.voiceSlots ?? [];
   const speaking = new Set<number>();
-  [1, 2, 3, 4].forEach((p) => (levels[`p${p}`] ?? 0) > 0.12 && speaking.add(p));
-  if (talking && (levels.mic ?? 0) > 0.12)
+  const speakingNames = new Set<string>();
+  [1, 2, 3, 4].forEach((n) => {
+    const who = voiceSlots[n - 1];
+    // WebRTC's level is linear (1 = full scale): speech is well above 0.03.
+    if (!who || (live.voiceLevels[n] ?? 0) <= 0.03 || silenced.has(who.name)) return;
+    if (who.port) speaking.add(who.port);
+    else speakingNames.add(who.name);
+  });
+  if (talking && (levels.mic ?? 0) > 0.12) {
     live.room?.you.ports.forEach((p) => speaking.add(p));
+    if (!seated && live.room) speakingNames.add(live.room.you.name);
+  }
+  const silencedPorts = new Set(
+    (live.room?.seats ?? []).flatMap((s, i) => (s && silenced.has(s.name) ? [i + 1] : [])),
+  );
 
   useEffect(() => {
     if (videoRef.current) videoRef.current.srcObject = live.media;
@@ -1224,7 +1255,7 @@ export function RoomPage() {
         micOn,
         params.get("spectatorsHearVoice") === "true",
       )
-    : liveModel(live.room, live.chat, { speaking, silenced, talking });
+    : liveModel(live.room, live.chat, { speaking, silenced: silencedPorts, talking, speakingNames });
   // The host (its browser came in with the owner key) moves people toward
   // playing and takes them out of the room; the device checks it is the host.
   const hostTools: HostTools | null =
@@ -1327,13 +1358,16 @@ export function RoomPage() {
       : linkedAsks.asks
           .filter((a) => a.roomId === roomId)
           .map((a) => ({ ask: a.ask, answer: (accept: boolean) => linkedAsks.answer(a.id, a.ask.from, accept) }));
-  const toggleSilence = (port: number) =>
+  const toggleSilence = (port: number) => {
+    const name = live.room?.seats[port - 1]?.name;
+    if (!name) return;
     setSilenced((cur) => {
       const next = new Set(cur);
-      if (next.has(port)) next.delete(port);
-      else next.add(port);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
       return next;
     });
+  };
 
   const controlsPanel = (
     <ControlsPanel
@@ -1844,6 +1878,19 @@ export function RoomPage() {
                           },
                         }
                   }
+                  spectatorsHear={
+                    !demo && live.room && (ownsRoom || ownTest)
+                      ? {
+                          on: live.room.spectatorsHear,
+                          onChange: (on) =>
+                            sendToDevice({
+                              type: "room_action",
+                              id: ownRoom ? ownRoom.id : "test",
+                              action: on ? "spectators_voice_on" : "spectators_voice_off",
+                            }),
+                        }
+                      : undefined
+                  }
                 />
               )}
               {streaming && pausable && (
@@ -2057,12 +2104,12 @@ export function RoomPage() {
 
 
           {/* Voice of the other players, each with its own volume. */}
-          {Object.entries(live.voiceStreams).map(([port, stream]) => (
+          {Object.entries(live.voiceStreams).map(([slot, stream]) => (
             <VoiceAudio
-              key={port}
+              key={slot}
               stream={stream}
               volume={voiceVolume / 100}
-              muted={!soundOn || silenced.has(Number(port))}
+              muted={!soundOn || silenced.has(voiceSlots[Number(slot) - 1]?.name ?? "\u0000")}
               sinkId={audio.outId}
             />
           ))}

@@ -335,14 +335,16 @@ export const docsEn: Docs = {
       slug: "voice-chat",
       group: "Playing",
       title: "Voice and chat",
-      lead: "Seated players can talk to each other; everyone can chat.",
+      lead: "The players and the people in the queue talk; spectators listen; everyone can chat.",
       blocks: [
         {
           t: "list",
           items: [
-            "Only players in seats P1 to P4 can talk. Turn the microphone on in the room's dock, or hold **V**.",
+            "The players (P1 to P4) and the people waiting in the queue can talk. Turn the microphone on in the room's dock, or hold **V**.",
+            "Spectators hear the game and the voices, but cannot talk. The host can turn off **Spectators hear the voices** in **Volume and voice**.",
+            "Up to four people are heard at once: whoever is speaking. A fifth voice comes in as soon as someone goes quiet.",
             "Game sound and voice have separate volumes, and you can silence one player.",
-            "Voice travels encrypted from each player to the host's app and on to the other players. It is only recorded when the host records the game, and then everyone sees **REC** over the video and a notice in the chat.",
+            "Voice travels encrypted from each person to the host's app and on to the others. It is only recorded when the host records the game, and then everyone sees **REC** over the video and a notice in the chat.",
             "Chat messages are up to 300 characters, and you see who is typing.",
             "The host can switch the chat off for a room.",
           ],

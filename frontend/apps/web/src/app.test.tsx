@@ -265,11 +265,11 @@ describe("room", () => {
   it("renders the spectator variant in demo mode", async () => {
     FakeSocket.reset();
     renderApp(`/r/${ROOM}?perspective=spectator&spectatorsHearVoice=true`, { demo: true });
-    expect(await screen.findByText("You are next in the queue")).toBeInTheDocument();
+    expect(await screen.findByText("You are watching")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Microphone not available" })).toBeDisabled();
     // The voice rules sit in the dock's voice settings.
     await userEvent.click(screen.getByRole("button", { name: "Volume and voice" }));
-    expect(screen.getByText(/You hear the players' commentary/)).toBeInTheDocument();
+    expect(screen.getByText(/You hear the players and the queue/)).toBeInTheDocument();
   });
 
   it("explains every control in the how to play dialog", async () => {

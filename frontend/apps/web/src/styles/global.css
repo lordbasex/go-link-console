@@ -3084,3 +3084,4 @@ body .video-stage.has-touchpad.is-console .picture-layer { inset: auto; left: va
 .queue-row .stack-xxs, .viewer-row .grow { min-width: 0; }
 .viewer-hand { display: inline-flex; color: var(--color-accent-text); }
 .video-hand.is-on { border-color: var(--color-accent); color: var(--color-accent-text); }
+.queue-speaking { display: inline-flex; margin-left: auto; color: var(--color-voice); }

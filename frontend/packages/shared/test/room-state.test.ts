@@ -108,3 +108,20 @@ describe("raised hands", () => {
     }
   });
 });
+
+describe("voice slots", () => {
+  it("reads who each voice track carries and whether spectators hear", () => {
+    const st = parseRoomState({
+      type: "room_state",
+      max_players: 2,
+      seats: [null, null],
+      spectators_hear: true,
+      voice_slots: [{ name: "Ana" }, { name: "Bob", port: 2, you: true }, null, { name: "x", port: 9 }],
+    })!;
+    expect(st.spectatorsHear).toBe(true);
+    expect(st.voiceSlots).toEqual([{ name: "Ana", port: 0, you: false }, { name: "Bob", port: 2, you: true }, null, { name: "x", port: 0, you: false }]);
+    const old = parseRoomState({ type: "room_state", max_players: 2, seats: [] })!;
+    expect(old.spectatorsHear).toBe(false);
+    expect(old.voiceSlots).toEqual([null, null, null, null]);
+  });
+});

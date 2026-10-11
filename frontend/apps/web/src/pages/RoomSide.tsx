@@ -19,7 +19,7 @@ import {
   SendIcon,
 } from "../components/Icons";
 import { GuestMenu, type HostTools } from "../components/GuestMenu";
-import { HandIcon } from "../components/Icons";
+import { HandIcon, MicIcon } from "../components/Icons";
 import { NameField } from "../components/NameField";
 import { portStyle } from "../components/Seats";
 import { localName, type RoomModel } from "./roomModel";
@@ -400,8 +400,13 @@ export function QueueList({ model, tools }: { model: RoomModel; tools?: HostTool
               {q.name}
               {q.you ? t.room.youSuffix : ""}
             </span>
-            <span className="small muted">{q.note}</span>
+            <span className="small muted">{q.speaking ? t.room.speaking : q.note}</span>
           </div>
+          {q.speaking && (
+            <span className="queue-speaking" role="img" aria-label={t.room.speaking}>
+              <MicIcon size={14} />
+            </span>
+          )}
           {tools && q.peer && !q.you && <GuestMenu tools={tools} peer={q.peer} name={q.name} spectator={false} />}
         </div>
       ))}

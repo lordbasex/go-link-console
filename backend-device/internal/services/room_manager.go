@@ -173,9 +173,19 @@ type RoomManager struct {
 	pauseAsks  []pauseAsk
 	onAsk      func(PauseAskEvent) // set by OnPauseAsk; called on the actor goroutine
 	onRemove   func(peer string)   // set by OnRemove; called on its own goroutine
+	// spectatorsHear: spectators hear the voices too (the host's switch,
+	// on by default). voiceSlots is who each voice track carries now.
+	spectatorsHear bool
+	voiceSlots     [voiceSlots]string
 
 	ports atomic.Pointer[map[seatKey]int]
+	// voice is who may talk and who hears, read by the voice path for
+	// every packet: an immutable snapshot, like ports.
+	voice atomic.Pointer[map[string]voiceRole]
 }
+
+// voiceRole is one guest's part in the room's voice.
+type voiceRole struct{ talk, hear bool }
 
 // NewRoomManager builds the manager. Call Run to start it.
 func NewRoomManager(cfg RoomManagerConfig, out ControlSender) *RoomManager {
@@ -200,6 +210,9 @@ func NewRoomManager(cfg RoomManagerConfig, out ControlSender) *RoomManager {
 	}
 	empty := map[seatKey]int{}
 	m.ports.Store(&empty)
+	noVoice := map[string]voiceRole{}
+	m.voice.Store(&noVoice)
+	m.spectatorsHear = true
 	return m
 }
 
@@ -229,6 +242,54 @@ func (m *RoomManager) Sync() {
 func (m *RoomManager) PortOf(peerID string, local uint8) (int, bool) {
 	port, ok := (*m.ports.Load())[seatKey{peerID, local}]
 	return port, ok
+}
+
+// VoiceRole says whether a guest may talk (a player or someone in the
+// queue: everyone waiting to play talks with the players) and whether it
+// hears the voices (those, plus the spectators when the host lets them).
+// Safe to call from any goroutine.
+func (m *RoomManager) VoiceRole(peerID string) (talk, hear bool) {
+	r := (*m.voice.Load())[peerID]
+	return r.talk, r.hear
+}
+
+// Hooks connects a stream's guests to this room.
+func (m *RoomManager) Hooks() RoomHooks {
+	return RoomHooks{Opened: m.Join, Message: m.HandleControl, Closed: m.Leave, PortOf: m.PortOf,
+		VoiceRole: m.VoiceRole, VoiceSlots: m.SetVoiceSlots}
+}
+
+// SetSpectatorsHear lets the spectators hear the voices, or not (the
+// host's switch; they always hear the game).
+func (m *RoomManager) SetSpectatorsHear(on bool) {
+	m.do(func() {
+		if m.spectatorsHear != on {
+			m.spectatorsHear = on
+			m.publishVoice()
+			m.broadcastState()
+		}
+	})
+}
+
+// SetVoiceSlots tells the guests who each voice track carries, so they
+// show who is speaking and silence the right person.
+func (m *RoomManager) SetVoiceSlots(peers [4]string) {
+	m.do(func() {
+		if m.voiceSlots != peers {
+			m.voiceSlots = peers
+			m.broadcastState()
+		}
+	})
+}
+
+// publishVoice stores who may talk and hear (actor goroutine).
+func (m *RoomManager) publishVoice() {
+	roles := make(map[string]voiceRole, len(m.members))
+	for peer, mem := range m.members {
+		talk := !mem.spectator
+		roles[peer] = voiceRole{talk: talk, hear: talk || m.spectatorsHear}
+	}
+	m.voice.Store(&roles)
 }
 
 // Join adds a guest whose control channel just opened.
@@ -1083,6 +1144,7 @@ func (m *RoomManager) reconcile() {
 		}
 	}
 	m.ports.Store(&ports)
+	m.publishVoice()
 	m.swaps = slices.DeleteFunc(m.swaps, func(p pendingSwap) bool { return !m.swapValid(p) })
 	m.broadcastState()
 	if m.cfg.OnSummary != nil {
@@ -1230,19 +1292,46 @@ type stateOut struct {
 	Controls   GameControls        `json:"controls"`
 	Recording  bool                `json:"recording"`
 	HostOnline bool                `json:"host_online"`
+	// SpectatorsHear: spectators hear the voices too. VoiceSlots: who each
+	// voice track (voice-p1..voice-p4) carries now, null when nobody.
+	SpectatorsHear bool            `json:"spectators_hear"`
+	VoiceSlots     []*voiceSlotOut `json:"voice_slots"`
+}
+
+// voiceSlotOut is the person a voice track carries: port is their seat (0
+// in the queue).
+type voiceSlotOut struct {
+	Name string `json:"name"`
+	Port int    `json:"port,omitempty"`
+	You  bool   `json:"you,omitempty"`
 }
 
 // broadcastState sends each member its own view of the room.
 func (m *RoomManager) broadcastState() {
 	online := m.hostOnline()
 	now := m.cfg.Now()
+	slotPeople := make([]*voiceSlotOut, len(m.voiceSlots))
+	for i, p := range m.voiceSlots {
+		if mem := m.members[p]; mem != nil {
+			_, port := m.roleOf(mem)
+			slotPeople[i] = &voiceSlotOut{Name: mem.name, Port: port}
+		}
+	}
 	var asks []pauseAskOut
 	for _, a := range m.pauseAsks {
 		asks = append(asks, pauseAskOut{From: a.peer, Name: a.name, Port: a.port, ExpiresAt: a.expires})
 	}
 	for peer, mem := range m.members {
 		st := stateOut{Type: "room_state", MaxPlayers: m.cfg.MaxPlayers, Voice: !m.voiceOff, Chat: !m.chatOff, InputHUD: m.inputHUD, Picture: m.picture, Info: m.info, Seats: make([]*seatOut, len(m.seats)), Queue: []queueOut{}, Spectators: []personOut{},
-			Pausable: m.pausable, Paused: m.paused, PausedBy: m.pausedBy, Controls: m.controls, Recording: m.recording, HostOnline: online}
+			Pausable: m.pausable, Paused: m.paused, PausedBy: m.pausedBy, Controls: m.controls, Recording: m.recording, HostOnline: online,
+			SpectatorsHear: m.spectatorsHear, VoiceSlots: make([]*voiceSlotOut, len(slotPeople))}
+		for i, sp := range slotPeople {
+			if sp != nil {
+				c := *sp
+				c.You = m.voiceSlots[i] == peer
+				st.VoiceSlots[i] = &c
+			}
+		}
 		owner := m.owners[peer]
 		peerFor := func(p string) string {
 			if owner {

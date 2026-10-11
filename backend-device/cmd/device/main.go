@@ -280,12 +280,7 @@ func run() error {
 		room.SetPicture(cfg.TestRoomPicture)
 		testManager = manager
 		manager.SetInfo(services.RoomInfo{Title: "Test pattern", Game: "Test pattern", Host: hostName()})
-		stream.SetRoomHooks(services.RoomHooks{
-			Opened:  manager.Join,
-			Message: manager.HandleControl,
-			Closed:  manager.Leave,
-			PortOf:  manager.PortOf,
-		})
+		stream.SetRoomHooks(manager.Hooks())
 		if *testPause {
 			var paused atomic.Bool
 			stream.PausableTestCard(paused.Load)
@@ -738,10 +733,15 @@ func run() error {
 			// The test pattern room ("test"): a new link, and a pause with
 			// --test-room-pause.
 			if msg.ID == services.TestRoomID && room != nil {
-				ok := action == "new_link" || ((action == "pause" || action == "resume") && *testPause) || action == "input_hud_on" || action == "input_hud_off"
+				ok := action == "new_link" || ((action == "pause" || action == "resume") && *testPause) || action == "input_hud_on" || action == "input_hud_off" ||
+					action == "spectators_voice_on" || action == "spectators_voice_off"
 				switch action {
 				case "new_link":
 					room.NewInvite()
+				case "spectators_voice_on", "spectators_voice_off":
+					if testManager != nil {
+						testManager.SetSpectatorsHear(action == "spectators_voice_on")
+					}
 				case "input_hud_on", "input_hud_off":
 					// The latency test: the beacons of the 4 seats on the card.
 					on := action == "input_hud_on"

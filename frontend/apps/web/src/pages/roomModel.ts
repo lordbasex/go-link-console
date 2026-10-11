@@ -25,6 +25,8 @@ export interface VoiceView {
   silenced: ReadonlySet<number>;
   /** Your microphone is sending. */
   talking: boolean;
+  /** People in the queue speaking right now (their names). */
+  speakingNames?: ReadonlySet<string>;
 }
 
 export interface QueueRow {
@@ -34,6 +36,8 @@ export interface QueueRow {
   note: string;
   /** The host's view only: the person's peer id. */
   peer?: string;
+  /** Speaking right now (the queue talks with the players). */
+  speaking?: boolean;
 }
 
 /** Someone watching; peer only in the host's view. */
@@ -145,11 +149,12 @@ export function demoModel(isPlayer: boolean, micOn: boolean, hearVoice: boolean)
       status: p.speaking ? t.room.speaking : p.muted ? t.room.muted : t.room.micOn,
       tone: p.speaking ? "speaking" : p.muted ? "muted" : "normal",
     })),
-    queue: DEMO_QUEUE.map((q, i) => ({ pos: q.pos, name: q.name, you: i === 0 && !isPlayer, note: q.note })),
+    queue: DEMO_QUEUE.map((q) => ({ pos: q.pos, name: q.name, you: false, note: q.note })),
     spectators: DEMO_SPECTATORS.map((name) => ({ name, you: false })),
     hands: [],
     chat: DEMO_MESSAGES.map((m) => ("system" in m ? { system: m.system } : { name: m.name, port: m.port, role: m.role, text: m.text, you: m.name === you })),
-    me: isPlayer ? { kind: "player", ports: [1] } : { kind: "queue", position: 1 },
+    // The spectator variant only watches (the queue talks, like the players).
+    me: isPlayer ? { kind: "player", ports: [1] } : { kind: "spectator" },
     voice: isPlayer ? "player" : "spectator",
     hearVoice,
   };
@@ -187,6 +192,7 @@ export function liveModel(room: RoomStateView | null, chat: ChatLine[], voice: V
       you: q.you,
       note: q.position === 1 ? t.room.queueNext : t.room.queueWaiting,
       ...(q.peer ? { peer: q.peer } : {}),
+      ...(voice.speakingNames?.has(q.name) ? { speaking: true } : {}),
     })),
     spectators: (room?.spectators ?? []).map((sp) => ({
       name: localName(sp.name),
@@ -199,7 +205,8 @@ export function liveModel(room: RoomStateView | null, chat: ChatLine[], voice: V
       .sort((a, b) => a.at - b.at),
     chat: chat.map((c) => (c.kind === "system" ? { system: systemText(c) } : { name: localName(c.name), port: c.port, role: c.role, text: c.text, you: !!room && c.name === room.you.name })),
     me,
-    voice: room?.voice === false ? "off" : me.kind === "player" ? "player" : "spectator",
-    hearVoice: false,
+    // The players and the queue talk; spectators hear when the host lets them.
+    voice: room?.voice === false ? "off" : me.kind === "player" || me.kind === "queue" ? "player" : "spectator",
+    hearVoice: room?.spectatorsHear ?? false,
   };
 }

@@ -335,14 +335,16 @@ export const docsPt: Docs = {
       slug: "voice-chat",
       group: "Jogar",
       title: "Voz e chat",
-      lead: "Os jogadores sentados podem conversar entre si; todos podem usar o chat.",
+      lead: "Falam os jogadores e quem espera na fila; os espectadores ouvem; todos podem usar o chat.",
       blocks: [
         {
           t: "list",
           items: [
-            "Só os jogadores nos lugares P1 a P4 podem falar. Ligue o microfone no painel da sala, ou segure **V**.",
+            "Podem falar os jogadores (P1 a P4) e quem espera na fila. Ligue o microfone no painel da sala, ou segure **V**.",
+            "Os espectadores ouvem o jogo e as vozes, mas não podem falar. O anfitrião pode desligar **Os espectadores ouvem as vozes** em **Volume e voz**.",
+            "Até quatro pessoas são ouvidas ao mesmo tempo: quem está falando. Uma quinta voz entra assim que alguém fica em silêncio.",
             "O som do jogo e a voz têm volumes separados, e você pode silenciar um jogador.",
-            "A voz viaja criptografada de cada jogador para o app do anfitrião e dali para os outros jogadores. Só é gravada quando o anfitrião grava a partida, e então todos veem **REC** sobre o vídeo e um aviso no chat.",
+            "A voz viaja criptografada de cada pessoa para o app do anfitrião e dali para os demais. Só é gravada quando o anfitrião grava a partida, e então todos veem **REC** sobre o vídeo e um aviso no chat.",
             "As mensagens do chat têm até 300 caracteres, e você vê quem está digitando.",
             "O anfitrião pode desligar o chat de uma sala.",
           ],

@@ -83,6 +83,18 @@ export interface RoomStateView {
   recording?: boolean;
   /** The host's default picture style for the room; null: the site's default. */
   picture?: PictureSettings | null;
+  /** Spectators hear the voices too (the host's switch). */
+  spectatorsHear: boolean;
+  /** Who each voice track (voice-p1..voice-p4) carries now; null: nobody. */
+  voiceSlots: (VoiceSlotView | null)[];
+}
+
+/** A person speaking on one of the four voice tracks. */
+export interface VoiceSlotView {
+  name: string;
+  /** Their seat, or 0 when they wait in the queue. */
+  port: number;
+  you: boolean;
 }
 
 /** What the device tells guests about the room. */
@@ -300,6 +312,14 @@ export function parseRoomState(msg: unknown): RoomStateView | null {
     controls: parseControls(m.controls),
     recording: m.recording === true,
     picture: parseRoomPicture(m.picture),
+    spectatorsHear: m.spectators_hear === true,
+    voiceSlots: Array.from({ length: 4 }, (_, i) => {
+      const v = arr(m.voice_slots)[i];
+      if (v === null || typeof v !== "object") return null;
+      const o = obj(v);
+      const port = num(o.port);
+      return { name: str(o.name, 40), port: Number.isInteger(port) && port >= 1 && port <= maxPlayers ? port : 0, you: o.you === true };
+    }),
   };
 }
 

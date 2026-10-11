@@ -19,6 +19,7 @@ import (
 
 	"github.com/pion/interceptor"
 	"github.com/pion/rtcp"
+	"github.com/pion/rtp"
 	"github.com/pion/webrtc/v4"
 	"github.com/pion/webrtc/v4/pkg/media"
 
@@ -97,6 +98,11 @@ func NewWebRTCAPI(udpPort int, includeLoopback bool) (*webrtc.API, error) {
 		return nil, err
 	}
 	if err := me.RegisterHeaderExtension(webrtc.RTPHeaderExtensionCapability{URI: playoutDelayURI}, webrtc.RTPCodecTypeVideo); err != nil {
+		return nil, err
+	}
+	// The microphones' level on each packet (RFC 6464): who is speaking
+	// gets one of the four voice slots (voice_select.go).
+	if err := me.RegisterHeaderExtension(webrtc.RTPHeaderExtensionCapability{URI: audioLevelURI}, webrtc.RTPCodecTypeAudio); err != nil {
 		return nil, err
 	}
 	reg := &interceptor.Registry{}
@@ -223,6 +229,7 @@ type StreamService struct {
 	stopSource   func()
 	onSourceErr  func(error)
 	voiceOff     bool
+	voices       *voiceSelector // who each voice track carries
 	pings        map[uint64]time.Time
 	addrs        map[string]PeerAddr // how each browser reached the device
 	pingSeq      uint64
@@ -304,8 +311,13 @@ type RoomHooks struct {
 	// PortOf maps a guest's local player to its seat (1-4). Input from
 	// players without a seat is ignored.
 	PortOf func(peerID string, local uint8) (int, bool)
-	// SpectatorsHearVoice lets guests without a seat hear the players.
-	SpectatorsHearVoice bool
+	// VoiceRole says whether a guest may talk (a player or someone in the
+	// queue) and whether it hears the voices (those, plus the spectators
+	// when the room lets them). Nil: only seated players talk and hear.
+	VoiceRole func(peerID string) (talk, hear bool)
+	// VoiceSlots, when set, is told who each of the four voice tracks
+	// carries now ("" for none), whenever that changes.
+	VoiceSlots func(peers [4]string)
 }
 
 // SetRoomHooks wires the Room Manager.
@@ -529,6 +541,12 @@ func NewStreamService(cfg StreamConfig, ice *ICEStore) (*StreamService, error) {
 		pads:    make(map[string][input.MaxLocalPlayers]input.Pad),
 		pings:   make(map[uint64]time.Time),
 		addrs:   make(map[string]PeerAddr),
+		voices:  newVoiceSelector(nil),
+	}
+	s.voices.onChange = func(peers [voiceSlots]string) {
+		if fn := s.hooks().VoiceSlots; fn != nil {
+			fn(peers)
+		}
 	}
 	s.kbps.Store(int64(cfg.BitrateKbps))
 	s.scale.Store(1)
@@ -1337,41 +1355,86 @@ func (s *StreamService) addMedia(v *viewer) error {
 	if _, err := pc.AddTransceiverFromKind(webrtc.RTPCodecTypeAudio, webrtc.RTPTransceiverInit{Direction: webrtc.RTPTransceiverDirectionRecvonly}); err != nil {
 		return err
 	}
-	pc.OnTrack(func(track *webrtc.TrackRemote, _ *webrtc.RTPReceiver) {
+	pc.OnTrack(func(track *webrtc.TrackRemote, receiver *webrtc.RTPReceiver) {
 		if track.Kind() == webrtc.RTPCodecTypeAudio {
-			s.forwardVoice(v.id, track)
+			level := 0
+			for _, e := range receiver.GetParameters().HeaderExtensions {
+				if e.URI == audioLevelURI {
+					level = e.ID
+				}
+			}
+			s.forwardVoice(v.id, track, level)
 		}
 	})
 	return nil
 }
 
+// audioLevelURI is the RTP header extension with a microphone's level.
+const audioLevelURI = "urn:ietf:params:rtp-hdrext:ssrc-audio-level"
+
 // forwardVoice relays a guest's microphone, packet by packet and without
-// decoding, to the other players (SFU style). Audio from a guest without
-// a seat is dropped here, on the device, whatever the web shows.
-func (s *StreamService) forwardVoice(from string, track *webrtc.TrackRemote) {
+// decoding (SFU style), on the voice slot it speaks in, to everyone else
+// who hears the voices. Audio from a guest who may not talk (a spectator)
+// is dropped here, on the device, whatever the web shows. levelID is the
+// negotiated id of the audio level extension (0: none, then the packet's
+// size tells speech from silence).
+func (s *StreamService) forwardVoice(from string, track *webrtc.TrackRemote, levelID int) {
 	s.mu.Lock()
 	v := s.viewers[from]
 	s.mu.Unlock()
 	for {
 		pkt, _, err := track.ReadRTP()
 		if err != nil {
+			s.voices.Drop(from)
 			return
 		}
 		if v != nil {
 			v.tm.voiceIn.Add(1)
 		}
-		port := s.seatOf(from)
-		if port == 0 || s.voiceDisabled() {
-			continue // not a player, or voice is off in this room
+		if talk, _ := s.voiceRole(from); !talk || s.voiceDisabled() {
+			s.voices.Drop(from)
+			continue // may not talk, or voice is off in this room
+		}
+		slot := s.voices.Pick(from, voiceIsLoud(pkt, levelID), pkt, levelID)
+		if slot < 0 {
+			continue // four others are speaking
 		}
 		if rec := s.rec.Load(); rec != nil {
-			rec.Voice(port, pkt)
+			rec.Voice(slot+1, pkt)
 		}
-		for _, out := range s.voiceTargets(from, port) {
+		for _, out := range s.voiceTargets(from, slot) {
 			_ = out.WriteRTP(pkt)
 		}
 	}
 }
+
+// voiceIsLoud tells speech from silence: the level the browser put on the
+// packet, or without it the packet's size (Opus spends few bytes on
+// silence).
+func voiceIsLoud(pkt *rtp.Packet, levelID int) bool {
+	if levelID > 0 {
+		if b := pkt.GetExtension(uint8(levelID)); len(b) > 0 {
+			return int(b[0]&0x7f) <= voiceLoud
+		}
+	}
+	return len(pkt.Payload) > 40
+}
+
+// voiceRole is the room's rule for one guest; without one, seated
+// players talk and hear.
+func (s *StreamService) voiceRole(peerID string) (talk, hear bool) {
+	s.mu.Lock()
+	fn := s.room.VoiceRole
+	s.mu.Unlock()
+	if fn != nil {
+		return fn(peerID)
+	}
+	seated := s.seatOf(peerID) != 0
+	return seated, seated
+}
+
+// VoicePeers is who each voice track carries now ("" for none).
+func (s *StreamService) VoicePeers() [4]string { return s.voices.Peers() }
 
 // SetVoiceEnabled turns voice between players on or off for the room.
 func (s *StreamService) SetVoiceEnabled(on bool) {
@@ -1402,12 +1465,10 @@ func (s *StreamService) seatOf(peerID string) int {
 	return 0
 }
 
-// voiceTargets lists the tracks that carry the voice of port to everyone
-// allowed to hear it: other players, plus spectators if the room says so.
-// The speaker never gets their own voice back.
-func (s *StreamService) voiceTargets(from string, port int) []*webrtc.TrackLocalStaticRTP {
+// voiceTargets lists the tracks of voice slot that reach everyone allowed
+// to hear the voices. The speaker never gets their own voice back.
+func (s *StreamService) voiceTargets(from string, slot int) []*webrtc.TrackLocalStaticRTP {
 	s.mu.Lock()
-	hear := s.room.SpectatorsHearVoice
 	viewers := make([]*viewer, 0, len(s.viewers))
 	for _, v := range s.viewers {
 		if v.kind == KindViewer && v.id != from {
@@ -1417,8 +1478,8 @@ func (s *StreamService) voiceTargets(from string, port int) []*webrtc.TrackLocal
 	s.mu.Unlock()
 	var out []*webrtc.TrackLocalStaticRTP
 	for _, v := range viewers {
-		if (hear || s.seatOf(v.id) != 0) && v.voice[port-1] != nil {
-			out = append(out, v.voice[port-1])
+		if _, hear := s.voiceRole(v.id); hear && v.voice[slot] != nil {
+			out = append(out, v.voice[slot])
 		}
 	}
 	return out

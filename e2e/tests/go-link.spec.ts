@@ -580,7 +580,7 @@ test("a spectator raises a hand: the host says not now, then seats them at once;
   await shot(page, "3-host-hand-list");
   await expectAccessible(page, "host's raised hands");
   await page.getByRole("menuitem", { name: "Not now" }).click();
-  await expect(sol.page.getByText("The host will let you play later")).toBeVisible();
+  await expect(sol.page.locator(".hand-note")).toHaveText("The host will let you play later");
   await expect(hands).toHaveCount(0);
   await shot(sol.page, "4-spectator-not-now");
   // Again at once: once a minute.
@@ -613,6 +613,61 @@ test("a spectator raises a hand: the host says not now, then seats them at once;
   await expectVideoPlaying(sol.page);
   await sol.context.close();
   await leo.context.close();
+});
+
+test("the queue talks with the players; spectators hear the voices until the host turns that off", async ({ browser }) => {
+  test.setTimeout(240_000);
+  const shot = async (p: Page, name: string) => {
+    if (process.env.E2E_VOICE_SHOTS) await p.screenshot({ path: `${process.env.E2E_VOICE_SHOTS}/${name}.png` });
+  };
+  const join = async (name: string) => {
+    const inv = await newInvitation();
+    const g = await joinAsGuest(browser, inv.code, inv.pin);
+    await enterName(g.page, name);
+    await expectVideoPlaying(g.page);
+    // "Your place", the queue and the spectators are in the Chat tab.
+    await g.page.getByRole("tablist", { name: "Room panel" }).getByRole("tab", { name: "Chat" }).click();
+    return g;
+  };
+  // Zed only watches; Sol, Leo and Ivy fill the seats; Max waits in the queue.
+  const zed = await join("Zed");
+  await zed.page.locator(".side-status").getByRole("button", { name: "Watch instead" }).click();
+  await expect(zed.page.locator(".side-status").getByText("You are watching")).toBeVisible();
+  const others = [await join("Sol"), await join("Leo"), await join("Ivy")];
+  const max = await join("Max");
+  await expect(max.page.locator(".side-status").getByText("You are next in the queue")).toBeVisible();
+
+  // Max, in the queue, turns the microphone on (Chrome's fake one beeps).
+  await clickControl(max.page, "microphone muted");
+  const speakingMax = (p: Page) => p.locator(".queue-row", { hasText: "Max" }).getByRole("img", { name: "Speaking" });
+  const queueTab = (p: Page) => p.getByRole("tablist", { name: "Room", exact: true }).getByRole("tab", { name: /Queue/ });
+  await queueTab(page).click();
+  await queueTab(zed.page).click();
+  await expect(speakingMax(page)).toBeVisible({ timeout: 30_000 });
+  await shot(page, "1-host-hears-the-queue");
+  await expect(speakingMax(zed.page)).toBeVisible({ timeout: 30_000 });
+  await shot(zed.page, "2-spectator-hears");
+
+  // The host turns off "Spectators hear the voices": Zed no longer hears Max, the host still does.
+  await clickControl(page, "Volume and voice");
+  const hearSwitch = page.getByRole("switch", { name: "Spectators hear the voices" });
+  await expect(hearSwitch).toHaveAttribute("aria-checked", "true");
+  await shot(page, "3-host-switch");
+  await hearSwitch.click();
+  await expect(hearSwitch).toHaveAttribute("aria-checked", "false");
+  await page.keyboard.press("Escape");
+  await zed.page.waitForTimeout(1500);
+  for (let i = 0; i < 6; i++) {
+    await expect(speakingMax(zed.page)).toHaveCount(0);
+    await zed.page.waitForTimeout(500);
+  }
+  await expect(speakingMax(page)).toBeVisible({ timeout: 30_000 });
+  // Back on for the next tests.
+  await clickControl(page, "Volume and voice");
+  await hearSwitch.click();
+  await expect(hearSwitch).toHaveAttribute("aria-checked", "true");
+  await page.keyboard.press("Escape");
+  for (const g of [zed, ...others, max]) await g.context.close();
 });
 
 test("the controller test page lights the keyboard's buttons", async ({ browser }) => {
