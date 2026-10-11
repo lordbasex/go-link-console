@@ -2,7 +2,7 @@
 <!-- Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com> -->
 <!-- Same keys as values/strings.xml (English, the reference). -->
 <resources>
-    <string name="app_name">go-link Player</string>
+    <string name="app_name">go-link Console Player</string>
     <string name="app_subtitle">Jogador</string>
     <string name="back">Voltar</string>
     <string name="home_title">Entre em uma partida</string>
@@ -19,13 +19,13 @@
     <string name="scan_invalid">Esse código QR não é um convite do go-link.</string>
     <string name="scan_type_instead">Digitar o código</string>
     <string name="perm_camera_title">Câmera para o código QR</string>
-    <string name="perm_camera_text">O go-link Player usa a câmera só nesta tela, para ler o código QR do convite. Nada é gravado nem enviado.</string>
+    <string name="perm_camera_text">O go-link Console Player usa a câmera só nesta tela, para ler o código QR do convite. Nada é gravado nem enviado.</string>
     <string name="perm_camera_denied">A câmera está bloqueada. Você ainda pode digitar o código da sala, ou permitir a câmera nas configurações do sistema.</string>
     <string name="perm_mic_title">Microfone para o chat de voz</string>
     <string name="perm_mic_text">Os jogadores sentados podem conversar entre si. O microfone só envia enquanto você o liga na sala. Sem ele você ainda pode jogar e ouvir.</string>
     <string name="perm_mic_denied">O microfone está bloqueado: você pode jogar e ouvir. Para falar, permita-o nas configurações do sistema.</string>
     <string name="perm_bt_title">Fones de ouvido</string>
-    <string name="perm_bt_text">Permita os dispositivos próximos para que o go-link Player use seus fones Bluetooth para o som do jogo e a sua voz. Fones com fio funcionam sem esta permissão. Sem fones, o som sai pelo alto-falante.</string>
+    <string name="perm_bt_text">Permita os dispositivos próximos para que o go-link Console Player use seus fones Bluetooth para o som do jogo e a sua voz. Fones com fio funcionam sem esta permissão. Sem fones, o som sai pelo alto-falante.</string>
     <string name="perm_allow">Permitir</string>
     <string name="perm_not_now">Agora não</string>
     <string name="perm_open_settings">Abrir configurações</string>
@@ -143,7 +143,7 @@
     <string name="settings_perm_bt">Dispositivos próximos (fones Bluetooth)</string>
     <string name="settings_perm_on">Permitido</string>
     <string name="settings_perm_off">Não permitido</string>
-    <string name="settings_about">go-link Player %1$s. Você joga partidas que rodam no computador do anfitrião (baseado no MAME, motor mame2003-plus). Neste celular só se instala o app.</string>
+    <string name="settings_about">go-link Console Player %1$s. Você joga partidas que rodam no computador do anfitrião (baseado no MAME, motor mame2003-plus). Neste celular só se instala o app.</string>
     <string name="alias_title">Qual é o seu nome?</string>
     <string name="alias_subtitle">É o nome que os outros veem na sala e no chat. Você pode mudá-lo durante a partida.</string>
     <string name="alias_label">Seu nome</string>
@@ -188,7 +188,7 @@
     <string name="tester_start">Start</string>
     <string name="tester_offline">Latência: do toque até o próximo quadro nesta tela, então fica perto de um quadro de tela (8 ms a 120 Hz, 17 ms a 60 Hz).</string>
     <string name="tester_card">Padrão de teste</string>
-    <string name="app_version">go-link Player v%1$s (build %2$d)</string>
+    <string name="app_version">go-link Console Player v%1$s (build %2$d)</string>
     <string name="app_version_debug">\u0020· debug</string>
     <string name="app_version_copied">Versão copiada</string>
     <plurals name="pin_wrong">

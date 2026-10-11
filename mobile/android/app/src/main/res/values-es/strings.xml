@@ -2,7 +2,7 @@
 <!-- Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com> -->
 <!-- Same keys as values/strings.xml (English, the reference). -->
 <resources>
-    <string name="app_name">go-link Player</string>
+    <string name="app_name">go-link Console Player</string>
     <string name="app_subtitle">Jugador</string>
     <string name="back">Volver</string>
     <string name="home_title">Únete a una partida</string>
@@ -19,13 +19,13 @@
     <string name="scan_invalid">Ese código QR no es una invitación de go-link.</string>
     <string name="scan_type_instead">Escribir el código</string>
     <string name="perm_camera_title">Cámara para el código QR</string>
-    <string name="perm_camera_text">go-link Player usa la cámara solo en esta pantalla, para leer el código QR de la invitación. No se graba ni se envía nada.</string>
+    <string name="perm_camera_text">go-link Console Player usa la cámara solo en esta pantalla, para leer el código QR de la invitación. No se graba ni se envía nada.</string>
     <string name="perm_camera_denied">La cámara está bloqueada. Puedes escribir el código de la sala, o permitir la cámara en los ajustes del sistema.</string>
     <string name="perm_mic_title">Micrófono para el chat de voz</string>
     <string name="perm_mic_text">Los jugadores sentados pueden hablar entre sí. El micrófono solo envía mientras lo activas en la sala. Sin él puedes jugar y escuchar igual.</string>
     <string name="perm_mic_denied">El micrófono está bloqueado: puedes jugar y escuchar. Para hablar, permítelo en los ajustes del sistema.</string>
     <string name="perm_bt_title">Auriculares</string>
-    <string name="perm_bt_text">Permite los dispositivos cercanos para que go-link Player use tus auriculares Bluetooth para el sonido del juego y tu voz. Los auriculares con cable funcionan sin este permiso. Sin auriculares, el sonido sale por el altavoz.</string>
+    <string name="perm_bt_text">Permite los dispositivos cercanos para que go-link Console Player use tus auriculares Bluetooth para el sonido del juego y tu voz. Los auriculares con cable funcionan sin este permiso. Sin auriculares, el sonido sale por el altavoz.</string>
     <string name="perm_allow">Permitir</string>
     <string name="perm_not_now">Ahora no</string>
     <string name="perm_open_settings">Abrir ajustes</string>
@@ -143,7 +143,7 @@
     <string name="settings_perm_bt">Dispositivos cercanos (auriculares Bluetooth)</string>
     <string name="settings_perm_on">Permitido</string>
     <string name="settings_perm_off">No permitido</string>
-    <string name="settings_about">go-link Player %1$s. Juegas partidas que corren en la computadora del anfitrión (basado en MAME, motor mame2003-plus). En este teléfono solo se instala la app.</string>
+    <string name="settings_about">go-link Console Player %1$s. Juegas partidas que corren en la computadora del anfitrión (basado en MAME, motor mame2003-plus). En este teléfono solo se instala la app.</string>
     <string name="alias_title">¿Cómo te llamas?</string>
     <string name="alias_subtitle">Es el nombre que ven los demás en la sala y en el chat. Lo puedes cambiar durante la partida.</string>
     <string name="alias_label">Tu alias</string>
@@ -188,7 +188,7 @@
     <string name="tester_start">Start</string>
     <string name="tester_offline">Latencia: desde que presionas hasta el siguiente cuadro en esta pantalla, así que ronda un cuadro de pantalla (8 ms a 120 Hz, 17 ms a 60 Hz).</string>
     <string name="tester_card">Carta de ajuste</string>
-    <string name="app_version">go-link Player v%1$s (compilación %2$d)</string>
+    <string name="app_version">go-link Console Player v%1$s (compilación %2$d)</string>
     <string name="app_version_debug">\u0020· debug</string>
     <string name="app_version_copied">Versión copiada</string>
     <plurals name="pin_wrong">

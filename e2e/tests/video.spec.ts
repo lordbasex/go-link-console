@@ -74,7 +74,7 @@ const home = homedir();
 const short = hostname().split(".")[0]!;
 const MASK: [string, string][] = [
   [join(here, "..", ".state", "home"), "~"],
-  [root, "~/go-link"],
+  [root, "~/go-link-console"],
   [home, "~"],
   [hostname(), "arcade-pc"],
   [short, "arcade-pc"],
@@ -340,7 +340,7 @@ test("a phone becomes a console", async ({ browser }) => {
 });
 
 test("Willy Maker: a game made in the browser plays in a room", async ({ browser }) => {
-  const cores = join(here, "..", ".state", "home", "go-link", "cores");
+  const cores = join(here, "..", ".state", "home", "go-link-console", "cores");
   test.skip(!existsSync(cores) || !readdirSync(cores).some((f) => f.startsWith("mame2003_plus_libretro")), "no emulator core: set E2E_CORE_DIR");
   test.setTimeout(600_000);
   await take(browser, "maker", async (p, ctx) => {

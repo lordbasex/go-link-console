@@ -47,7 +47,7 @@ var (
 )
 
 // RecordingService keeps the recordings of game rooms under one folder
-// (~/go-link/rec), one subfolder per room. Only the host sees them: they
+// (~/go-link-console/rec), one subfolder per room. Only the host sees them: they
 // are listed and downloaded by the host's linked browsers and the CLI.
 type RecordingService struct {
 	dir string

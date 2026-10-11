@@ -25,8 +25,8 @@ import (
 
 // GameCoreConfig describes the game a GameCore runs.
 type GameCoreConfig struct {
-	CorePath  string // e.g. ~/go-link/cores/mame2003_plus_libretro.dylib
-	RomPath   string // e.g. ~/go-link/roms/robby.zip
+	CorePath  string // e.g. ~/go-link-console/cores/mame2003_plus_libretro.dylib
+	RomPath   string // e.g. ~/go-link-console/roms/robby.zip
 	SystemDir string // BIOS, samples, hiscores, NVRAM
 	Logger    *slog.Logger
 	// Video receives every frame as packed I420 of w x h (the enlarged

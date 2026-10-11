@@ -1,12 +1,12 @@
-# The Android app (go-link Player)
+# The Android app (go-link Console Player)
 
-`mobile/android/` is **go-link Player**, a native Android app (Kotlin, Jetpack Compose) for joining a game as a player. It is not a web view: it speaks the same signaling and WebRTC protocol as the website ([protocol.md](protocol.md), signalhub's README) with a prebuilt libwebrtc. It only joins rooms. Hosting stays on the device app.
+`mobile/android/` is **go-link Console Player**, a native Android app (Kotlin, Jetpack Compose) for joining a game as a player. It is not a web view: it speaks the same signaling and WebRTC protocol as the website ([protocol.md](protocol.md), signalhub's README) with a prebuilt libwebrtc. It only joins rooms. Hosting stays on the device app.
 
 | | |
 |---|---|
 | Package | `org.golink.player` |
 | Android | 8.0 (API 26) or newer; built against API 37, targets API 36 |
-| Distribution | An APK attached to the GitHub releases (`go-link-vX.Y.Z-android.apk`), not in Play Store yet |
+| Distribution | An APK attached to the GitHub releases (`go-link-console-vX.Y.Z-android.apk`), not in Play Store yet |
 | Build, sign, install | [`mobile/android/README.md`](../mobile/android/README.md) |
 
 ## Layout
@@ -123,7 +123,7 @@ Only the room and the controller test ask for the screen's highest refresh rate;
 
 ## App version
 
-Home (small, faint) and the bottom of Settings show **go-link Player v*X.Y.Z* (build *N*)**, plus " · debug" in debug builds (`app-version`; a long press copies it). The build number follows one rule on both platforms: major × 10000 + minor × 100 + patch (0.1.5 → 105, 1.2.3 → 10203).
+Home (small, faint) and the bottom of Settings show **go-link Console Player v*X.Y.Z* (build *N*)**, plus " · debug" in debug builds (`app-version`; a long press copies it). The build number follows one rule on both platforms: major × 10000 + minor × 100 + patch (0.1.5 → 105, 1.2.3 → 10203).
 
 - **Android:** `BuildConfig.VERSION_NAME` / `VERSION_CODE`, from `-PversionName` / `-PversionCode` (`app/build.gradle.kts`, defaults 0.1.0 and 1). A release uses `VERSION=0.1.5 make android-apk` (`scripts/release.sh` does), which computes the code.
 - **iOS:** `CFBundleShortVersionString` / `CFBundleVersion` come from the build settings `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` (defaults 0.1.0 and 1 in `Config/Base.xcconfig`). `make build-sim|device-build|test-ui VERSION=0.1.5` computes build 105, or pass `MARKETING_VERSION=0.1.5 CURRENT_PROJECT_VERSION=105` to `xcodebuild`.
@@ -204,7 +204,7 @@ On Android, the website's `/g/:invite` page shows a small card under the PIN for
 
 The app's debug build logs its room events and WebRTC counters (inbound/outbound RTP per track, audio levels, the candidate pair) once a second with the tag `GoLinkE2E` (`app/src/debug/.../E2eProbe.kt`; the release build has an empty probe in `app/src/release`), and the test reads them with `adb logcat -s GoLinkE2E`. Audio is proven with these counters: `screenrecord` records video only. The screen is recorded in chunks (`screenrecord`, 175 s each) and a screenshot is saved per step, all in `e2e/test-results/android/` (and copied to `E2E_EVIDENCE_DIR` when set).
 
-The harness (`e2e/android.ts`) closes system dialogs that a slow emulator shows over the app while it waits for a node: "*X* isn't responding" gets **Wait**, another app's crash gets **Close**, and a crash of go-link Player fails the test with the dialog's text. A release build on the device (another key, a higher version code) is uninstalled before the debug build is installed; reinstall the release APK afterwards if you need it.
+The harness (`e2e/android.ts`) closes system dialogs that a slow emulator shows over the app while it waits for a node: "*X* isn't responding" gets **Wait**, another app's crash gets **Close**, and a crash of go-link Console Player fails the test with the dialog's text. A release build on the device (another key, a higher version code) is uninstalled before the debug build is installed; reinstall the release APK afterwards if you need it.
 
 ICE with the emulator works without TURN or `--announce`: the emulator sends its checks to the device's host candidate through the emulator's NAT, and the device learns a peer-reflexive candidate (`GoLinkE2E` shows `prflx->host`).
 
@@ -232,11 +232,11 @@ Its screenshots and screen recording go to `e2e/test-results/android-camera/` (a
 
 ## Releases
 
-`VERSION=x.y.z make android-apk` runs the tests and builds the signed release APK into `dist/android/`. `VERSION=x.y.z make release` builds it too (`ANDROID=0` skips it) and publishes it as `go-link-vX.Y.Z-android.apk`; the website's Android card downloads that file and the guide points to the latest release. The release key lives outside the repository (`ANDROID_SIGNING`, see the [app README](../mobile/android/README.md)).
+`VERSION=x.y.z make android-apk` runs the tests and builds the signed release APK into `dist/android/`. `VERSION=x.y.z make release` builds it too (`ANDROID=0` skips it) and publishes it as `go-link-console-vX.Y.Z-android.apk`; the website's Android card downloads that file and the guide points to the latest release. The release key lives outside the repository (`ANDROID_SIGNING`, see the [app README](../mobile/android/README.md)).
 
 ## The iOS app
 
-`mobile/ios/` is **go-link Player for iPhone and iPad**: SwiftUI, iOS 17 or newer, bundle id `org.golink.player`. Same features and rules as the Android app. It is not distributed yet: the website keeps iPhone and iPad as "coming soon". Build, sign and install: [`mobile/ios/README.md`](../mobile/ios/README.md).
+`mobile/ios/` is **go-link Console Player for iPhone and iPad**: SwiftUI, iOS 17 or newer, bundle id `org.golink.player`. Same features and rules as the Android app. It is not distributed yet: the website keeps iPhone and iPad as "coming soon". Build, sign and install: [`mobile/ios/README.md`](../mobile/ios/README.md).
 
 | Part | What it is |
 |---|---|

@@ -28,7 +28,7 @@ ARG VERSION=dev
 # shared: every Linux desktop has them.
 RUN mkdir /static && ln -s /usr/lib/*-linux-gnu/libvpx.a /usr/lib/*-linux-gnu/libopus.a /static/ && \
     CGO_ENABLED=1 CGO_LDFLAGS="-L/static" go build -trimpath -tags "$TAGS" \
-      -ldflags "-s -w -X main.version=$VERSION" -o /out/go-link-device ./cmd/device
+      -ldflags "-s -w -X main.version=$VERSION" -o /out/go-link-console ./cmd/device
 COPY --from=golinkhd / /golinkhd
 RUN if [ -f /golinkhd/Makefile ]; then make -s -B -C /golinkhd && cp /golinkhd/libgolinkhd.so /out/; fi
 

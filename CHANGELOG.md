@@ -7,6 +7,7 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 ### Changed
 
 - **The repository is now [lordbasex/go-link-console](https://github.com/lordbasex/go-link-console)** (the Go modules too: `github.com/lordbasex/go-link-console/...`). GitHub redirects the old name, so devices that check for updates and the Homebrew tap keep working.
+- **The app is go-link Console**: `go-link-console.app` (bundle `org.go-link.console`), the `go-link-console` command (`go-link-console.exe` on Windows), the Homebrew cask `go-link-console`, the Docker image `go-link-console`, release files `go-link-console-vX.Y.Z-…`, and the signalhub app `go-link-console` (a self-hosted signalhub must allow it in `ALLOWED_APPS`). Its folders are `~/go-link-console` and `<config dir>/go-link-console`: on the first start the old `~/go-link` and `<config dir>/go-link` move there, and `device.json` paths inside the old folder follow. The phone app is **go-link Console Player**.
 - **The landing, the guide and the tools moved to console.go-link.org.** go-link.org is now the index of go-link's WebRTC projects and sends every old address there.
 - **Invitations are `play.go-link.org/g/<invite>`**, the rooms' own address: the Player apps (App Links, Universal Links) and their QR reader take only that host, and play serves `.well-known/`. Invitations shared before as `go-link.org/g/…` no longer open; make a new one. The apps link to console.go-link.org for the terms, the privacy policy and the skin editor.
 

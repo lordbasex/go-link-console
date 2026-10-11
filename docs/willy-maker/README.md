@@ -301,7 +301,7 @@ The screens match the mocks being designed on the go-link design canvas:
 ## Open questions
 
 - **The engine's data format** for Phase 2: answered by `wm_data` ([engine.md](engine.md#the-data-block-wm_data)), a translation of the project format.
-- **A room with a created set** (built 2026-10-04, device 0.1.9): **Play on my go-link** sends the game to the device's own Willy Maker folder (`~/go-link/maker/`, never the ROM folder) and opens its room (`@maker`, one per device: a new game replaces it), and the site opens that room ([protocol](../protocol.md)).
+- **A room with a created set** (built 2026-10-04, device 0.1.9): **Play on my go-link** sends the game to the device's own Willy Maker folder (`~/go-link-console/maker/`, never the ROM folder) and opens its room (`@maker`, one per device: a new game replaces it), and the site opens that room ([protocol](../protocol.md)).
 - **Sound** in the maker: QSound samples on `slammast` need a sound driver first (journal: pending). Phase 1 only stores references.
 - **Our sets' identity**: the device's allow-list of go-link-owned sets by hash, so the library shows the user's title and art instead of the original set's ([docs/rom/README.md](../rom/README.md#how-the-core-finds-the-game)). It is needed before Create and play.
 - **Sharing projects between users**: Phase 1 is files only. A gallery would need storage, which go-link does not have by choice.

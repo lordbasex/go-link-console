@@ -8,7 +8,7 @@ import { MAKER_URL, PLAY_URL, PORTS, SITE_URL } from "./ports";
 // each other (pair, then reconnect, then invite...), so they run in order.
 //
 // Four projects: "web" (npm test), "android" (npm run test:android: the
-// go-link Player app on an emulator or phone through adb, skipped when no
+// go-link Console Player app on an emulator or phone through adb, skipped when no
 // device is attached), "android-camera" (npm run test:android:camera: the
 // app scans a QR code with the emulator's virtual camera; it restarts the
 // emulator, so it is opt-in) and "shots" (npm run shots: the landing page's

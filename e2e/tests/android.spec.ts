@@ -8,7 +8,7 @@ import { enterAlias, freshApp, invite as ownerInvite, joinAsBrowserGuest, joinWi
 import { PORTS } from "../ports";
 import { stack } from "../stack";
 
-// The go-link Player Android app against the test stack (its own signalhub,
+// The go-link Console Player Android app against the test stack (its own signalhub,
 // headless device and website). The owner is a Chromium page that links the
 // device, opens the test pattern room (taking P1, with Chromium's fake
 // microphone tone) and makes invitations; the app, driven through adb and

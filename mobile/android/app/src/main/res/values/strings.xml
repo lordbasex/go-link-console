@@ -2,7 +2,7 @@
 <!-- Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com> -->
 <!-- Generated from one table so the three languages keep the same keys. -->
 <resources>
-    <string name="app_name">go-link Player</string>
+    <string name="app_name">go-link Console Player</string>
     <string name="app_subtitle">Player</string>
     <string name="back">Back</string>
     <string name="home_title">Join a game</string>
@@ -19,13 +19,13 @@
     <string name="scan_invalid">That QR code is not a go-link invitation.</string>
     <string name="scan_type_instead">Type the code instead</string>
     <string name="perm_camera_title">Camera for the QR code</string>
-    <string name="perm_camera_text">go-link Player uses the camera only on this screen, to read the invitation\'s QR code. Nothing is recorded or sent.</string>
+    <string name="perm_camera_text">go-link Console Player uses the camera only on this screen, to read the invitation\'s QR code. Nothing is recorded or sent.</string>
     <string name="perm_camera_denied">The camera is blocked. You can still type the room code, or allow the camera in the system settings.</string>
     <string name="perm_mic_title">Microphone for voice chat</string>
     <string name="perm_mic_text">Seated players can talk to each other. The microphone only sends while you turn it on in the room. Without it you can still play and listen.</string>
     <string name="perm_mic_denied">The microphone is blocked: you can play and listen. To talk, allow it in the system settings.</string>
     <string name="perm_bt_title">Headphones</string>
-    <string name="perm_bt_text">Allow nearby devices so go-link Player can use your Bluetooth headphones or earbuds for the game sound and your voice. Wired headphones work without it. With no headphones, the sound plays on the loudspeaker.</string>
+    <string name="perm_bt_text">Allow nearby devices so go-link Console Player can use your Bluetooth headphones or earbuds for the game sound and your voice. Wired headphones work without it. With no headphones, the sound plays on the loudspeaker.</string>
     <string name="perm_allow">Allow</string>
     <string name="perm_not_now">Not now</string>
     <string name="perm_open_settings">Open settings</string>
@@ -143,7 +143,7 @@
     <string name="settings_perm_bt">Nearby devices (Bluetooth headphones)</string>
     <string name="settings_perm_on">Allowed</string>
     <string name="settings_perm_off">Not allowed</string>
-    <string name="settings_about">go-link Player %1$s. You play games that run on the host\'s computer (based on MAME, mame2003-plus engine). Nothing is installed on this phone but the app.</string>
+    <string name="settings_about">go-link Console Player %1$s. You play games that run on the host\'s computer (based on MAME, mame2003-plus engine). Nothing is installed on this phone but the app.</string>
     <string name="alias_title">What\'s your name?</string>
     <string name="alias_subtitle">It\'s the name the others see in the room and in the chat. You can change it during the game.</string>
     <string name="alias_label">Your name</string>
@@ -188,7 +188,7 @@
     <string name="tester_start">Start</string>
     <string name="tester_offline">Latency: from the input to the next frame on this screen, so it is about one screen frame (8 ms at 120 Hz, 17 ms at 60 Hz).</string>
     <string name="tester_card">Test card</string>
-    <string name="app_version">go-link Player v%1$s (build %2$d)</string>
+    <string name="app_version">go-link Console Player v%1$s (build %2$d)</string>
     <string name="app_version_debug">\u0020· debug</string>
     <string name="app_version_copied">Version copied</string>
     <plurals name="pin_wrong">

@@ -324,7 +324,7 @@ func TestSettingsPage(t *testing.T) {
 		t.Fatalf("network: signal %q", p.signal.Text)
 	}
 	test.Tap(p.cats[settingsRooms])
-	if p.maxRooms.Text != "4 by default" || !strings.HasSuffix(p.saves.Text, filepath.Join("go-link", "saves")) {
+	if p.maxRooms.Text != "4 by default" || !strings.HasSuffix(p.saves.Text, filepath.Join("go-link-console", "saves")) {
 		t.Fatalf("rooms: %q %q", p.maxRooms.Text, p.saves.Text)
 	}
 }

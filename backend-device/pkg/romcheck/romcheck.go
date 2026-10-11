@@ -302,7 +302,7 @@ func Download(ctx context.Context, client *http.Client, url, path string) (*Cata
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "go-link-device")
+	req.Header.Set("User-Agent", "go-link-console")
 	if client == nil {
 		client = &http.Client{Timeout: 5 * time.Minute}
 	}

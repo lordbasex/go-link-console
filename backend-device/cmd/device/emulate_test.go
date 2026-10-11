@@ -82,11 +82,11 @@ func TestEmulateHelper(t *testing.T) {
 
 // TestEmulateWorkerWithRealCore runs robby in a worker process and saves
 // and restores its state. It needs the mame2003-plus core and robby.zip in
-// ~/go-link and is skipped otherwise.
+// ~/go-link-console and is skipped otherwise.
 func TestEmulateWorkerWithRealCore(t *testing.T) {
 	home, _ := os.UserHomeDir()
-	corePath := filepath.Join(home, "go-link", "cores", cores.FileName(cores.DefaultCore, runtime.GOOS))
-	romPath := filepath.Join(home, "go-link", "roms", "robby.zip")
+	corePath := filepath.Join(home, "go-link-console", "cores", cores.FileName(cores.DefaultCore, runtime.GOOS))
+	romPath := filepath.Join(home, "go-link-console", "roms", "robby.zip")
 	if _, err := os.Stat(corePath); err != nil {
 		t.Skip("mame2003-plus core not installed")
 	}

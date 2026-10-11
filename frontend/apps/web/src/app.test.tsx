@@ -144,7 +144,7 @@ describe("device pairing", () => {
     // The page stays on /device and turns into the device panel.
     expect(await screen.findByRole("heading", { name: "Your device" })).toBeInTheDocument();
     expect(screen.queryByLabelText("Digit 1 of 9")).not.toBeInTheDocument();
-    expect(FakeSocket.allSent().find((e) => e.type === "claim")).toMatchObject({ app: "go-link", code: "113134323" });
+    expect(FakeSocket.allSent().find((e) => e.type === "claim")).toMatchObject({ app: "go-link-console", code: "113134323" });
   });
 
   it("comes back to a remembered device without a code", async () => {
@@ -165,7 +165,7 @@ describe("device pairing", () => {
     renderApp("/device");
     expect(screen.queryByLabelText("Digit 1 of 9")).not.toBeInTheDocument();
     expect(await screen.findByText("Your device is offline")).toBeInTheDocument();
-    expect(FakeSocket.allSent().find((e) => e.type === "reach")).toMatchObject({ app: "go-link", device_id: "c2c5f76f-1a25-45d8-abe7-91f51d11f75d" });
+    expect(FakeSocket.allSent().find((e) => e.type === "reach")).toMatchObject({ app: "go-link-console", device_id: "c2c5f76f-1a25-45d8-abe7-91f51d11f75d" });
     // Forgetting the device brings the code form back.
     await userEvent.click(screen.getByRole("button", { name: "Forget this device" }));
     expect(screen.getByLabelText("Digit 1 of 9")).toBeInTheDocument();
@@ -477,7 +477,7 @@ describe("docs", () => {
     expect(screen.getByRole("tabpanel", { name: "macOS" })).toHaveTextContent("macos-universal.dmg");
     await userEvent.keyboard("{ArrowRight}");
     expect(within(tabs).getByRole("tab", { name: "Windows" })).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByRole("tabpanel", { name: "Windows" })).toHaveTextContent("go-link-device.exe");
+    expect(screen.getByRole("tabpanel", { name: "Windows" })).toHaveTextContent("go-link-console.exe");
   });
 
   it("has the same pages in every language", () => {

@@ -1,6 +1,6 @@
 /* Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com> */
 /* Generated from the Android app's strings.xml (same keys), then iOS strings added. */
-"app_name" = "go-link Player";
+"app_name" = "go-link Console Player";
 "app_subtitle" = "Jogador";
 "back" = "Voltar";
 "home_title" = "Entre em uma partida";
@@ -17,13 +17,13 @@
 "scan_invalid" = "Esse código QR não é um convite do go-link.";
 "scan_type_instead" = "Digitar o código";
 "perm_camera_title" = "Câmera para o código QR";
-"perm_camera_text" = "O go-link Player usa a câmera só nesta tela, para ler o código QR do convite. Nada é gravado nem enviado.";
+"perm_camera_text" = "O go-link Console Player usa a câmera só nesta tela, para ler o código QR do convite. Nada é gravado nem enviado.";
 "perm_camera_denied" = "A câmera está bloqueada. Você ainda pode digitar o código da sala, ou permitir a câmera nas configurações do sistema.";
 "perm_mic_title" = "Microfone para o chat de voz";
 "perm_mic_text" = "Os jogadores sentados podem conversar entre si. O microfone só envia enquanto você o liga na sala. Sem ele você ainda pode jogar e ouvir.";
 "perm_mic_denied" = "O microfone está bloqueado: você pode jogar e ouvir. Para falar, permita-o nas configurações do sistema.";
 "perm_bt_title" = "Fones de ouvido";
-"perm_bt_text" = "Permita os dispositivos próximos para que o go-link Player use seus fones Bluetooth para o som do jogo e a sua voz. Fones com fio funcionam sem esta permissão. Sem fones, o som sai pelo alto-falante.";
+"perm_bt_text" = "Permita os dispositivos próximos para que o go-link Console Player use seus fones Bluetooth para o som do jogo e a sua voz. Fones com fio funcionam sem esta permissão. Sem fones, o som sai pelo alto-falante.";
 "perm_allow" = "Permitir";
 "perm_not_now" = "Agora não";
 "perm_open_settings" = "Abrir configurações";
@@ -141,7 +141,7 @@
 "settings_perm_bt" = "Dispositivos próximos (fones Bluetooth)";
 "settings_perm_on" = "Permitido";
 "settings_perm_off" = "Não permitido";
-"settings_about" = "go-link Player %1$@. Você joga partidas que rodam no computador do anfitrião (baseado no MAME, motor mame2003-plus). Neste celular só se instala o app.";
+"settings_about" = "go-link Console Player %1$@. Você joga partidas que rodam no computador do anfitrião (baseado no MAME, motor mame2003-plus). Neste celular só se instala o app.";
 "pin_wrong_one" = "PIN incorreto: resta 1 tentativa.";
 "pin_wrong_many" = "PIN incorreto: restam %d tentativas.";
 "pin_wrong_other" = "PIN incorreto: restam %d tentativas.";
@@ -171,7 +171,7 @@
 "sound_ipad_mic" = "Microfone do iPad";
 "sound_iphone_mic" = "Microfone do iPhone";
 "scan_no_camera" = "Nenhuma câmera disponível. Digite o código da sala.";
-"settings_about_ios" = "go-link Player %1$@. Você joga partidas que rodam no computador do anfitrião (baseado no MAME, motor mame2003-plus). Neste dispositivo só se instala o app.";
+"settings_about_ios" = "go-link Console Player %1$@. Você joga partidas que rodam no computador do anfitrião (baseado no MAME, motor mame2003-plus). Neste dispositivo só se instala o app.";
 "settings_permissions_note" = "A câmera e o microfone são pedidos só quando você os usa. Você pode alterá-los nos ajustes do sistema.";
 "help_title" = "Como jogar";
 "help_intro" = "O go-link transmite o jogo do computador do anfitrião. Você joga neste dispositivo: nada mais para instalar e nenhuma ROM do seu lado.";
@@ -240,7 +240,7 @@
 "test_screen" = "Tela: %1$@ · 1 quadro %2$@ ms";
 "test_start" = "Start";
 "test_pressed" = "pressionado";
-"app_version" = "go-link Player v%1$@ (build %2$@)";
+"app_version" = "go-link Console Player v%1$@ (build %2$@)";
 "app_version_copy" = "Copiar a versão";
 
 /* Game settings (the dock's gear) and the picture styles */
@@ -279,7 +279,7 @@
 /* Gamepad skins (Game settings › Skin) */
 "skin_title" = "Skin";
 "skin_note" = "Uma carcaça de console ao redor da imagem. Só neste telefone.";
-"skin_folder_hint" = "Mais skins: coloque os arquivos de skin no app Arquivos, No meu iPhone › go-link Player › Skins.";
+"skin_folder_hint" = "Mais skins: coloque os arquivos de skin no app Arquivos, No meu iPhone › go-link Console Player › Skins.";
 "room_show_menu" = "Mostrar o menu";
 
 /* Install a skin by pasting its JSON (Settings and Game settings › Skin) */

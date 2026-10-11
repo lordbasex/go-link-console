@@ -1,4 +1,4 @@
-# go-link Player (Android)
+# go-link Console Player (Android)
 
 The native Android app for joining a go-link game as a player. How it works: [docs/mobile.md](../../docs/mobile.md).
 
@@ -57,7 +57,7 @@ An emulator: `emulator -avd <name> -no-window -gpu swiftshader_indirect` (add `-
 - The round **stats** button at the top left of the picture shows fps, resolution and codec, ping, direct or relay, loss and audio, read from `getStats` once a second (`AndroidRtcPeer.sample()`, `core/.../LiveStats.kt`), plus the measured screen refresh rate (`screen 120 Hz`) and what the device sends (`video 768×448 (2× of 384×224)`, `quality High`, from `stream_stats.video`).
 - **High refresh rate:** the room and Test controller ask for the display mode with the same resolution and the highest refresh rate (90, 120 or 144 Hz) through the window's `preferredDisplayModeId`, and restore it on leaving (`ui/HighRefreshRate.kt`, `core/.../ScreenRate.kt`); the menus stay at the system's rate.
 - With a real controller connected, the gamepad button shows the on-screen pad **see-through and display only**, lighting what you press on the controller. **Test controller** on the home screen checks a controller offline, with the input latency and the screen's refresh rate (the latency is about one screen frame). The connection is named only when Android can confirm it (USB by vendor and product id, Bluetooth by a paired name); otherwise just the controller's name.
-- Home and Settings show **go-link Player v*X.Y.Z* (build *N*)** from `BuildConfig` (" · debug" in debug builds).
+- Home and Settings show **go-link Console Player v*X.Y.Z* (build *N*)** from `BuildConfig` (" · debug" in debug builds).
 
 Details: [docs/mobile.md](../../docs/mobile.md#your-name).
 
@@ -114,7 +114,7 @@ The release build is minified (R8) and signed when signing values exist; otherwi
    apksigner verify --print-certs app/build/outputs/apk/release/app-release.apk
    ```
 
-   Or from the root: `VERSION=0.1.4 make android-apk` (JDK 17 from Homebrew, `versionCode` from the version: 0.1.4 → 104; it refuses an unsigned APK and copies it to `dist/android/go-link-player-v0.1.4.apk`). `versionCode` must grow with every release, or Android refuses the update. The app shows both on Home and in Settings ("go-link Player v0.1.4 (build 104)"); a build without the properties shows v0.1.0 (build 1).
+   Or from the root: `VERSION=0.1.4 make android-apk` (JDK 17 from Homebrew, `versionCode` from the version: 0.1.4 → 104; it refuses an unsigned APK and copies it to `dist/android/go-link-player-v0.1.4.apk`). `versionCode` must grow with every release, or Android refuses the update. The app shows both on Home and in Settings ("go-link Console Player v0.1.4 (build 104)"); a build without the properties shows v0.1.0 (build 1).
 
 4. `VERSION=x.y.z make release` builds it too (`ANDROID=0` skips it) and publishes it as `go-link-vx.y.z-android.apk`; the website's Android card downloads that file.
 

@@ -29,7 +29,7 @@ import (
 )
 
 // appID identifies the application to the operating system.
-const appID = "org.go-link.device"
+const appID = "org.go-link.console"
 
 // Options wires the window to the device.
 type Options struct {
@@ -140,7 +140,7 @@ func Run(opts Options) {
 		}
 	}()
 	u.win.Show()
-	styleWindow("go-link")
+	styleWindow("go-link Console")
 	a.Run()
 	close(stopped)
 	if opts.Quit != nil {
@@ -167,7 +167,7 @@ func newUI(a fyne.App, opts Options) *ui {
 	}
 	u := &ui{opts: opts, app: a}
 	setLanguage(opts.Language)
-	u.win = a.NewWindow("go-link")
+	u.win = a.NewWindow("go-link Console")
 	// The gradient reaches the window edges (Fyne pads by default).
 	u.win.SetPadded(false)
 	u.bg = background(violet)
@@ -218,7 +218,7 @@ func (u *ui) build() {
 			side.Add(row)
 		}
 	}
-	brand := container.New(layout.NewCustomPaddedLayout(4, 18, 10, 0), container.NewHBox(logo(24), text("go-link", 15, white, true)))
+	brand := container.New(layout.NewCustomPaddedLayout(4, 18, 10, 0), container.NewHBox(logo(24), text("go-link Console", 15, white, true)))
 	footer := container.New(layout.NewCustomPaddedLayout(0, 0, 10, 0), text(L("Device")+" "+u.opts.Version, 11, textFaint, false))
 	sideBg := canvas.NewRectangle(withAlpha(white, 0x0a))
 	divider := canvas.NewRectangle(cardStroke)
@@ -348,7 +348,7 @@ func (u *ui) setupTray() {
 	u.trayCode = fyne.NewMenuItem("", nil)
 	u.trayCode.Disabled = true
 	show := fyne.NewMenuItem(L("Open go-link"), u.showWindow)
-	u.trayMenu = fyne.NewMenu("go-link", u.trayCode, fyne.NewMenuItemSeparator(), show)
+	u.trayMenu = fyne.NewMenu("go-link Console", u.trayCode, fyne.NewMenuItemSeparator(), show)
 	desk.SetSystemTrayMenu(u.trayMenu)
 	desk.SetSystemTrayIcon(trayResource())
 	u.win.SetCloseIntercept(u.win.Hide)

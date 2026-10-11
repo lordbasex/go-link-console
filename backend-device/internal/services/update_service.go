@@ -94,7 +94,7 @@ func (u *UpdateService) Check(ctx context.Context) (models.UpdateInfo, error) {
 		return models.UpdateInfo{}, err
 	}
 	req.Header.Set("Accept", "application/vnd.github+json")
-	req.Header.Set("User-Agent", "go-link-device/"+u.cfg.Current)
+	req.Header.Set("User-Agent", "go-link-console/"+u.cfg.Current)
 	resp, err := u.cfg.Client.Do(req)
 	if err != nil {
 		return models.UpdateInfo{}, err

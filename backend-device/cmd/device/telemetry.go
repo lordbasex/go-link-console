@@ -159,7 +159,7 @@ func buildTelemetry(store *telemetry.Store, q telemetryRequest) map[string]any {
 	return res
 }
 
-// openTelemetry opens ~/go-link/telemetry.db for the CLI (the device may
+// openTelemetry opens ~/go-link-console/telemetry.db for the CLI (the device may
 // be running: SQLite lets both read it).
 func openTelemetry() (*telemetry.Store, error) {
 	base, err := dataDir()

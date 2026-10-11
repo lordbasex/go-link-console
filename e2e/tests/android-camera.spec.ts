@@ -8,7 +8,7 @@ import * as A from "../android";
 import { enterAlias, freshApp, invite, joinWithPin, ownerOpensTestPattern, pointAppAt, trackedContext } from "../android-owner";
 import { PORTS } from "../ports";
 
-// The go-link Player app scans a real QR code with the emulator's back
+// The go-link Console Player app scans a real QR code with the emulator's back
 // camera (npm run test:android:camera, opt-in: it restarts the emulator).
 //
 // The emulator's "virtualscene" camera renders a 3D room with a poster on

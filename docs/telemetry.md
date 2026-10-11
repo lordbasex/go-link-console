@@ -4,7 +4,7 @@ The device keeps what happens in each room while it runs, so a freeze, a lag or 
 
 ## Storage
 
-- One SQLite database next to the rooms: `~/go-link/telemetry.db` (WAL), opened by `internal/telemetry` with the pure-Go driver `modernc.org/sqlite` (no cgo, so every platform builds it the same way).
+- One SQLite database next to the rooms: `~/go-link-console/telemetry.db` (WAL), opened by `internal/telemetry` with the pure-Go driver `modernc.org/sqlite` (no cgo, so every platform builds it the same way).
 - **Nothing is dropped by age.** A room's data stays from its first start through every time it was on, also while it is off; starting it again adds to it. Deleting the room for good (`purge`) deletes everything kept about it; a factory reset deletes the whole database.
 - Writes never block the media path: they go through a buffered queue (8192) to one writer goroutine that commits them in batches every 500 ms. A full queue drops the write and counts it.
 - Tables:

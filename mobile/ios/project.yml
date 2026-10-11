@@ -32,8 +32,8 @@ targets:
     info:
       path: GoLinkPlayer/Info.plist
       properties:
-        CFBundleDisplayName: go-link Player
-        CFBundleName: go-link Player
+        CFBundleDisplayName: go-link Console Player
+        CFBundleName: go-link Console Player
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CFBundleDevelopmentRegion: en
@@ -49,7 +49,7 @@ targets:
         UISupportedInterfaceOrientations~ipad:
           [UIInterfaceOrientationPortrait, UIInterfaceOrientationPortraitUpsideDown, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
         UIBackgroundModes: [audio]
-        NSCameraUsageDescription: go-link Player uses the camera only to read the invitation's QR code. Nothing is recorded or sent.
+        NSCameraUsageDescription: go-link Console Player uses the camera only to read the invitation's QR code. Nothing is recorded or sent.
         NSMicrophoneUsageDescription: Seated players can talk to each other. The microphone only sends while you turn it on in the room.
         # ProMotion iPhones: let the room and the controller test ask for 120 Hz
         # (without it iPhones cap CADisplayLink and MTKView at 60).

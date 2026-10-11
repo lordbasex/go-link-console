@@ -29,7 +29,7 @@ Rules:
 
 - Only `wss://` is accepted (an HTTPS page cannot open plain `ws://`; `ws://` to the local machine is allowed in development).
 - The server is only changed **by hand** from that button, never from a link parameter: otherwise a link could send other users to a malicious server.
-- A self-hosted server must allow the rooms' site origin in `ALLOWED_ORIGINS` (`https://play.go-link.org`; the landing never connects) and the app `go-link` in `ALLOWED_APPS`, and allow several rooms per session (`MAX_ROOMS_PER_SESSION` > 1).
+- A self-hosted server must allow the rooms' site origin in `ALLOWED_ORIGINS` (`https://play.go-link.org`; the landing never connects) and the app `go-link-console` in `ALLOWED_APPS`, and allow several rooms per session (`MAX_ROOMS_PER_SESSION` > 1).
 - The device and the players must use **the same server**: the host sets it on the device and each player in their browser.
 - The CSP allows `connect-src` to any `wss:` precisely to allow this.
 - When an invitation or pairing code is not found, the website explains that the host may be using their own signaling server and offers a shortcut to that setting.

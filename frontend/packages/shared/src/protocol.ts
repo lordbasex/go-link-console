@@ -6,7 +6,7 @@
 export const PROTOCOL_VERSION = "1";
 
 /** signalhub namespace of this project. */
-export const APP = "go-link";
+export const APP = "go-link-console";
 
 export type MessageType =
   | "hello"

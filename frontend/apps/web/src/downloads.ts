@@ -11,7 +11,7 @@ export const PLATFORMS: readonly Platform[] = ["windows", "macos", "linux", "doc
 export const RELEASE_VERSION: string = release.version;
 export const RELEASE_PAGE = `${REPO_URL}/releases/tag/${release.version}`;
 /** The device image on the GitHub Container Registry (amd64 and arm64). */
-export const DOCKER_IMAGE = "ghcr.io/lordbasex/go-link-device:latest";
+export const DOCKER_IMAGE = "ghcr.io/lordbasex/go-link-console:latest";
 export const CHECKSUMS_URL = `${REPO_URL}/releases/download/${release.version}/SHA256SUMS`;
 
 const assets: Record<string, number> = release.assets;
@@ -34,7 +34,7 @@ export interface Download {
 function asset(key: string | undefined): Download | null {
   if (!key || !(key in assets)) return null;
   return {
-    url: `${REPO_URL}/releases/download/${release.version}/go-link-${release.version}-${key}`,
+    url: `${REPO_URL}/releases/download/${release.version}/go-link-console-${release.version}-${key}`,
     mb: Math.max(1, Math.round((assets[key] ?? 0) / 1_000_000)),
   };
 }
@@ -49,7 +49,7 @@ export function armDownloadFor(p: Platform): Download | null {
   return asset(FILES[p].arm);
 }
 
-/** The go-link Player app for Android (a signed APK), null when this release has none. */
+/** The go-link Console Player app for Android (a signed APK), null when this release has none. */
 export function androidDownload(): Download | null {
   return asset("android.apk");
 }

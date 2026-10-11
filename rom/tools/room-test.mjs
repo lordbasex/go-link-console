@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com>
 // Plays rom/build/<set>.zip in a real go-link game room, end to end:
 // a signalhub and a headless device of their own (throwaway HOME whose ROM
-// folder holds only our set; the core is copied from ~/go-link/cores), the
+// folder holds only our set; the core is copied from ~/go-link-console/cores), the
 // device's local panel in Chromium, "New game", then coin, start, run,
 // shoot, the bazooka and a jump through the room's keyboard input (Z, X, C
 // are buttons 1, 2, 3). Saves pictures of the room's WebRTC video in
@@ -52,7 +52,7 @@ const signal = spawn(path.join(OUT, "bin/signal"), [], {
     ...process.env,
     ADDR: `127.0.0.1:${PORTS.signal}`,
     ALLOWED_ORIGINS: `http://127.0.0.1:${PORTS.panel}`,
-    ALLOWED_APPS: "go-link",
+    ALLOWED_APPS: "go-link-console",
     MAX_ROOMS_PER_SESSION: "8",
     LOG_LEVEL: "warn",
   },

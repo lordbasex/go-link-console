@@ -56,9 +56,9 @@ Usage:
   device hd download GAME [--size 720p|1080p]
                                          download a starter game into the games folder
   device panel token [--new]             show (or replace) the web panel token
-  device rec list [--json]               list the recordings of game rooms (~/go-link/rec)
+  device rec list [--json]               list the recordings of game rooms (~/go-link-console/rec)
   device rec rm ID...|--all              delete recordings
-  device telemetry rooms                 list the rooms with telemetry (~/go-link/telemetry.db)
+  device telemetry rooms                 list the rooms with telemetry (~/go-link-console/telemetry.db)
   device telemetry runs ROOM             the times a room was on, with their game ids
   device telemetry events ROOM|#GAME [--warn] [--since 30m]
                                          a room's (or one game's) log of events
@@ -511,7 +511,7 @@ func cmdThumbnailsDir(args []string) error {
 }
 
 // thumbnailsDir shows the thumbnails folder, or sets it ("default" goes
-// back to ~/go-link/thumbnails/MAME).
+// back to ~/go-link-console/thumbnails/MAME).
 func thumbnailsDir(w io.Writer, settings *services.SettingsService, args []string) error {
 	if len(args) == 0 {
 		fmt.Fprintln(w, settings.ThumbnailsDir())

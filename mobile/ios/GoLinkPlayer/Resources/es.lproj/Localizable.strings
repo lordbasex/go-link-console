@@ -1,6 +1,6 @@
 /* Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com> */
 /* Generated from the Android app's strings.xml (same keys), then iOS strings added. */
-"app_name" = "go-link Player";
+"app_name" = "go-link Console Player";
 "app_subtitle" = "Jugador";
 "back" = "Volver";
 "home_title" = "Únete a una partida";
@@ -17,13 +17,13 @@
 "scan_invalid" = "Ese código QR no es una invitación de go-link.";
 "scan_type_instead" = "Escribir el código";
 "perm_camera_title" = "Cámara para el código QR";
-"perm_camera_text" = "go-link Player usa la cámara solo en esta pantalla, para leer el código QR de la invitación. No se graba ni se envía nada.";
+"perm_camera_text" = "go-link Console Player usa la cámara solo en esta pantalla, para leer el código QR de la invitación. No se graba ni se envía nada.";
 "perm_camera_denied" = "La cámara está bloqueada. Puedes escribir el código de la sala, o permitir la cámara en los ajustes del sistema.";
 "perm_mic_title" = "Micrófono para el chat de voz";
 "perm_mic_text" = "Los jugadores sentados pueden hablar entre sí. El micrófono solo envía mientras lo activas en la sala. Sin él puedes jugar y escuchar igual.";
 "perm_mic_denied" = "El micrófono está bloqueado: puedes jugar y escuchar. Para hablar, permítelo en los ajustes del sistema.";
 "perm_bt_title" = "Auriculares";
-"perm_bt_text" = "Permite los dispositivos cercanos para que go-link Player use tus auriculares Bluetooth para el sonido del juego y tu voz. Los auriculares con cable funcionan sin este permiso. Sin auriculares, el sonido sale por el altavoz.";
+"perm_bt_text" = "Permite los dispositivos cercanos para que go-link Console Player use tus auriculares Bluetooth para el sonido del juego y tu voz. Los auriculares con cable funcionan sin este permiso. Sin auriculares, el sonido sale por el altavoz.";
 "perm_allow" = "Permitir";
 "perm_not_now" = "Ahora no";
 "perm_open_settings" = "Abrir ajustes";
@@ -141,7 +141,7 @@
 "settings_perm_bt" = "Dispositivos cercanos (auriculares Bluetooth)";
 "settings_perm_on" = "Permitido";
 "settings_perm_off" = "No permitido";
-"settings_about" = "go-link Player %1$@. Juegas partidas que corren en la computadora del anfitrión (basado en MAME, motor mame2003-plus). En este teléfono solo se instala la app.";
+"settings_about" = "go-link Console Player %1$@. Juegas partidas que corren en la computadora del anfitrión (basado en MAME, motor mame2003-plus). En este teléfono solo se instala la app.";
 "pin_wrong_one" = "PIN incorrecto: te queda 1 intento.";
 "pin_wrong_many" = "PIN incorrecto: te quedan %d intentos.";
 "pin_wrong_other" = "PIN incorrecto: te quedan %d intentos.";
@@ -171,7 +171,7 @@
 "sound_ipad_mic" = "Micrófono del iPad";
 "sound_iphone_mic" = "Micrófono del iPhone";
 "scan_no_camera" = "No hay una cámara disponible. Escribe el código de la sala.";
-"settings_about_ios" = "go-link Player %1$@. Juegas partidas que corren en la computadora del anfitrión (basado en MAME, motor mame2003-plus). En este dispositivo solo se instala la app.";
+"settings_about_ios" = "go-link Console Player %1$@. Juegas partidas que corren en la computadora del anfitrión (basado en MAME, motor mame2003-plus). En este dispositivo solo se instala la app.";
 "settings_permissions_note" = "La cámara y el micrófono se piden solo cuando los usas. Puedes cambiarlos en los ajustes del sistema.";
 "help_title" = "Cómo jugar";
 "help_intro" = "go-link transmite el juego desde la computadora del anfitrión. Juegas en este dispositivo: no hay nada más que instalar ni ROMs de tu lado.";
@@ -240,7 +240,7 @@
 "test_screen" = "Pantalla: %1$@ · 1 cuadro %2$@ ms";
 "test_start" = "Start";
 "test_pressed" = "presionado";
-"app_version" = "go-link Player v%1$@ (compilación %2$@)";
+"app_version" = "go-link Console Player v%1$@ (compilación %2$@)";
 "app_version_copy" = "Copiar la versión";
 
 /* Game settings (the dock's gear) and the picture styles */
@@ -279,7 +279,7 @@
 /* Gamepad skins (Game settings › Skin) */
 "skin_title" = "Piel";
 "skin_note" = "Una carcasa de consola alrededor de la imagen. Solo en este teléfono.";
-"skin_folder_hint" = "Más pieles: pon los archivos de piel en la app Archivos, En mi iPhone › go-link Player › Skins.";
+"skin_folder_hint" = "Más pieles: pon los archivos de piel en la app Archivos, En mi iPhone › go-link Console Player › Skins.";
 "room_show_menu" = "Mostrar el menú";
 
 /* Install a skin by pasting its JSON (Settings and Game settings › Skin) */

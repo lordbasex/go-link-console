@@ -18,7 +18,7 @@ describe("downloads", () => {
     for (const p of PLATFORMS) {
       const d = downloadFor(p);
       expect(d, p).not.toBeNull();
-      expect(d!.url).toContain(`/releases/download/${release.version}/go-link-${release.version}-`);
+      expect(d!.url).toContain(`/releases/download/${release.version}/go-link-console-${release.version}-`);
       expect(d!.mb).toBeGreaterThan(0);
     }
     expect(armDownloadFor("windows")?.url).toMatch(/windows-arm64\.zip$/);

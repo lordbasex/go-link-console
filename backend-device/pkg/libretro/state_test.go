@@ -15,11 +15,11 @@ import (
 )
 
 // TestSaveStateWithRealCore needs the mame2003-plus core and the free ROM
-// robby.zip in ~/go-link; it is skipped otherwise.
+// robby.zip in ~/go-link-console; it is skipped otherwise.
 func TestSaveStateWithRealCore(t *testing.T) {
 	home, _ := os.UserHomeDir()
-	corePath := filepath.Join(home, "go-link", "cores", cores.FileName(cores.DefaultCore, runtime.GOOS))
-	romPath := filepath.Join(home, "go-link", "roms", "robby.zip")
+	corePath := filepath.Join(home, "go-link-console", "cores", cores.FileName(cores.DefaultCore, runtime.GOOS))
+	romPath := filepath.Join(home, "go-link-console", "roms", "robby.zip")
 	if _, err := os.Stat(corePath); err != nil {
 		t.Skip("mame2003-plus core not installed")
 	}

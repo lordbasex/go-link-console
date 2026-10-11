@@ -1,5 +1,5 @@
 # Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com>
-# go-link Player for iOS. `make help` lists the targets.
+# go-link Console Player for iOS. `make help` lists the targets.
 
 SIM ?= iPhone 17
 DEST ?= platform=iOS Simulator,name=$(SIM)

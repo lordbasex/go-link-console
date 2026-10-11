@@ -82,7 +82,7 @@ func newOverviewPage(u *ui) *overviewPage {
 	))
 	intro := wrapped(L("Your arcade, streamed. Guests play in their browser with no ROMs: the game runs here and only video, sound and controls travel."))
 	header := newAdaptiveRow(640, container.NewCenter(logo(150)),
-		container.NewVBox(text("go-link", 30, white, true), intro, info))
+		container.NewVBox(text("go-link Console", 30, white, true), intro, info))
 
 	p.cpu = newStatTile("cpu", L("CPU"), violet, true)
 	p.memory = newStatTile("memory", L("Memory"), violet, true)

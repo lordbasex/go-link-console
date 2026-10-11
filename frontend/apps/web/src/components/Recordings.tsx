@@ -81,7 +81,7 @@ export function RecordingFacts({ rec }: { rec: RecordingInfo }) {
       <dt>{t.rec.tracks}</dt>
       <dd>{trackNames(rec.tracks)}</dd>
       <dt>{t.rec.onDevice}</dt>
-      <dd className="mono small">{`~/go-link/rec/${rec.id}`}</dd>
+      <dd className="mono small">{`~/go-link-console/rec/${rec.id}`}</dd>
     </dl>
   );
 }

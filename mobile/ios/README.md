@@ -1,5 +1,5 @@
 <!-- Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com> -->
-# go-link Player for iOS
+# go-link Console Player for iOS
 
 The native iPhone and iPad app for joining a go-link game as a player: the iOS counterpart of [the Android app](../android/README.md). SwiftUI, iOS 17 or newer, bundle id `org.golink.player`. It speaks the same signalhub and WebRTC protocol as the website ([docs/mobile.md](../../docs/mobile.md), [docs/protocol.md](../../docs/protocol.md)). It only joins rooms; hosting stays on the device app.
 
@@ -84,7 +84,7 @@ Details: [docs/mobile.md](../../docs/mobile.md#your-name).
 
 ## Version
 
-Home and Settings show **go-link Player v*X.Y.Z* (build *N*)** (" · debug" in debug builds; a long press copies it). `CFBundleShortVersionString` and `CFBundleVersion` come from the build settings `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` (defaults 0.1.0 and 1 in `Config/Base.xcconfig`). A release passes the version: `make device-build VERSION=0.1.5` (also `build-sim` and `test-ui`) computes build 105 with the Android rule (major × 10000 + minor × 100 + patch), or give both to `xcodebuild` (`MARKETING_VERSION=0.1.5 CURRENT_PROJECT_VERSION=105`).
+Home and Settings show **go-link Console Player v*X.Y.Z* (build *N*)** (" · debug" in debug builds; a long press copies it). `CFBundleShortVersionString` and `CFBundleVersion` come from the build settings `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` (defaults 0.1.0 and 1 in `Config/Base.xcconfig`). A release passes the version: `make device-build VERSION=0.1.5` (also `build-sim` and `test-ui`) computes build 105 with the Android rule (major × 10000 + minor × 100 + patch), or give both to `xcodebuild` (`MARKETING_VERSION=0.1.5 CURRENT_PROJECT_VERSION=105`).
 
 ## Sound and the microphone
 
@@ -135,7 +135,7 @@ export ASC_KEY_PATH=/path/to/AuthKey_<ASC_KEY_ID>.p8
 
 ## TestFlight
 
-App Store Connect has the app **go-link Player** (bundle id `org.golink.player`, SKU `golink-player`) and two TestFlight groups:
+App Store Connect has the app **go-link Console Player** (bundle id `org.golink.player`, SKU `golink-player`) and two TestFlight groups:
 
 - **Equipo** (internal): the team's own App Store Connect users, every build as soon as Apple processes it (about 10 minutes after `make testflight`), no review.
 - **Amigos** (external): anyone with the public link, up to 100 people. Each new build is added to the group and submitted to Beta App Review (`betaAppReviewSubmissions`); once approved, the link installs it through the TestFlight app. The beta's description, feedback email, review contact and What to Test are set in English, Spanish and Portuguese.

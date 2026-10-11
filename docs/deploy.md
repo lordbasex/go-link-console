@@ -18,7 +18,7 @@ For go-link, set in its `deploy/.env`:
 | Variable | Value for go-link |
 |---|---|
 | `ALLOWED_ORIGINS` | The rooms' site origin, for example `https://play.go-link.org` (plus `http://localhost:5180` for development). The landing (`https://console.go-link.org`) never talks to signaling |
-| `ALLOWED_APPS` | Must include `go-link` |
+| `ALLOWED_APPS` | Must include `go-link-console` |
 | `MAX_ROOMS_PER_SESSION` | More than 1: each game room of a device is a room of the same session |
 
 Then point the website (`SIGNAL_URL` at build time) and the devices (`--server-signaling` or `signal_url`) at `wss://<your domain>/ws`.

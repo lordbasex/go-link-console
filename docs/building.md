@@ -51,7 +51,7 @@ npm run wasm:check -w @go-link/cps1-sim     # rebuilds in a temporary folder and
 | `make device-darwin-amd64` | One platform. Also `-darwin-arm64`, `-linux-amd64`, `-linux-arm64`, `-linux-amd64-headless`, `-linux-arm64-headless`, `-windows-amd64`, `-windows-arm64` |
 | `make device-dmg` | The universal macOS app in a drag-to-Applications `.dmg` |
 | `make panel` | Builds the website into `backend-device/web/panel/dist`, the panel that headless devices serve (device builds do it when it is missing) |
-| `make device-docker` | The `go-link-device` image (headless, panel on :7373) in the local Docker |
+| `make device-docker` | The `go-link-console` image (headless, panel on :7373) in the local Docker |
 | `make device-docker-oci` | The same image for amd64 and arm64, as an OCI archive in `dist/docker/` |
 | `make e2e` | End-to-end tests in a real browser |
 | `VERSION=x.y.z make release` | A full release (below) |
@@ -75,7 +75,7 @@ The emulator core is not in any binary: it is downloaded on first use (see [emul
 
 ## macOS app
 
-On macOS the device ships as one universal **`go-link.app`** (Intel and Apple silicon, macOS 12 or later), not a bare executable (which the Finder would open through Terminal). It has its `Info.plist` (`org.go-link.device`), an `.icns` icon made from the logo and an ad hoc signature.
+On macOS the device ships as one universal **`go-link-console.app`** (Intel and Apple silicon, macOS 12 or later), not a bare executable (which the Finder would open through Terminal). It has its `Info.plist` (`org.go-link.console`), an `.icns` icon made from the logo and an ad hoc signature.
 
 `make device-dmg` builds `dist/device/go-link-<version>-macos-universal.dmg` (with its `.sha256`): the app on the left, a shortcut to Applications on the right, on a dark background with an amber arrow (`backend-device/build/macos/dmg-background.swift`). `backend-device/build/macos/make-dmg.sh` uses only macOS tools (`hdiutil`, `SetFile`, `osascript`, `swift`). The first time, macOS asks for permission for the terminal to control the Finder (the window layout); without it the `.dmg` is made without the background.
 
@@ -85,17 +85,17 @@ On macOS the device ships as one universal **`go-link.app`** (Intel and Apple si
 
 | File | For |
 |---|---|
-| `go-link-v0.1.0-macos-universal.dmg` | macOS 12 or later, Intel and Apple silicon: drag to Applications |
-| `go-link-v0.1.0-windows-amd64.zip` / `-arm64.zip` | Windows: the `.exe`, no console |
-| `go-link-v0.1.0-linux-amd64.tar.gz` / `-arm64.tar.gz` | Linux desktops |
-| `go-link-v0.1.0-linux-amd64-headless.tar.gz` / `-arm64-headless.tar.gz` | Raspberry Pi and servers (no window, web panel) |
-| `go-link-v0.1.0-docker.oci.tar.gz` (skipped with `DOCKER=0`) | The Docker image (amd64 and arm64), for `docker load` without internet; it loads as `go-link-device:v0.1.0`. Publishing the release also runs `.github/workflows/docker.yml`, which pushes the same image to `ghcr.io/lordbasex/go-link-device` (`:v0.1.0` and `:latest`) |
-| `go-link-v0.1.0-android.apk` (skipped with `ANDROID=0`) | **go-link Player** for Android, signed with the release key (`ANDROID_SIGNING`, see [mobile.md](mobile.md)) |
+| `go-link-console-v0.1.0-macos-universal.dmg` | macOS 12 or later, Intel and Apple silicon: drag to Applications |
+| `go-link-console-v0.1.0-windows-amd64.zip` / `-arm64.zip` | Windows: the `.exe`, no console |
+| `go-link-console-v0.1.0-linux-amd64.tar.gz` / `-arm64.tar.gz` | Linux desktops |
+| `go-link-console-v0.1.0-linux-amd64-headless.tar.gz` / `-arm64-headless.tar.gz` | Raspberry Pi and servers (no window, web panel) |
+| `go-link-console-v0.1.0-docker.oci.tar.gz` (skipped with `DOCKER=0`) | The Docker image (amd64 and arm64), for `docker load` without internet; it loads as `go-link-console:v0.1.0`. Publishing the release also runs `.github/workflows/docker.yml`, which pushes the same image to `ghcr.io/lordbasex/go-link-console` (`:v0.1.0` and `:latest`) |
+| `go-link-console-v0.1.0-android.apk` (skipped with `ANDROID=0`) | **go-link Console Player** for Android, signed with the release key (`ANDROID_SIGNING`, see [mobile.md](mobile.md)) |
 | `SHA256SUMS` | To verify the downloads |
 
-The release also writes `frontend/apps/web/src/release.json` (version and download sizes) for the website's downloads; commit it with `Casks/go-link.rb` and deploy the website.
+The release also writes `frontend/apps/web/src/release.json` (version and download sizes) for the website's downloads; commit it with `Casks/go-link-console.rb` and deploy the website.
 
-It also updates `Casks/go-link.rb` (Homebrew: `brew install --cask go-link` from the repository's tap) and, with `gh`, creates the `v0.1.0` release on `lordbasex/go-link-console` (`REPO=…` changes it) with every file and generated notes. `SKIP_BUILD=1` packs what is already in `dist/device`, and `GITHUB_RELEASE=0` only builds the files.
+It also updates `Casks/go-link-console.rb` (Homebrew: `brew install --cask go-link` from the repository's tap) and, with `gh`, creates the `v0.1.0` release on `lordbasex/go-link-console` (`REPO=…` changes it) with every file and generated notes. `SKIP_BUILD=1` packs what is already in `dist/device`, and `GITHUB_RELEASE=0` only builds the files.
 
 **Development mode** (no `CODESIGN_IDENTITY`, the default): the macOS app has an ad hoc signature and the GitHub release is a **pre-release**. On another Mac, macOS blocks it the first time: open it, then System Settings › Privacy & Security › Open Anyway (right click › Open on macOS 14 and earlier). Releases before 0.3.0 were made this way.
 
@@ -105,7 +105,7 @@ It also updates `Casks/go-link.rb` (Homebrew: `brew install --cask go-link` from
 2. Store the notarization credentials once: `xcrun notarytool store-credentials "go-link-notary" --apple-id you@example.com --team-id TEAMID --password <app-specific-password>`.
 3. `VERSION=0.1.0 CODESIGN_IDENTITY="Developer ID Application: Name (TEAMID)" NOTARY_PROFILE=go-link-notary make release`
 
-The app is then signed with the hardened runtime and `backend-device/build/macos/entitlements.plist` (`disable-library-validation`, because the device loads the libretro core, which is downloaded separately and not signed by us). Notarization is done twice (`build/macos/notarize.sh`): first the app, whose ticket is stapled inside `go-link.app` (the copy in /Applications then opens without asking Apple's servers, offline too), then the `.dmg` made with that app, signed, notarized and stapled. The release is no longer a pre-release.
+The app is then signed with the hardened runtime and `backend-device/build/macos/entitlements.plist` (`disable-library-validation`, because the device loads the libretro core, which is downloaded separately and not signed by us). Notarization is done twice (`build/macos/notarize.sh`): first the app, whose ticket is stapled inside `go-link-console.app` (the copy in /Applications then opens without asking Apple's servers, offline too), then the `.dmg` made with that app, signed, notarized and stapled. The release is no longer a pre-release.
 
 ## Tests
 

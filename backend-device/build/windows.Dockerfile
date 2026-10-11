@@ -51,7 +51,7 @@ RUN CGO_ENABLED=1 GOOS=windows GOARCH=$GOARCH CC=$HOST-clang CXX=$HOST-clang++ \
     PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig PKG_CONFIG_LIBDIR=$PREFIX/lib/pkgconfig \
     CGO_LDFLAGS="-static -lpthread" \
     go build -trimpath -ldflags "-s -w -H windowsgui -X main.version=$VERSION" \
-      -o /out/go-link-device.exe ./cmd/device
+      -o /out/go-link-console.exe ./cmd/device
 # go-link HD's engine as golinkhd.dll beside the .exe; only the API is
 # exported (GOLINKHD_BUILD_SHARED marks it dllexport).
 COPY --from=golinkhd / /golinkhd

@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com>
 #
 # Wraps a built device binary (one architecture or universal) in
-# go-link.app: Info.plist, the icon and the signature. Ad hoc signature by
+# go-link-console.app: Info.plist, the icon and the signature. Ad hoc signature by
 # default; with a Developer ID, the hardened runtime and its entitlements.
 #
 # go-link HD's engine library, when given, goes in Contents/Frameworks,
@@ -22,7 +22,7 @@ DEVICE="$(cd "$HERE/../.." && pwd)"
 
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp "$BIN" "$APP/Contents/MacOS/go-link-device"
+cp "$BIN" "$APP/Contents/MacOS/go-link-console"
 cp "$DEVICE/../LICENSE" "$DEVICE/../THIRD_PARTY_NOTICES.md" "$APP/Contents/Resources/"
 if [[ -n "$ENGINE" ]]; then
   mkdir -p "$APP/Contents/Frameworks"
@@ -45,4 +45,4 @@ else
   codesign --force --options runtime --timestamp \
     --entitlements "$HERE/entitlements.plist" --sign "$IDENTITY" "$APP"
 fi
-echo "✓ $APP ($(lipo -archs "$APP/Contents/MacOS/go-link-device"))"
+echo "✓ $APP ($(lipo -archs "$APP/Contents/MacOS/go-link-console"))"

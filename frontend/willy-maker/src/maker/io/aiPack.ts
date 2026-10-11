@@ -445,7 +445,7 @@ export function buildPrompt(p: Project, review: Review, notes: { missingPictures
   line("4. Get the core the device uses (`device core download`), build the frame capture tool and run the set in it:");
   line("   ```sh");
   line("   (cd backend-device && go build -o /tmp/framelab ./cmd/framelab)");
-  line(`   /tmp/framelab capture -log -core ~/go-link/cores/mame2003_plus_libretro.dylib -rom rom/build/${layout.id}.zip -out /tmp/rom-run -frames 860 -script "60-63:coin 110-113:start 140-400:right"`);
+  line(`   /tmp/framelab capture -log -core ~/go-link-console/cores/mame2003_plus_libretro.dylib -rom rom/build/${layout.id}.zip -out /tmp/rom-run -frames 860 -script "60-63:coin 110-113:start 140-400:right"`);
   line("   ```");
   line("   (The core is a .so on Linux.) A set of your own bytes gives one \"WRONG CHECKSUMS\" line per file and still runs; the log must have no \"NOT FOUND\" or \"INCORRECT LENGTH\" line.");
   line(`5. Play it in a real go-link room: \`node rom/tools/room-test.mjs${layout.id === "slammast" ? "" : ` ${layout.id}`}\` (it needs the signalhub repository next to go-link).`);

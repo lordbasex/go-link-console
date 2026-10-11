@@ -2,7 +2,7 @@
 <!-- Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com> -->
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
-  The app's privacy manifest (App Store requirement). go-link Player tracks
+  The app's privacy manifest (App Store requirement). go-link Console Player tracks
   nobody and collects nothing: the picture, sound, voice and controls go
   straight to the host's own computer over WebRTC, and the signaling server
   only relays the connection setup. It declares the reasons for the two

@@ -42,7 +42,7 @@ function DownloadChoice({ platform, onPick }: { platform: Platform; onPick: (p: 
       </div>
       {platform === "docker" && (
         <pre className="wz-command">{`docker run -d --name go-link --network host \\
-  -v go-link:/data -v ~/roms:/data/go-link/roms \\
+  -v go-link:/data -v ~/roms:/data/go-link-console/roms \\
   ${DOCKER_IMAGE}`}</pre>
       )}
       {file && platform !== "docker" && (

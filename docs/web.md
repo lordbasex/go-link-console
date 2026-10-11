@@ -70,7 +70,7 @@ The website is built twice from `apps/web` (`src/role.ts`), each on its own orig
 | `/WillyGorklingo` | The Destroy game's direct link (any letter case): opens the landing with the mission briefing ([below](#destroy-this-page)) |
 | `/rooms` | Rooms: the host's own games, or the "Join a game" form in guest mode |
 | `/create` | New game (`/create?rom=<set>` preselects a game) |
-| `/g/:invite` | A room by invitation (a link or QR token, or a 9-digit code). On Android it also offers the [go-link Player app](mobile.md) (`components/AndroidAppCard.tsx`) |
+| `/g/:invite` | A room by invitation (a link or QR token, or a 9-digit code). On Android it also offers the [go-link Console Player app](mobile.md) (`components/AndroidAppCard.tsx`) |
 | `/g` | Guest join form (code + PIN) |
 | `/r/:roomId` | A room by id (the owner's own rooms) |
 | `/device` | My device: linking with the code, then the live dashboard |

@@ -75,8 +75,8 @@ The real-core steps need a device with `romtest --input` (added in `3a0b738`, so
 
 ```sh
 make device-darwin-universal
-DEVICE=$PWD/dist/device/darwin-universal/go-link.app/Contents/MacOS/go-link-device
-$DEVICE core download                 # once: ~/go-link/cores/mame2003_plus_libretro.dylib and its game list
+DEVICE=$PWD/dist/device/darwin-universal/go-link-console.app/Contents/MacOS/go-link-console
+$DEVICE core download                 # once: ~/go-link-console/cores/mame2003_plus_libretro.dylib and its game list
 ```
 
 Build it **after** step 2 to get a device that knows case A's set (its `pkg/ownsets/sets.json` is part of the patch): `romtest` then says `go-link set ... verified by the SHA-256 of its 28 files`. A device built before the patch (or the released app) still runs the set; it only names it after the original game. The case used a device built at `3a0b738` (`go-link device v0.1.7-9-g3a0b738-dirty`).
@@ -365,7 +365,7 @@ The set is a normal `slammast.zip` for the device: it powers on the stock mame20
 3. On the website: **My device › Rooms › New game**, pick `slammast`, start it. In the room: `5` inserts a coin, `Enter` is your Start, the arrows move, `Z` jumps (B1), `X` fires (B2), `C` is B3 (does nothing in this section). A double tap on → runs. A second browser invited to the room (Invite, then the code and the one-time PIN) takes P2: coin and 2P Start.
 4. Expected: the title (`WILLY GORKLINGO`, `THE LAG PROTOCOL`, `PUSH START`, `CREDITS n`), then the docks; the same pictures as `$OUT/sim/run.mp4`.
 
-**Automatic, with its own throwaway stack:** `node rom/tools/room-test.mjs` (needs the signalhub repo next to go-link or `SIGNALING_DIR`, `npm ci` in `e2e/`, and the core in `~/go-link/cores`) builds a signalhub and a headless device, opens the device's panel in Chromium, starts "New game" with only this set in a throwaway ROM folder and saves pictures of the room's WebRTC video in `rom/build/room/shots/`. It uses ports 8192 and 7392, and its key sequence was written for the prototype (its picture names say "bazooka"; in this ROM C does nothing). Case A did not run it (`checklist.md`): the room plays the same core that steps 6-8 test.
+**Automatic, with its own throwaway stack:** `node rom/tools/room-test.mjs` (needs the signalhub repo next to go-link or `SIGNALING_DIR`, `npm ci` in `e2e/`, and the core in `~/go-link-console/cores`) builds a signalhub and a headless device, opens the device's panel in Chromium, starts "New game" with only this set in a throwaway ROM folder and saves pictures of the room's WebRTC video in `rom/build/room/shots/`. It uses ports 8192 and 7392, and its key sequence was written for the prototype (its picture names say "bazooka"; in this ROM C does nothing). Case A did not run it (`checklist.md`): the room plays the same core that steps 6-8 test.
 
 ## When it goes wrong
 
@@ -389,6 +389,6 @@ Every item happened in the case (journal and decisions) or in this guide's repro
 | The route bot clears but never takes the ledge, and rescues at most one civilian | the bot's route model has no jump straight up onto a ledge above a floor, nor a level jump across a gap | not a ROM fault (the scripted run takes the ledge); seed 3 skips both civilians (300 points) |
 | Laya clears 0 of 3, answering `fire` | an untrained (zero-shot) decision model, the same on the prototype | expected; `--laya-games 0` to skip |
 | `pip` finds no `torch` (Laya setup) | an Intel Mac with Python 3.14: PyTorch 2.2.2 has wheels only for 3.8-3.12 | the system Python 3.9 (`/usr/bin/python3`), step 1d |
-| `romtest` fails to find the core | `~/go-link/cores` is empty | `$DEVICE core download` |
+| `romtest` fails to find the core | `~/go-link-console/cores` is empty | `$DEVICE core download` |
 | `room-test.mjs` fails at the signalhub build | no signalhub repo next to go-link | `git clone https://github.com/lordbasex/signalhub ../signaling` or set `SIGNALING_DIR` |
 | `2UP INSERT COIN` touches `ENEMY 3` in the HUD | the first layout (D-010) | fixed in the patch (2UP at x 20) |

@@ -38,7 +38,7 @@ if (!zip || !script || !out) {
 }
 const skip = new Set((opt("--skip", "") || "").split(",").filter(Boolean));
 const mp4 = !args.includes("--no-mp4");
-const device = opt("--device", path.join(REPO, "dist/device/darwin-universal/go-link.app/Contents/MacOS/go-link-device"));
+const device = opt("--device", path.join(REPO, "dist/device/darwin-universal/go-link-console.app/Contents/MacOS/go-link-console"));
 const python = opt("--python", path.join(os.homedir(), "go-link-lab/venv/bin/python"));
 const botGames = Number(opt("--bot-games", 3));
 const layaGames = Number(opt("--laya-games", 1));

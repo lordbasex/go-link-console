@@ -2,28 +2,28 @@
 
 # Homebrew cask for the go-link device on macOS. Install from this repo's tap:
 #   brew tap lordbasex/go-link-console https://github.com/lordbasex/go-link-console
-#   brew trust --cask lordbasex/go-link-console/go-link   (newer Homebrew asks to trust third-party taps once)
-#   brew install --cask go-link
+#   brew trust --cask lordbasex/go-link-console/go-link-console   (newer Homebrew asks to trust third-party taps once)
+#   brew install --cask go-link-console
 # One universal app (Intel + Apple silicon). scripts/release.sh rewrites
 # version and sha256 on every release.
-cask "go-link" do
+cask "go-link-console" do
   version "0.3.3"
   sha256 "a63e9589b56bfcb10a639053035d5e51402af29307534d3fc07a15449463a1ae"
 
-  url "https://github.com/lordbasex/go-link-console/releases/download/v#{version}/go-link-v#{version}-macos-universal.dmg"
-  name "go-link"
+  url "https://github.com/lordbasex/go-link-console/releases/download/v#{version}/go-link-console-v#{version}-macos-universal.dmg"
+  name "go-link Console"
   desc "Retro arcade that streams live from your computer to your friends' browsers"
   homepage "https://console.go-link.org"
 
   depends_on macos: :monterey
 
-  app "go-link.app"
-  binary "#{appdir}/go-link.app/Contents/MacOS/go-link-device", target: "go-link-device"
+  app "go-link-console.app"
+  binary "#{appdir}/go-link-console.app/Contents/MacOS/go-link-console", target: "go-link-console"
 
-  # Only the device's settings and log; ~/go-link also holds the host's own
+  # Only the device's settings and log; ~/go-link-console also holds the host's own
   # ROMs and saved games, which are never removed.
   zap trash: [
-    "~/Library/Application Support/go-link",
-    "~/go-link/logs",
+    "~/Library/Application Support/go-link-console",
+    "~/go-link-console/logs",
   ]
 end

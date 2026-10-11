@@ -108,7 +108,7 @@ func Download(ctx context.Context, client *http.Client, g Game, size, dir string
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("User-Agent", "go-link-device")
+	req.Header.Set("User-Agent", "go-link-console")
 	if client == nil {
 		client = &http.Client{Timeout: 30 * time.Minute}
 	}

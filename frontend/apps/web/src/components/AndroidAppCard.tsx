@@ -16,7 +16,7 @@ export function isAndroid(userAgent: string = typeof navigator === "undefined" ?
 }
 
 /**
- * A small card on an invitation page opened on Android: the go-link Player
+ * A small card on an invitation page opened on Android: the go-link Console Player
  * app, with the browser as the other way to play. With the app installed,
  * the same link opens the app (Android App Links); the PIN is always typed
  * there, never passed along.

@@ -13,8 +13,8 @@ import (
 
 // EmulatorConfig describes the game to run.
 type EmulatorConfig struct {
-	CorePath string // e.g. ~/go-link/cores/mame2003_plus_libretro.dylib
-	RomPath  string // e.g. ~/go-link/roms/robby.zip; empty starts the core with no content
+	CorePath string // e.g. ~/go-link-console/cores/mame2003_plus_libretro.dylib
+	RomPath  string // e.g. ~/go-link-console/roms/robby.zip; empty starts the core with no content
 	// Native runs go-link HD's engine instead of a libretro core (GameCoreConfig.Native).
 	Native bool
 	// Upscale enlarges the picture that many times (GameCoreConfig.Upscale).

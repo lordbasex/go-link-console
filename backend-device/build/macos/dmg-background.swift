@@ -6,7 +6,7 @@
 //
 //   swift build/macos/dmg-background.swift OUT.tiff
 //
-// Layout (points, must match make-dmg.sh): a 660x400 window, go-link.app
+// Layout (points, must match make-dmg.sh): a 660x400 window, go-link-console.app
 // at (165, 190), Applications at (495, 190), the arrow between them.
 import AppKit
 

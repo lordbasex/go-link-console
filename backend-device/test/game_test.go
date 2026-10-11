@@ -64,10 +64,10 @@ func buildDevice(t *testing.T) string {
 }
 
 // TestGameRoomsWithRealCore needs the mame2003-plus core and the robby
-// and looping ROM sets in ~/go-link; it is skipped otherwise.
+// and looping ROM sets in ~/go-link-console; it is skipped otherwise.
 func TestGameRoomsWithRealCore(t *testing.T) {
 	home, _ := os.UserHomeDir()
-	base := filepath.Join(home, "go-link")
+	base := filepath.Join(home, "go-link-console")
 	romsDir := filepath.Join(base, "roms")
 	coresDir := filepath.Join(base, "cores")
 	if _, err := os.Stat(filepath.Join(coresDir, cores.FileName(cores.DefaultCore, runtime.GOOS))); err != nil {
