@@ -4,6 +4,10 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 
 ## [Unreleased]
 
+### Changed
+
+- **github.com/lordbasex/go-link is now the go-link.org index** (the project ecosystem), so GitHub no longer redirects the old name here. Its release `v0.4.0` has no files and points to this repository's 0.4.0, so a device running 0.3.x still sees the update and where to download it.
+
 ## [0.4.0] - 2026-10-11
 
 ### Changed
