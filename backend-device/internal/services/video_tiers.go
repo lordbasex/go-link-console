@@ -192,7 +192,11 @@ func (s *StreamService) writeTier(l int, data []byte, dur time.Duration) {
 // steps down as its connection asked for (callers hold s.mu).
 func (s *StreamService) tierOfLocked(v *viewer) int {
 	sizes := max(s.tierLevels, 1)
-	return min(min(v.tier, sizes-1)+v.drop, sizes-1+qualitySteps)
+	drop := v.drop
+	if s.room.Saver != nil && s.room.Saver(v.id) {
+		drop = max(drop, 1) // a spectator's lighter video
+	}
+	return min(min(v.tier, sizes-1)+drop, sizes-1+qualitySteps)
 }
 
 // sizeOfLocked is the size tier a tier shows (callers hold s.mu).
@@ -243,7 +247,15 @@ func (s *StreamService) tieredFrame(i420 []byte, w, h, kbps int, dur time.Durati
 				s.tiers[s.tierOfLocked(v)].keyframe.Store(true)
 			}
 		}
-		need[s.tierOfLocked(v)] = true
+		l := s.tierOfLocked(v)
+		if l != v.lastTier {
+			// Moved by something else than video_want (a spectator who now
+			// plays, or the room's saver switch): the tier starts with a
+			// keyframe for it.
+			v.lastTier = l
+			s.tiers[l].keyframe.Store(true)
+		}
+		need[l] = true
 	}
 	s.mu.Unlock()
 	if s.rec.Load() != nil {

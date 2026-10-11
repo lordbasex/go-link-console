@@ -146,6 +146,9 @@ type viewer struct {
 	// tier, moved by its connection (quality_ladder.go); under s.mu.
 	drop    int
 	quality qualityLadder
+	// lastTier is the tier its last frame came from (tieredFrame), to start
+	// a tier it moved to with a keyframe; under s.mu.
+	lastTier int
 	// videoSSRC is this viewer's video stream, to read its receiver
 	// reports among the others.
 	videoSSRC atomic.Uint32
@@ -318,6 +321,10 @@ type RoomHooks struct {
 	// VoiceSlots, when set, is told who each of the four voice tracks
 	// carries now ("" for none), whenever that changes.
 	VoiceSlots func(peers [4]string)
+	// Saver, when set, says which guests get the lighter video (one
+	// quality step down: half the bitrate), the spectators of a room that
+	// saves. Called with the stream's lock held: it must not block.
+	Saver func(peerID string) bool
 }
 
 // SetRoomHooks wires the Room Manager.

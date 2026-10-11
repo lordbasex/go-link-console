@@ -51,4 +51,31 @@ describe("InviteDialog", () => {
     fireEvent.click(screen.getByRole("button", { name: "Stop this QR code" }));
     expect(sendToDevice).toHaveBeenLastCalledWith({ type: "end_group", id: "test" });
   });
+
+  it("makes the spectators' QR code with its own link, and switches the lighter video", () => {
+    const onSaver = vi.fn();
+    const groupInvite = { key, uses: 10, used: 3, expiresAt: new Date(Date.now() + 3600e3).toISOString(), approval: true };
+    render(<InviteDialog room={{ ...room, groupInvite }} fallbackUrl="" onAction={() => {}} onClose={() => {}} saver={{ on: true, onChange: onSaver }} />);
+    fireEvent.click(screen.getByRole("button", { name: "Spectators" }));
+    // The players' group link is not the spectators' one.
+    expect(screen.queryByText("3 of 10 people came in")).toBeNull();
+    expect(screen.getByRole("checkbox", { name: /Ask me first/ })).toBeChecked();
+    fireEvent.click(screen.getByRole("button", { name: "Make the spectators' QR code" }));
+    expect(sendToDevice).toHaveBeenLastCalledWith({ type: "invite_group", id: "test", uses: 10, hours: 6, approval: true, watch: true });
+    const sw = screen.getByRole("switch", { name: "Lighter video for spectators" });
+    expect(sw).toHaveAttribute("aria-checked", "true");
+    fireEvent.click(sw);
+    expect(onSaver).toHaveBeenCalledWith(false);
+  });
+
+  it("shows and stops the room's spectators' QR code", () => {
+    const watchInvite = { key, uses: 20, used: 1, expiresAt: new Date(Date.now() + 3600e3).toISOString(), approval: false, watch: true };
+    localStorage.setItem("go-link.invite-mode", "watch");
+    render(<InviteDialog room={{ ...room, watchInvite }} fallbackUrl="" onAction={() => {}} onClose={() => {}} />);
+    expect(screen.getByText("1 of 20 people came in")).toBeInTheDocument();
+    // Without the room's state the lighter video switch is not shown.
+    expect(screen.queryByRole("switch")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Stop this QR code" }));
+    expect(sendToDevice).toHaveBeenLastCalledWith({ type: "end_group", id: "test", watch: true });
+  });
 });

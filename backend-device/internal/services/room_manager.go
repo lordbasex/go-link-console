@@ -177,6 +177,10 @@ type RoomManager struct {
 	// on by default). voiceSlots is who each voice track carries now.
 	spectatorsHear bool
 	voiceSlots     [voiceSlots]string
+	// watchers came with the spectators' invitation: they come in
+	// watching, held. saver: spectators get the lighter video.
+	watchers map[string]bool
+	saver    bool
 
 	ports atomic.Pointer[map[seatKey]int]
 	// voice is who may talk and who hears, read by the voice path for
@@ -184,8 +188,9 @@ type RoomManager struct {
 	voice atomic.Pointer[map[string]voiceRole]
 }
 
-// voiceRole is one guest's part in the room's voice.
-type voiceRole struct{ talk, hear bool }
+// voiceRole is one guest's part in the room's voice, and whether it gets
+// the lighter video (a spectator while the room saves).
+type voiceRole struct{ talk, hear, saver bool }
 
 // NewRoomManager builds the manager. Call Run to start it.
 func NewRoomManager(cfg RoomManagerConfig, out ControlSender) *RoomManager {
@@ -213,6 +218,8 @@ func NewRoomManager(cfg RoomManagerConfig, out ControlSender) *RoomManager {
 	noVoice := map[string]voiceRole{}
 	m.voice.Store(&noVoice)
 	m.spectatorsHear = true
+	m.saver = true
+	m.watchers = make(map[string]bool)
 	return m
 }
 
@@ -253,10 +260,41 @@ func (m *RoomManager) VoiceRole(peerID string) (talk, hear bool) {
 	return r.talk, r.hear
 }
 
+// Saver says whether a guest gets the lighter video: spectators, while
+// the room saves (the host's switch, on by default). Safe from any
+// goroutine.
+func (m *RoomManager) Saver(peerID string) bool { return (*m.voice.Load())[peerID].saver }
+
 // Hooks connects a stream's guests to this room.
 func (m *RoomManager) Hooks() RoomHooks {
 	return RoomHooks{Opened: m.Join, Message: m.HandleControl, Closed: m.Leave, PortOf: m.PortOf,
-		VoiceRole: m.VoiceRole, VoiceSlots: m.SetVoiceSlots}
+		VoiceRole: m.VoiceRole, VoiceSlots: m.SetVoiceSlots, Saver: m.Saver}
+}
+
+// SetSpectatorSaver sends spectators the lighter video (half the bitrate),
+// or the same as the players.
+func (m *RoomManager) SetSpectatorSaver(on bool) {
+	m.do(func() {
+		if m.saver != on {
+			m.saver = on
+			m.publishVoice()
+			m.broadcastState()
+		}
+	})
+}
+
+// MarkWatcher records that a guest came with the spectators' invitation:
+// it comes in watching and, like someone the host moved to watching, plays
+// only through a raised hand. Call it before Join (or after: it moves the
+// guest to watching then).
+func (m *RoomManager) MarkWatcher(peerID string) {
+	m.do(func() {
+		m.watchers[peerID] = true
+		if mem := m.members[peerID]; mem != nil && !mem.spectator {
+			mem.spectator, mem.held = true, true
+			m.reconcile()
+		}
+	})
 }
 
 // SetSpectatorsHear lets the spectators hear the voices, or not (the
@@ -287,7 +325,7 @@ func (m *RoomManager) publishVoice() {
 	roles := make(map[string]voiceRole, len(m.members))
 	for peer, mem := range m.members {
 		talk := !mem.spectator
-		roles[peer] = voiceRole{talk: talk, hear: talk || m.spectatorsHear}
+		roles[peer] = voiceRole{talk: talk, hear: talk || m.spectatorsHear, saver: mem.spectator && m.saver}
 	}
 	m.voice.Store(&roles)
 }
@@ -303,7 +341,8 @@ func (m *RoomManager) Join(peerID string) {
 			m.out.SendControl(peerID, msg)
 		}
 		m.nextOrder++
-		m.members[peerID] = &member{peer: peerID, name: defaultName(peerID), locals: []uint8{0}, order: m.nextOrder}
+		watch := m.watchers[peerID]
+		m.members[peerID] = &member{peer: peerID, name: defaultName(peerID), locals: []uint8{0}, order: m.nextOrder, spectator: watch, held: watch}
 		m.teleLog("join", peerID, "joined the room", map[string]any{"name": defaultName(peerID)})
 		m.reconcile()
 	})
@@ -318,6 +357,7 @@ func (m *RoomManager) Leave(peerID string) {
 		}
 		delete(m.members, peerID)
 		delete(m.owners, peerID)
+		delete(m.watchers, peerID)
 		m.teleLog("leave", peerID, "left the room", map[string]any{"name": mem.name})
 		m.reconcile()
 		if m.cfg.Now().Before(mem.typingUntil) {
@@ -1296,6 +1336,8 @@ type stateOut struct {
 	// voice track (voice-p1..voice-p4) carries now, null when nobody.
 	SpectatorsHear bool            `json:"spectators_hear"`
 	VoiceSlots     []*voiceSlotOut `json:"voice_slots"`
+	// SpectatorSaver: spectators get the lighter video.
+	SpectatorSaver bool `json:"spectator_saver"`
 }
 
 // voiceSlotOut is the person a voice track carries: port is their seat (0
@@ -1324,7 +1366,7 @@ func (m *RoomManager) broadcastState() {
 	for peer, mem := range m.members {
 		st := stateOut{Type: "room_state", MaxPlayers: m.cfg.MaxPlayers, Voice: !m.voiceOff, Chat: !m.chatOff, InputHUD: m.inputHUD, Picture: m.picture, Info: m.info, Seats: make([]*seatOut, len(m.seats)), Queue: []queueOut{}, Spectators: []personOut{},
 			Pausable: m.pausable, Paused: m.paused, PausedBy: m.pausedBy, Controls: m.controls, Recording: m.recording, HostOnline: online,
-			SpectatorsHear: m.spectatorsHear, VoiceSlots: make([]*voiceSlotOut, len(slotPeople))}
+			SpectatorsHear: m.spectatorsHear, SpectatorSaver: m.saver, VoiceSlots: make([]*voiceSlotOut, len(slotPeople))}
 		for i, sp := range slotPeople {
 			if sp != nil {
 				c := *sp

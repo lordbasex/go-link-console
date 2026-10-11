@@ -626,7 +626,7 @@ export function DeviceDashboard({
       )}
       {inviteOpen && room?.room_id && (
         <InviteDialog
-          room={{ id: "test", name: t.dash.testPattern, invite: room.invite ?? "", inviteCode: room.invite_code ?? "", groupInvite: room.groupInvite }}
+          room={{ id: "test", name: t.dash.testPattern, invite: room.invite ?? "", inviteCode: room.invite_code ?? "", groupInvite: room.groupInvite, watchInvite: room.watchInvite }}
           fallbackUrl={`${window.location.origin}/r/${room.room_id}`}
           onAction={(action) => sendToDevice({ type: "room_action", id: "test", action })}
           onClose={() => setInviteOpen(false)}

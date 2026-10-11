@@ -38,8 +38,11 @@ type SavedRoom struct {
 	ChatOff bool `json:"chat_off,omitempty"`
 	// SpectatorsVoiceOff: the host does not let spectators hear the
 	// voices (they hear them by default).
-	SpectatorsVoiceOff bool   `json:"spectators_voice_off,omitempty"`
-	Art                string `json:"art,omitempty"` // lobby picture: boxart, title or snap ("" = Settings)
+	SpectatorsVoiceOff bool `json:"spectators_voice_off,omitempty"`
+	// SpectatorSaverOff: spectators get the players' video quality instead
+	// of the lighter one (the default saves).
+	SpectatorSaverOff bool   `json:"spectator_saver_off,omitempty"`
+	Art               string `json:"art,omitempty"` // lobby picture: boxart, title or snap ("" = Settings)
 	// Picture is the host's default picture style for the room's guests
 	// (nil: the website's own default).
 	Picture   *RoomPicture `json:"picture,omitempty"`
@@ -79,6 +82,8 @@ type ManagedRoom struct {
 	// GroupInvite is the room's group invitation, while one is alive, and
 	// Knocks the people that used it and wait for the host to let them in.
 	GroupInvite *GroupInvite `json:"group_invite,omitempty"`
+	// WatchInvite is the room's spectators' invitation, while one is alive.
+	WatchInvite *GroupInvite `json:"watch_invite,omitempty"`
 	Knocks      []Knock      `json:"knocks,omitempty"`
 	// Recording is set while the host records the game, since
 	// RecordingSince.
@@ -110,6 +115,8 @@ type GroupInvite struct {
 	Used      int       `json:"used"`
 	ExpiresAt time.Time `json:"expires_at"`
 	Approval  bool      `json:"approval"`
+	// Watch: the spectators' invitation (its people come in to watch).
+	Watch bool `json:"watch,omitempty"`
 }
 
 // Knock is someone who came with a group invitation and waits for the
@@ -118,4 +125,6 @@ type Knock struct {
 	Peer  string    `json:"peer"`
 	Name  string    `json:"name"`
 	Since time.Time `json:"since"`
+	// Watch: came with the spectators' invitation.
+	Watch bool `json:"watch,omitempty"`
 }

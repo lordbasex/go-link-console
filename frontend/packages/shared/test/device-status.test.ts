@@ -161,6 +161,19 @@ describe("group invitations", () => {
     expect(s!.rooms[0]!.knocks).toEqual([]);
   });
 
+  it("reads the spectators' invitation and who comes to watch", () => {
+    const s = parseDeviceStatus({
+      type: "device_status",
+      device_id: "d",
+      rooms: [{ id: "g1", state: "live", name: "Game", watch_invite: { key, uses: 20, used: 1, expires_at: "x", approval: true, watch: true }, knocks: [{ peer: "p1", name: "Ana", since: "x", watch: true }] }],
+    });
+    expect(s!.rooms[0]!.watchInvite).toMatchObject({ key, uses: 20, watch: true });
+    expect(s!.rooms[0]!.groupInvite).toBeUndefined();
+    expect(s!.rooms[0]!.knocks).toEqual([{ peer: "p1", name: "Ana", since: "x", watch: true }]);
+    expect(parseGroupResult({ type: "end_group_result", id: "g1", ok: true, watch: true })).toMatchObject({ type: "end_group", watch: true });
+    expect(parseGroupResult({ type: "invite_group_result", id: "g1", ok: true, group: { key, watch: true } })).toMatchObject({ watch: true });
+  });
+
   it("reads the device's answers", () => {
     expect(parseGroupResult({ type: "invite_group_result", id: "g1", ok: true, group: { key, uses: 5, used: 0, expires_at: "x", approval: false } })).toMatchObject({ type: "invite_group", ok: true, group: { key, uses: 5 } });
     expect(parseGroupResult({ type: "knock_answer_result", id: "g1", ok: false, error: "that person is not waiting to come in" })).toMatchObject({ type: "knock_answer", ok: false });

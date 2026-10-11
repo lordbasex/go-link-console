@@ -184,6 +184,15 @@ export const docsEn: Docs = {
           ],
         },
         { t: "note", tone: "info", text: "The group's key goes after # in the link: browsers never send that part to a server, so only the people with the link have it." },
+        { t: "h2", id: "spectators", text: "A QR code for spectators" },
+        {
+          t: "list",
+          items: [
+            "Choose **Spectators** in the Invite dialog for people who come to watch: its own link and QR code, number of people and time, with **Ask me first** on by default.",
+            "They come in watching: they see and hear the game and chat. In your notice they show as “Ana · to watch”. To play, they raise a hand and you decide.",
+            "**Lighter video for spectators** (on by default) sends whoever watches the picture at half the bitrate, so your connection has room for the players. The players' video stays the same.",
+          ],
+        },
         { t: "h2", id: "hand", text: "Raise your hand to play" },
         { t: "p", text: "Someone watching can ask you to play without interrupting the game." },
         {

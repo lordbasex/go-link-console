@@ -184,6 +184,15 @@ export const docsPt: Docs = {
           ],
         },
         { t: "note", tone: "info", text: "A chave do grupo vai depois do # no link: os navegadores nunca enviam essa parte a um servidor, então só quem tem o link a tem." },
+        { t: "h2", id: "spectators", text: "Um QR para espectadores" },
+        {
+          t: "list",
+          items: [
+            "Escolha **Espectadores** no diálogo Convidar para quem vem assistir: seu próprio link e QR, número de pessoas e tempo, com **Pedir minha aprovação** ligado por padrão.",
+            "Entram assistindo: veem e ouvem o jogo e usam o chat. No seu aviso aparecem como “Ana · para assistir”. Para jogar, levantam a mão e você decide.",
+            "**Vídeo leve para espectadores** (ligado por padrão) manda a quem assiste a imagem com metade do bitrate, assim sua conexão tem espaço para os jogadores. O vídeo dos jogadores não muda.",
+          ],
+        },
         { t: "h2", id: "hand", text: "Levantar a mão para jogar" },
         { t: "p", text: "Quem está assistindo pode pedir para jogar sem interromper a partida." },
         {

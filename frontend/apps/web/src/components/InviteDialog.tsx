@@ -14,14 +14,15 @@ import { invitationUrl } from "../role";
 import { CopyButton } from "./CopyButton";
 import { QrCode } from "./QrCode";
 
-type Mode = "one" | "group";
+type Mode = "one" | "group" | "watch";
 const MODE_KEY = "go-link.invite-mode";
 const USES = [2, 5, 10, 20, 50];
 const HOURS = [1, 6, 24];
 
 function readMode(): Mode {
   try {
-    return window.localStorage.getItem(MODE_KEY) === "group" ? "group" : "one";
+    const m = window.localStorage.getItem(MODE_KEY);
+    return m === "group" || m === "watch" ? m : "one";
   } catch {
     return "one";
   }
@@ -37,6 +38,9 @@ function readMode(): Mode {
  * - A group: one link and QR code for several people (its key after #,
  *   never sent to a server), up to a number of people and a time, each one
  *   let in by the host when "Ask me first" is on (the default).
+ * - Spectators: the same with its own link and places, for people who come
+ *   in to watch (and play only if the host lets them); with the room's
+ *   "lighter video for spectators" switch.
  *
  * "New link" replaces the room's link and code for everyone.
  */
@@ -45,8 +49,11 @@ export function InviteDialog({
   fallbackUrl,
   onAction,
   onClose,
+  saver,
 }: {
-  room: { id: string; name: string; invite: string; inviteCode: string; groupInvite?: GroupInvite };
+  room: { id: string; name: string; invite: string; inviteCode: string; groupInvite?: GroupInvite; watchInvite?: GroupInvite };
+  /** The room's switch: spectators get the lighter video (unknown: not shown). */
+  saver?: { on: boolean; onChange: (on: boolean) => void };
   /** The room's plain link, while there is no invitation yet. */
   fallbackUrl: string;
   onAction: (action: "new_link") => void;
@@ -77,8 +84,10 @@ export function InviteDialog({
   const [approval, setApproval] = useState(true);
   const [groupError, setGroupError] = useState("");
   // The device answers at once; device_status follows a moment later.
-  const [fresh, setFresh] = useState<GroupInvite | null>(null);
-  const group = room.groupInvite ?? (fresh && new Date(fresh.expiresAt) > new Date() ? fresh : undefined);
+  const [fresh, setFresh] = useState<{ group: GroupInvite | null; watch: GroupInvite | null }>({ group: null, watch: null });
+  const watching = mode === "watch";
+  const live = (g: GroupInvite | null) => (g && new Date(g.expiresAt) > new Date() ? g : undefined);
+  const group = watching ? (room.watchInvite ?? live(fresh.watch)) : (room.groupInvite ?? live(fresh.group));
   // One new PIN when the dialog opens and one per "Invite someone else",
   // never on a mere re-render.
   const send = useRef(sendToDevice);
@@ -95,16 +104,17 @@ export function InviteDialog({
         const g = parseGroupResult(msg);
         if (g && g.id === room.id && g.type !== "knock_answer") {
           setGroupError(g.ok ? "" : g.error || t.invite.groupFailed);
-          setFresh(g.type === "invite_group" && g.ok ? (g.group ?? null) : null);
+          const got = g.type === "invite_group" && g.ok ? (g.group ?? null) : null;
+          setFresh((cur) => (g.watch ? { ...cur, watch: got } : { ...cur, group: got }));
         }
       }),
     [onDeviceMessage, room.id],
   );
   const makeGroup = () => {
     setGroupError("");
-    send.current({ type: "invite_group", id: room.id, uses, hours, approval });
+    send.current(watching ? { type: "invite_group", id: room.id, uses, hours, approval, watch: true } : { type: "invite_group", id: room.id, uses, hours, approval });
   };
-  const endGroup = () => send.current({ type: "end_group", id: room.id });
+  const endGroup = () => send.current(watching ? { type: "end_group", id: room.id, watch: true } : { type: "end_group", id: room.id });
   const groupLink = group ? groupInvitationUrl(link, group.key) : "";
   const groupExpires = group?.expiresAt
     ? new Date(group.expiresAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
@@ -121,13 +131,13 @@ export function InviteDialog({
           {t.invite.title(room.name)}
         </h2>
         <div className="dash-segmented invite-modes" role="group" aria-label={t.invite.modes}>
-          {(["one", "group"] as const).map((m) => (
+          {(["one", "group", "watch"] as const).map((m) => (
             <button key={m} type="button" aria-pressed={mode === m} className={mode === m ? "is-on" : ""} onClick={() => setMode(m)}>
-              {m === "one" ? t.invite.modeOne : t.invite.modeGroup}
+              {m === "one" ? t.invite.modeOne : m === "group" ? t.invite.modeGroup : t.invite.modeWatch}
             </button>
           ))}
         </div>
-        <p className="muted small-plus">{mode === "one" ? t.invite.introOne : t.invite.introGroup}</p>
+        <p className="muted small-plus">{mode === "one" ? t.invite.introOne : watching ? t.invite.introWatch : t.invite.introGroup}</p>
 
         {mode === "one" ? (
           <div className="invite-grid">
@@ -233,6 +243,24 @@ export function InviteDialog({
                   </label>
                 </>
               )}
+              {watching && saver && (
+                <div className="switch-row">
+                  <div className="stack-xxs">
+                    <span className="strong small-plus">{t.invite.saver}</span>
+                    <span className="small faint">{t.invite.saverHint}</span>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={saver.on}
+                    aria-label={t.invite.saver}
+                    className={`switch${saver.on ? " is-on" : ""}`}
+                    onClick={() => saver.onChange(!saver.on)}
+                  >
+                    <span className="switch-knob" />
+                  </button>
+                </div>
+              )}
               {groupError && <p className="form-error small">{groupError}</p>}
               {!room.invite && <p className="small muted">{t.invite.unavailable}</p>}
             </div>
@@ -255,7 +283,7 @@ export function InviteDialog({
             </button>
           ) : (
             <button type="button" className="button button-primary" onClick={makeGroup} disabled={!room.invite}>
-              {t.invite.groupMake}
+              {watching ? t.invite.watchMake : t.invite.groupMake}
             </button>
           )}
           <button ref={closeRef} type="button" className="button button-primary" onClick={onClose}>

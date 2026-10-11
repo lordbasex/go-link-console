@@ -85,6 +85,8 @@ export interface RoomStateView {
   picture?: PictureSettings | null;
   /** Spectators hear the voices too (the host's switch). */
   spectatorsHear: boolean;
+  /** Spectators get the lighter video (the host's switch). */
+  spectatorSaver: boolean;
   /** Who each voice track (voice-p1..voice-p4) carries now; null: nobody. */
   voiceSlots: (VoiceSlotView | null)[];
 }
@@ -313,6 +315,7 @@ export function parseRoomState(msg: unknown): RoomStateView | null {
     recording: m.recording === true,
     picture: parseRoomPicture(m.picture),
     spectatorsHear: m.spectators_hear === true,
+    spectatorSaver: m.spectator_saver === true,
     voiceSlots: Array.from({ length: 4 }, (_, i) => {
       const v = arr(m.voice_slots)[i];
       if (v === null || typeof v !== "object") return null;

@@ -184,6 +184,7 @@ type RoomStatus struct {
 	// The room's group invitation and the people waiting to be let in
 	// (see ManagedRoom).
 	GroupInvite *GroupInvite `json:"group_invite,omitempty"`
+	WatchInvite *GroupInvite `json:"watch_invite,omitempty"`
 	Knocks      []Knock      `json:"knocks,omitempty"`
 	// Picture is the test pattern room's default picture style (nil: the
 	// website's own default).

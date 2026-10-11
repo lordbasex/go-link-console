@@ -55,7 +55,10 @@ export function KnockNotices() {
               const who = k.name || t.knocks.noName;
               return (
                 <li key={k.peer} className="knock-row">
-                  <span className="knock-name">{who}</span>
+                  <span className="knock-name">
+                    {who}
+                    {k.watch && <span className="knock-watch small muted"> · {t.knocks.watching}</span>}
+                  </span>
                   <button type="button" className="button button-secondary button-small" aria-label={t.knocks.declineOne(who)} onClick={() => answer(r.id, k.peer, false)}>
                     {t.knocks.decline}
                   </button>

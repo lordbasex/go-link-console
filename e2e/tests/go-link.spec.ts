@@ -562,7 +562,7 @@ test("a spectator raises a hand: the host says not now, then seats them at once;
   // "Your place" is in the side panel's Chat tab (it opens on Controls while a game streams).
   await sol.page.getByRole("tablist", { name: "Room panel" }).getByRole("tab", { name: "Chat" }).click();
   const place = sol.page.locator(".side-status");
-  await expect(place.getByText("The host moved you to watching: raise your hand to play again")).toBeVisible();
+  await expect(place.getByText("You are watching: raise your hand to ask the host to play")).toBeVisible();
   await expect(place.getByRole("button", { name: "Join the queue" })).toHaveCount(0);
 
   // Sol raises a hand from the dock; the host hears it and sees it on the players.
@@ -668,6 +668,66 @@ test("the queue talks with the players; spectators hear the voices until the hos
   await expect(hearSwitch).toHaveAttribute("aria-checked", "true");
   await page.keyboard.press("Escape");
   for (const g of [zed, ...others, max]) await g.context.close();
+});
+
+test("a spectators' QR code lets people in to watch, each one let in by the host; spectators get the lighter video", async ({ browser }) => {
+  test.setTimeout(150_000);
+  const shot = async (p: Page, name: string) => {
+    if (process.env.E2E_WATCH_SHOTS) await p.screenshot({ path: `${process.env.E2E_WATCH_SHOTS}/${name}.png` });
+  };
+  await page.getByRole("button", { name: "Invite", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: /Invite to/ });
+  await dialog.getByRole("button", { name: "Spectators" }).click();
+  await expect(dialog.getByRole("checkbox", { name: /Ask me first/ })).toBeChecked();
+  const saver = dialog.getByRole("switch", { name: "Lighter video for spectators" });
+  await expect(saver).toHaveAttribute("aria-checked", "true");
+  await dialog.getByRole("button", { name: "Make the spectators' QR code" }).click();
+  await expect(dialog.getByText("0 of 10 people came in")).toBeVisible();
+  await shot(page, "1-host-spectators-qr");
+  await expectAccessible(page, "spectators' QR code");
+  const link = (await dialog.locator(".invite-url[data-link]").getAttribute("data-link")) ?? "";
+  expect(link).toMatch(/\/g\/[A-Za-z0-9_-]{22}#k=[A-Za-z0-9_-]{43}$/);
+  await dialog.getByRole("button", { name: "Got it" }).click();
+
+  // Ana opens the link: a name for the host, then a wait.
+  const context = await browser.newContext();
+  const ana = await context.newPage();
+  await ana.goto(link);
+  await expect(ana.locator("#splash")).toBeHidden();
+  const form = ana.locator(".knock-prompt");
+  await form.getByRole("textbox", { name: "Your name" }).fill("Ana");
+  await form.getByRole("checkbox", { name: /I have read and accept/ }).check();
+  await form.getByRole("button", { name: "Ask to come in" }).click();
+  await expect(ana.getByText("Waiting for the host")).toBeVisible();
+  // The host sees that Ana comes to watch, and lets her in.
+  const row = page.locator(".knock-row", { hasText: "Ana" });
+  await expect(row.getByText("to watch")).toBeVisible();
+  await shot(page, "2-host-sees-who-comes-to-watch");
+  await page.getByRole("button", { name: "Let Ana in", exact: true }).click();
+  await expectVideoPlaying(ana);
+  // Ana watches, and plays only through a raised hand.
+  await ana.getByRole("tablist", { name: "Room panel" }).getByRole("tab", { name: "Chat" }).click();
+  const place = ana.locator(".side-status");
+  await expect(place.getByText("You are watching: raise your hand to ask the host to play")).toBeVisible();
+  await expect(place.getByRole("button", { name: "Raise your hand to play" })).toBeVisible();
+  await expect(place.getByRole("button", { name: "Join the queue" })).toHaveCount(0);
+  await shot(ana, "3-spectator-in");
+
+  // The host's switch: the players' video for spectators, and back.
+  await page.getByRole("button", { name: "Invite", exact: true }).click();
+  await dialog.getByRole("button", { name: "Spectators" }).click();
+  await expect(dialog.getByText("1 of 10 people came in")).toBeVisible();
+  await saver.click();
+  await expect(saver).toHaveAttribute("aria-checked", "false");
+  await saver.click();
+  await expect(saver).toHaveAttribute("aria-checked", "true");
+  // Stopping the QR code: Ana stays.
+  await dialog.getByRole("button", { name: "Stop this QR code" }).click();
+  await expect(dialog.getByRole("button", { name: "Make the spectators' QR code" })).toBeVisible();
+  await dialog.getByRole("button", { name: "One person" }).click();
+  await dialog.getByRole("button", { name: "Got it" }).click();
+  await expectVideoPlaying(ana);
+  await context.close();
 });
 
 test("the controller test page lights the keyboard's buttons", async ({ browser }) => {

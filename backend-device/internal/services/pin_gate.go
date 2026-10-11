@@ -90,6 +90,8 @@ type PinResult struct {
 	RetryAfter int    `json:"retry_after,omitempty"`
 	// Owner: the guest came in with the host's own key (never sent).
 	Owner bool `json:"-"`
+	// Watch: the guest came with the spectators' invitation: in to watch.
+	Watch bool `json:"-"`
 }
 
 // Pass is one invitation's PIN, for the host to share.
@@ -118,6 +120,8 @@ type PinGate struct {
 	lockedUntil time.Time
 
 	group       *groupPass       // the room's group invitation, if any
+	watch       *groupPass       // the spectators' invitation, if any
+	watchTokens map[string]bool  // group tokens that come back to watch
 	groupTokens []string         // return tokens of people it let in
 	knocks      map[string]knock // peer -> waiting for the host
 	declined    map[string]bool  // peers the host said no to, this session
@@ -130,11 +134,13 @@ type groupPass struct {
 	used     int
 	expires  time.Time
 	approval bool
+	watch    bool // the spectators' invitation
 }
 
 type knock struct {
 	name  string
 	since time.Time
+	watch bool // came with the spectators' invitation
 }
 
 // NewPinGate returns an open gate (no PIN asked). now may be nil (time.Now).
@@ -142,7 +148,7 @@ func NewPinGate(now func() time.Time) *PinGate {
 	if now == nil {
 		now = time.Now
 	}
-	return &PinGate{now: now, tries: map[string]int{}, owner: newToken(), knocks: map[string]knock{}, declined: map[string]bool{}}
+	return &PinGate{now: now, tries: map[string]int{}, owner: newToken(), knocks: map[string]knock{}, declined: map[string]bool{}, watchTokens: map[string]bool{}}
 }
 
 // SetPrivate makes guests need an invitation's PIN (or a token).
@@ -229,7 +235,7 @@ func (g *PinGate) Check(peer, pin, token string) PinResult {
 			if equal(token, tk) {
 				delete(g.tries, peer)
 				delete(g.knocks, peer)
-				return PinResult{OK: true, Token: tk}
+				return PinResult{OK: true, Token: tk, Watch: g.watchTokens[tk]}
 			}
 		}
 	}
@@ -297,47 +303,73 @@ func (g *PinGate) Forget(peer string) {
 // clamped to 1..GroupMaxUses and ttl to GroupMinTTL..GroupMaxTTL. People
 // still waiting with the old link are returned, to be told.
 func (g *PinGate) IssueGroup(uses int, ttl time.Duration, approval bool) (models.GroupInvite, []string) {
+	return g.issue(false, uses, ttl, approval)
+}
+
+// IssueWatchGroup makes the room's spectators' invitation: like the group
+// invitation, with its own link and places, but the people it lets in come
+// to watch (PinResult.Watch) and play only if the host lets them.
+func (g *PinGate) IssueWatchGroup(uses int, ttl time.Duration, approval bool) (models.GroupInvite, []string) {
+	return g.issue(true, uses, ttl, approval)
+}
+
+func (g *PinGate) issue(watch bool, uses int, ttl time.Duration, approval bool) (models.GroupInvite, []string) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	uses = min(max(uses, 1), GroupMaxUses)
 	ttl = min(max(ttl, GroupMinTTL), GroupMaxTTL)
-	g.group = &groupPass{key: newToken(), uses: uses, expires: g.now().Add(ttl), approval: approval}
-	waiting := g.dropKnocks()
-	return g.groupInfo(), waiting
+	gp := &groupPass{key: newToken(), uses: uses, expires: g.now().Add(ttl), approval: approval, watch: watch}
+	*g.passOf(watch) = gp
+	waiting := g.dropKnocks(watch)
+	return gp.info(), waiting
+}
+
+// passOf is where the group invitation of a kind lives (callers hold mu).
+func (g *PinGate) passOf(watch bool) **groupPass {
+	if watch {
+		return &g.watch
+	}
+	return &g.group
 }
 
 // RevokeGroup ends the group invitation: its link stops working at once.
 // People still waiting are returned, to be told.
-func (g *PinGate) RevokeGroup() []string {
+func (g *PinGate) RevokeGroup() []string { return g.revoke(false) }
+
+// RevokeWatchGroup ends the spectators' invitation.
+func (g *PinGate) RevokeWatchGroup() []string { return g.revoke(true) }
+
+func (g *PinGate) revoke(watch bool) []string {
 	g.mu.Lock()
 	defer g.mu.Unlock()
-	g.group = nil
-	return g.dropKnocks()
+	*g.passOf(watch) = nil
+	return g.dropKnocks(watch)
 }
 
-func (g *PinGate) dropKnocks() []string {
+// dropKnocks stops the waiting of the people who came with one kind of
+// group invitation, and returns them.
+func (g *PinGate) dropKnocks(watch bool) []string {
 	var peers []string
-	for p := range g.knocks {
-		peers = append(peers, p)
+	for p, k := range g.knocks {
+		if k.watch == watch {
+			peers = append(peers, p)
+			delete(g.knocks, p)
+		}
 	}
-	g.knocks = map[string]knock{}
 	slices.Sort(peers)
 	return peers
 }
 
-// Group returns the live group invitation and the people waiting for the
-// host, oldest first (for the host's status). Nil once it expired.
+// Group returns the live group invitation and everyone waiting for the
+// host with either invitation (Knock.Watch: to watch), oldest first, for
+// the host's status. Nil once it expired.
 func (g *PinGate) Group() (*models.GroupInvite, []models.Knock) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
-	var gi *models.GroupInvite
-	if g.group != nil && g.now().Before(g.group.expires) {
-		v := g.groupInfo()
-		gi = &v
-	}
+	gi := g.liveInfo(g.group)
 	knocks := make([]models.Knock, 0, len(g.knocks))
 	for p, k := range g.knocks {
-		knocks = append(knocks, models.Knock{Peer: p, Name: k.name, Since: k.since})
+		knocks = append(knocks, models.Knock{Peer: p, Name: k.name, Since: k.since, Watch: k.watch})
 	}
 	slices.SortFunc(knocks, func(a, b models.Knock) int { return a.Since.Compare(b.Since) })
 	if len(knocks) == 0 {
@@ -346,16 +378,31 @@ func (g *PinGate) Group() (*models.GroupInvite, []models.Knock) {
 	return gi, knocks
 }
 
-func (g *PinGate) groupInfo() models.GroupInvite {
-	gp := g.group
-	return models.GroupInvite{Key: gp.key, Uses: gp.uses, Used: gp.used, ExpiresAt: gp.expires, Approval: gp.approval}
+// WatchGroup returns the live spectators' invitation (nil: none).
+func (g *PinGate) WatchGroup() *models.GroupInvite {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	return g.liveInfo(g.watch)
 }
 
-// CheckKey answers a guest that came with the group invitation's key. With
-// the host's approval on, the guest waits (Reason "waiting") until Answer.
-// The right key is checked before the room's lock, like a guest's token: a
-// PIN guesser can lock the PIN path, never the people the host invited. A
-// wrong key counts as a wrong PIN. Someone the host said no to stays out.
+func (g *PinGate) liveInfo(gp *groupPass) *models.GroupInvite {
+	if gp == nil || !g.now().Before(gp.expires) {
+		return nil
+	}
+	v := gp.info()
+	return &v
+}
+
+func (gp *groupPass) info() models.GroupInvite {
+	return models.GroupInvite{Key: gp.key, Uses: gp.uses, Used: gp.used, ExpiresAt: gp.expires, Approval: gp.approval, Watch: gp.watch}
+}
+
+// CheckKey answers a guest that came with a group invitation's key (to
+// play, or the spectators' one, to watch). With the host's approval on, the
+// guest waits (Reason "waiting") until Answer. The right key is checked
+// before the room's lock, like a guest's token: a PIN guesser can lock the
+// PIN path, never the people the host invited. A wrong key counts as a
+// wrong PIN. Someone the host said no to stays out.
 func (g *PinGate) CheckKey(peer, key, name string) PinResult {
 	g.mu.Lock()
 	defer g.mu.Unlock()
@@ -363,8 +410,13 @@ func (g *PinGate) CheckKey(peer, key, name string) PinResult {
 	if !g.private {
 		return PinResult{OK: true}
 	}
-	gp := g.group
-	if gp == nil || !equal(key, gp.key) {
+	var gp *groupPass
+	for _, c := range []*groupPass{g.group, g.watch} {
+		if c != nil && equal(key, c.key) {
+			gp = c
+		}
+	}
+	if gp == nil {
 		if now.Before(g.lockedUntil) {
 			return PinResult{Reason: "locked", RetryAfter: int(g.lockedUntil.Sub(now).Seconds()) + 1}
 		}
@@ -385,7 +437,7 @@ func (g *PinGate) CheckKey(peer, key, name string) PinResult {
 	delete(g.tries, peer)
 	if !gp.approval {
 		delete(g.knocks, peer)
-		return g.letInByGroup()
+		return g.letInByGroup(gp)
 	}
 	if _, ok := g.knocks[peer]; ok {
 		return PinResult{Reason: "waiting"} // asked again: still waiting, same place in line
@@ -393,7 +445,7 @@ func (g *PinGate) CheckKey(peer, key, name string) PinResult {
 	if len(g.knocks) >= maxKnocks {
 		return PinResult{Reason: "busy"}
 	}
-	g.knocks[peer] = knock{name: cleanName(name), since: now}
+	g.knocks[peer] = knock{name: cleanName(name), since: now, watch: gp.watch}
 	return PinResult{Reason: "waiting"}
 }
 
@@ -410,7 +462,8 @@ func (g *PinGate) Knocking(peer string) bool {
 func (g *PinGate) Answer(peer string, accept bool) (res PinResult, ok bool) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
-	if _, ok := g.knocks[peer]; !ok {
+	k, ok := g.knocks[peer]
+	if !ok {
 		return PinResult{}, false
 	}
 	delete(g.knocks, peer)
@@ -421,24 +474,28 @@ func (g *PinGate) Answer(peer string, accept bool) (res PinResult, ok bool) {
 		}
 		return PinResult{Reason: "declined"}, true
 	}
-	gp := g.group
+	gp := *g.passOf(k.watch)
 	switch {
 	case gp == nil || !g.now().Before(gp.expires):
 		return PinResult{Reason: "expired"}, true
 	case gp.used >= gp.uses:
 		return PinResult{Reason: "full"}, true
 	}
-	return g.letInByGroup(), true
+	return g.letInByGroup(gp), true
 }
 
-func (g *PinGate) letInByGroup() PinResult {
-	g.group.used++
+func (g *PinGate) letInByGroup(gp *groupPass) PinResult {
+	gp.used++
 	tk := newToken()
 	g.groupTokens = append(g.groupTokens, tk)
 	if len(g.groupTokens) > maxGroupTokens {
+		delete(g.watchTokens, g.groupTokens[0])
 		g.groupTokens = g.groupTokens[len(g.groupTokens)-maxGroupTokens:]
 	}
-	return PinResult{OK: true, Token: tk}
+	if gp.watch {
+		g.watchTokens[tk] = true
+	}
+	return PinResult{OK: true, Token: tk, Watch: gp.watch}
 }
 
 // Revoke ends a guest's return token: the host took that person out of
@@ -456,6 +513,7 @@ func (g *PinGate) Revoke(token string) {
 		}
 	}
 	g.groupTokens = slices.DeleteFunc(g.groupTokens, func(tk string) bool { return equal(token, tk) })
+	delete(g.watchTokens, token)
 	g.removed = append(g.removed, token)
 	if len(g.removed) > maxGroupTokens {
 		g.removed = g.removed[len(g.removed)-maxGroupTokens:]

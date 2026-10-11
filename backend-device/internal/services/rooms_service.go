@@ -610,6 +610,12 @@ func (r *RoomsService) Action(ctx context.Context, id, action, name string) (int
 		if m := r.managerOf(gr); m != nil {
 			m.SetChat(on)
 		}
+	case "spectator_saver_on", "spectator_saver_off":
+		on := action == "spectator_saver_on"
+		r.update(gr, func(s *models.SavedRoom) { s.SpectatorSaverOff = !on })
+		if m := r.managerOf(gr); m != nil {
+			m.SetSpectatorSaver(on)
+		}
 	case "spectators_voice_on", "spectators_voice_off":
 		on := action == "spectators_voice_on"
 		r.update(gr, func(s *models.SavedRoom) { s.SpectatorsVoiceOff = !on })
@@ -873,6 +879,7 @@ func (r *RoomsService) launch(gr *gameRoom, statePath string) error {
 			manager.SetVoice(saved.Voice)
 			manager.SetChat(!saved.ChatOff)
 			manager.SetSpectatorsHear(!saved.SpectatorsVoiceOff)
+			manager.SetSpectatorSaver(!saved.SpectatorSaverOff)
 			manager.SetPicture(saved.Picture)
 			manager.SetPausable(true)
 			// A room saved paused comes back paused, now that the game can
@@ -1454,13 +1461,14 @@ func (r *RoomsService) List() []models.ManagedRoom {
 		if seats < 1 {
 			seats = SeatsFor(r.controlsOf(gr.saved.Rom))
 		}
-		var group *models.GroupInvite
+		var group, watch *models.GroupInvite
 		var knocks []models.Knock
 		if gr.signal != nil {
 			group, knocks = gr.signal.Admission()
+			watch = gr.signal.WatchInvite()
 		}
 		out = append(out, models.ManagedRoom{
-			GroupInvite: group, Knocks: knocks,
+			GroupInvite: group, WatchInvite: watch, Knocks: knocks,
 			SavedRoom: gr.saved, Game: gr.game, RoomID: gr.roomID,
 			Players: gr.summary.Players, MaxPlayers: seats, Spectators: gr.summary.Spectators, Queue: gr.summary.Queue,
 			Invite: gr.invite, InviteCode: gr.code, OwnerKey: ownerKey(gr.signal),
@@ -1536,19 +1544,28 @@ func (r *RoomsService) signalOf(id string) (*TestRoomService, error) {
 
 // InviteGroup makes a running room's group invitation (one link for
 // several people), replacing the one before.
-func (r *RoomsService) InviteGroup(id string, uses int, ttl time.Duration, approval bool) (models.GroupInvite, error) {
+// With watch it is the spectators' invitation instead.
+func (r *RoomsService) InviteGroup(id string, uses int, ttl time.Duration, approval, watch bool) (models.GroupInvite, error) {
 	sig, err := r.signalOf(id)
 	if err != nil {
 		return models.GroupInvite{}, err
 	}
+	if watch {
+		return sig.IssueWatchGroup(uses, ttl, approval), nil
+	}
 	return sig.IssueGroup(uses, ttl, approval), nil
 }
 
-// RevokeGroup ends a running room's group invitation.
-func (r *RoomsService) RevokeGroup(id string) error {
+// RevokeGroup ends a running room's group invitation (with watch, its
+// spectators' invitation).
+func (r *RoomsService) RevokeGroup(id string, watch bool) error {
 	sig, err := r.signalOf(id)
 	if err == nil {
-		sig.RevokeGroup()
+		if watch {
+			sig.RevokeWatchGroup()
+		} else {
+			sig.RevokeGroup()
+		}
 	}
 	return err
 }

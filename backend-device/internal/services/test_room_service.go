@@ -108,6 +108,25 @@ func (t *TestRoomService) RevokeGroup() {
 	t.admissionChanged()
 }
 
+// IssueWatchGroup makes the room's spectators' invitation: one link for
+// several people who come in to watch (and play only if the host lets
+// them), replacing the one before.
+func (t *TestRoomService) IssueWatchGroup(uses int, ttl time.Duration, approval bool) models.GroupInvite {
+	gi, waiting := t.pin.IssueWatchGroup(uses, ttl, approval)
+	t.tellWaiting(waiting, "expired")
+	t.admissionChanged()
+	return gi
+}
+
+// RevokeWatchGroup ends the room's spectators' invitation.
+func (t *TestRoomService) RevokeWatchGroup() {
+	t.tellWaiting(t.pin.RevokeWatchGroup(), "expired")
+	t.admissionChanged()
+}
+
+// WatchInvite is the room's live spectators' invitation (nil: none).
+func (t *TestRoomService) WatchInvite() *models.GroupInvite { return t.pin.WatchGroup() }
+
 func (t *TestRoomService) tellWaiting(peers []string, reason string) {
 	for _, p := range peers {
 		t.signal(p, struct {
@@ -137,6 +156,9 @@ func (t *TestRoomService) Answer(peer string, accept bool) error {
 		PinResult
 	}{"pin_result", res})
 	if res.OK {
+		if res.Watch {
+			t.markWatcher(peer)
+		}
 		t.admitWith(peer, res.Token)
 	}
 	t.log.Info("host answered a guest", "peer_id", peer, "accept", accept, "reason", res.Reason)
@@ -242,6 +264,17 @@ func (t *TestRoomService) markOwner(peer string) {
 	}
 }
 
+// markWatcher tells the Room Manager that a guest came with the
+// spectators' invitation: it comes in watching.
+func (t *TestRoomService) markWatcher(peer string) {
+	t.mu.Lock()
+	m := t.manager
+	t.mu.Unlock()
+	if m != nil {
+		m.MarkWatcher(peer)
+	}
+}
+
 // checkPin answers a guest's PIN and lets it in when right.
 func (t *TestRoomService) checkPin(peer string, payload json.RawMessage) {
 	var msg struct {
@@ -268,6 +301,9 @@ func (t *TestRoomService) checkPin(peer string, payload json.RawMessage) {
 	if res.OK {
 		if res.Owner {
 			t.markOwner(peer)
+		}
+		if res.Watch {
+			t.markWatcher(peer)
 		}
 		t.admitWith(peer, res.Token)
 		if msg.Key != "" || wasWaiting {
@@ -680,6 +716,6 @@ func (t *TestRoomService) setStatusWith(id string, n int, sum RoomSummary) {
 		RoomID: id, Viewers: n, Title: title, Game: game, Public: public,
 		Players: sum.Players, MaxPlayers: seatsOrDefault(sum.MaxPlayers), Queue: sum.Queue, Spectators: sum.Spectators,
 		Invite: invite, InviteCode: code, OwnerKey: key, Picture: picture,
-		GroupInvite: group, Knocks: knocks,
+		GroupInvite: group, WatchInvite: t.pin.WatchGroup(), Knocks: knocks,
 	})
 }

@@ -470,6 +470,7 @@ func run() error {
 			Hours    int    `json:"hours"`
 			Approval *bool  `json:"approval"`
 			Peer     string `json:"peer"`
+			Watch    bool   `json:"watch"` // the spectators' invitation
 			services.GameRequest
 		}
 		if json.Unmarshal(data, &msg) != nil {
@@ -691,19 +692,26 @@ func run() error {
 			case "invite_group":
 				approval := msg.Approval == nil || *msg.Approval // on unless turned off
 				ttl := time.Duration(max(msg.Hours, 1)) * time.Hour
-				if test {
+				switch {
+				case test && msg.Watch:
+					gi = room.IssueWatchGroup(msg.Uses, ttl, approval)
+				case test:
 					gi = room.IssueGroup(msg.Uses, ttl, approval)
-				} else {
-					gi, gerr = games.InviteGroup(msg.ID, msg.Uses, ttl, approval)
+				default:
+					gi, gerr = games.InviteGroup(msg.ID, msg.Uses, ttl, approval, msg.Watch)
 				}
 				if gerr == nil {
 					res["group"] = gi
 				}
 			case "end_group":
-				if test {
+				res["watch"] = msg.Watch
+				switch {
+				case test && msg.Watch:
+					room.RevokeWatchGroup()
+				case test:
 					room.RevokeGroup()
-				} else {
-					gerr = games.RevokeGroup(msg.ID)
+				default:
+					gerr = games.RevokeGroup(msg.ID, msg.Watch)
 				}
 			case "knock_answer":
 				res["peer"], res["accept"] = msg.Peer, msg.Accept
@@ -734,10 +742,14 @@ func run() error {
 			// --test-room-pause.
 			if msg.ID == services.TestRoomID && room != nil {
 				ok := action == "new_link" || ((action == "pause" || action == "resume") && *testPause) || action == "input_hud_on" || action == "input_hud_off" ||
-					action == "spectators_voice_on" || action == "spectators_voice_off"
+					action == "spectators_voice_on" || action == "spectators_voice_off" || action == "spectator_saver_on" || action == "spectator_saver_off"
 				switch action {
 				case "new_link":
 					room.NewInvite()
+				case "spectator_saver_on", "spectator_saver_off":
+					if testManager != nil {
+						testManager.SetSpectatorSaver(action == "spectator_saver_on")
+					}
 				case "spectators_voice_on", "spectators_voice_off":
 					if testManager != nil {
 						testManager.SetSpectatorsHear(action == "spectators_voice_on")

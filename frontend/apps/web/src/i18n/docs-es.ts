@@ -184,6 +184,15 @@ export const docsEs: Docs = {
           ],
         },
         { t: "note", tone: "info", text: "La clave del grupo va después del # en el enlace: los navegadores nunca mandan esa parte a un servidor, así que solo la tienen quienes tienen el enlace." },
+        { t: "h2", id: "spectators", text: "Un QR para espectadores" },
+        {
+          t: "list",
+          items: [
+            "Elige **Espectadores** en el modal Invitar para quienes vienen a mirar: su propio enlace y QR, cantidad de personas y tiempo, con **Pedirme aprobación** encendido por defecto.",
+            "Entran mirando: ven y escuchan el juego y chatean. En tu aviso aparecen como “Ana · para mirar”. Para jugar, levantan la mano y tú decides.",
+            "**Video liviano para espectadores** (encendido por defecto) manda a quien mira la imagen con la mitad del bitrate, así a tu conexión le queda lugar para los jugadores. El video de los jugadores no cambia.",
+          ],
+        },
         { t: "h2", id: "hand", text: "Levantar la mano para jugar" },
         { t: "p", text: "Quien mira puede pedirte jugar sin interrumpir la partida." },
         {

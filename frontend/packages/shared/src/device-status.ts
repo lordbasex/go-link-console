@@ -182,6 +182,8 @@ export interface ManagedRoom {
   inviteCode: string;
   /** The room's group invitation (one link for several people), while alive. */
   groupInvite?: GroupInvite;
+  /** The room's spectators' invitation, while alive. */
+  watchInvite?: GroupInvite;
   /** People who came with it and wait for the host to let them in. */
   knocks?: Knock[];
   /** The host turned the room's chat off. */
@@ -240,6 +242,7 @@ function parseRooms(v: unknown): ManagedRoom[] {
         chatOff: o.chat_off === true,
         inviteCode: typeof o.invite_code === "string" && /^\d{9}$/.test(o.invite_code) ? o.invite_code : "",
         groupInvite: parseGroupInvite(o.group_invite),
+        watchInvite: parseGroupInvite(o.watch_invite),
         knocks: parseKnocks(o.knocks),
         recording: o.recording === true,
         recordingSince: str(o.recording_since, 40),
@@ -268,6 +271,7 @@ export interface DeviceRoom {
   owner_key?: string;
   /** The test pattern room's group invitation and the people waiting (parsed). */
   groupInvite?: GroupInvite;
+  watchInvite?: GroupInvite;
   knocks?: Knock[];
   /** The test pattern room's default picture style (absent: the site's default). */
   picture?: PictureSettings | null;
@@ -334,8 +338,8 @@ export function parseDeviceStatus(msg: unknown): DeviceStatus | null {
 
 function parseDeviceRoom(v: unknown): DeviceRoom | undefined {
   if (typeof v !== "object" || v === null) return undefined;
-  const r = v as DeviceRoom & { picture?: unknown; group_invite?: unknown };
-  return { ...r, picture: parseRoomPicture(r.picture), groupInvite: parseGroupInvite(r.group_invite), knocks: parseKnocks(r.knocks) };
+  const r = v as DeviceRoom & { picture?: unknown; group_invite?: unknown; watch_invite?: unknown };
+  return { ...r, picture: parseRoomPicture(r.picture), groupInvite: parseGroupInvite(r.group_invite), watchInvite: parseGroupInvite(r.watch_invite), knocks: parseKnocks(r.knocks) };
 }
 
 /**
@@ -350,6 +354,8 @@ export interface GroupInvite {
   used: number;
   expiresAt: string;
   approval: boolean;
+  /** The spectators' invitation: its people come in to watch. */
+  watch?: boolean;
 }
 
 /** Someone who came with a group invitation and waits for the host. */
@@ -357,6 +363,8 @@ export interface Knock {
   peer: string;
   name: string;
   since: string;
+  /** Came with the spectators' invitation, to watch. */
+  watch?: boolean;
 }
 
 const GROUP_KEY = /^[A-Za-z0-9_-]{43}$/;
@@ -366,14 +374,18 @@ function parseGroupInvite(v: unknown): GroupInvite | undefined {
   const g = v as Record<string, unknown>;
   if (typeof g.key !== "string" || !GROUP_KEY.test(g.key)) return undefined;
   const n = (x: unknown) => (typeof x === "number" && Number.isInteger(x) && x >= 0 ? Math.min(x, 1000) : 0);
-  return { key: g.key, uses: n(g.uses), used: n(g.used), expiresAt: typeof g.expires_at === "string" ? g.expires_at.slice(0, 40) : "", approval: g.approval === true };
+  const gi: GroupInvite = { key: g.key, uses: n(g.uses), used: n(g.used), expiresAt: typeof g.expires_at === "string" ? g.expires_at.slice(0, 40) : "", approval: g.approval === true };
+  if (g.watch === true) gi.watch = true;
+  return gi;
 }
 
 function parseKnocks(v: unknown): Knock[] {
   return (Array.isArray(v) ? v : []).slice(0, 20).flatMap((x) => {
     const k = (typeof x === "object" && x !== null ? x : {}) as Record<string, unknown>;
     if (typeof k.peer !== "string" || !k.peer) return [];
-    return [{ peer: k.peer.slice(0, 64), name: typeof k.name === "string" ? k.name.slice(0, 24) : "", since: typeof k.since === "string" ? k.since.slice(0, 40) : "" }];
+    const knock: Knock = { peer: k.peer.slice(0, 64), name: typeof k.name === "string" ? k.name.slice(0, 24) : "", since: typeof k.since === "string" ? k.since.slice(0, 40) : "" };
+    if (k.watch === true) knock.watch = true;
+    return [knock];
   });
 }
 
@@ -384,6 +396,8 @@ export interface GroupResult {
   ok: boolean;
   error: string;
   group?: GroupInvite;
+  /** About the spectators' invitation (invite_group and end_group). */
+  watch: boolean;
 }
 
 export function parseGroupResult(msg: unknown): GroupResult | null {
@@ -391,7 +405,8 @@ export function parseGroupResult(msg: unknown): GroupResult | null {
   const m = msg as Record<string, unknown>;
   const kind = typeof m.type === "string" ? m.type.replace(/_result$/, "") : "";
   if (!/_result$/.test(String(m.type)) || !["invite_group", "end_group", "knock_answer"].includes(kind) || typeof m.id !== "string") return null;
-  return { type: kind as GroupResult["type"], id: m.id.slice(0, 40), ok: m.ok === true, error: typeof m.error === "string" ? m.error.slice(0, 200) : "", group: parseGroupInvite(m.group) };
+  const group = parseGroupInvite(m.group);
+  return { type: kind as GroupResult["type"], id: m.id.slice(0, 40), ok: m.ok === true, error: typeof m.error === "string" ? m.error.slice(0, 200) : "", group, watch: m.watch === true || group?.watch === true };
 }
 
 /** A byte count from the device: a finite number, never negative. */

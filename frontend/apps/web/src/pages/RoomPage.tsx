@@ -822,9 +822,9 @@ export function RoomPage() {
   const ownTest =
     hostLink !== null && !!testRoom?.room_id && testRoom.room_id === roomId;
   const inviteRoom = ownRoom
-    ? { id: ownRoom.id, name: ownRoom.name, invite: ownRoom.invite, inviteCode: ownRoom.inviteCode, ownerKey: ownRoom.ownerKey, groupInvite: ownRoom.groupInvite }
+    ? { id: ownRoom.id, name: ownRoom.name, invite: ownRoom.invite, inviteCode: ownRoom.inviteCode, ownerKey: ownRoom.ownerKey, groupInvite: ownRoom.groupInvite, watchInvite: ownRoom.watchInvite }
     : ownTest && testRoom
-      ? { id: "test", name: testRoom.title ?? "Test pattern", invite: testRoom.invite ?? "", inviteCode: testRoom.invite_code ?? "", ownerKey: testRoom.owner_key ?? "", groupInvite: testRoom.groupInvite }
+      ? { id: "test", name: testRoom.title ?? "Test pattern", invite: testRoom.invite ?? "", inviteCode: testRoom.invite_code ?? "", ownerKey: testRoom.owner_key ?? "", groupInvite: testRoom.groupInvite, watchInvite: testRoom.watchInvite }
       : null;
   const [inviteOpen, setInviteOpen] = useState(false);
   const linkedAsks = useLinkedPauseAsks();
@@ -2054,6 +2054,15 @@ export function RoomPage() {
                 sendToDevice({ type: "room_action", id: inviteRoom.id, action })
               }
               onClose={() => setInviteOpen(false)}
+              saver={
+                live.room
+                  ? {
+                      on: live.room.spectatorSaver,
+                      onChange: (on) =>
+                        sendToDevice({ type: "room_action", id: inviteRoom.id, action: on ? "spectator_saver_on" : "spectator_saver_off" }),
+                    }
+                  : undefined
+              }
             />
           )}
           {helpOpen && <HelpDialog onClose={() => setHelpOpen(false)} />}
