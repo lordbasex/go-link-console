@@ -1,8 +1,8 @@
 {
-  "app-chat": [600,1334],
+  "app-chat": [600,1304],
   "app-home": [600,1334],
   "app-pin": [600,1334],
-  "app-room": [600,1334],
+  "app-room": [600,1304],
   "web-device": [1440,900],
   "web-invite": [1440,900],
   "web-link": [1440,900],

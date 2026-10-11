@@ -17,6 +17,7 @@ import { SkeletonCards, SkeletonRows } from "../ui/Skeleton";
 import { useRomPages } from "./useLibrary";
 import { OwnBadge, ownControlsText } from "./OwnBadge";
 import { Select } from "../ui/Select";
+import { GameArt } from "../ui/GameArt";
 
 type View = "cards" | "list";
 type Sort = "name" | "size" | "year" | "status";
@@ -286,7 +287,7 @@ function RomCard({ rom }: { rom: DeviceRom }) {
     >
       <div className={`roms-screen${playable ? " is-playable" : ""}${art ? " has-art" : ""}`}>
         {art ? (
-          <img className="roms-art" src={art} alt="" />
+          <GameArt className="roms-art" src={art} />
         ) : (
           <span className="roms-marquee">{title.toUpperCase()}</span>
         )}
@@ -389,7 +390,7 @@ export function MiniArt({ rom, fallback }: { rom: DeviceRom; fallback: string })
   const art = useThumbnail(rom.name, thumbKind, "mini", rom.thumbs[thumbKind]);
   return (
     <span className={`roms-mini-screen${art ? " has-art" : ""}`} aria-hidden="true">
-      {art ? <img src={art} alt="" /> : fallback}
+      {art ? <GameArt src={art} /> : fallback}
     </span>
   );
 }

@@ -279,7 +279,7 @@ describe("thumbnails", () => {
     // Only sets with a Boxart are asked for.
     expect(sendControl).not.toHaveBeenCalledWith(expect.objectContaining({ set: "looping" }));
     act(() => listeners.forEach((fn) => fn({ type: "thumb", set: "robby", kind: "boxart", size: "card", data: btoa("jpeg") })));
-    expect(container.querySelector("img.roms-art")?.getAttribute("src")).toBe("blob:robby");
+    expect(container.querySelector(".roms-art img")?.getAttribute("src")).toBe("blob:robby");
   });
 });
 
