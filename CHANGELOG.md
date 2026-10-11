@@ -4,6 +4,11 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 
 ## [Unreleased]
 
+### Added
+
+- **go-link HD games show their own picture:** a game package's title screen (its manifest's `screens.title`) is its picture in the ROM list and on its rooms whenever the host has no thumbnail of it, so ANTÍDOTO's rooms show its cover. Wide pictures are shown whole over a blurred copy of themselves instead of being cropped to the box.
+- **The landing plays ANTÍDOTO:** the hero's screen is a silent loop of two players in ANTÍDOTO, and **Watch the trailer** opens its trailer with sound (two players beat a boss in each zone). The landing's retro music is gone; only the trailer has sound.
+
 ## [0.4.0] - 2026-10-11
 
 ### Changed

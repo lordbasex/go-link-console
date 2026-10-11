@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { t } from "../i18n";
 import { JoinForm } from "../components/JoinForm";
 import { PLAY_URL, ROLE } from "../role";
-import { FightScene } from "../components/landing/FightScene";
+import { GameScene } from "../components/landing/GameScene";
 import { ControllersShowcase } from "../components/landing/ControllersShowcase";
 import { GuestPath } from "../components/landing/GuestPath";
 import { PlayerApp } from "../components/landing/PlayerApp";
@@ -70,7 +70,7 @@ export function HowItWorksPage() {
           </div>
           <p className="small faint">{t.landing.platforms}</p>
         </div>
-        <FightScene />
+        <GameScene />
       </section>
 
       <GuestPath onJoin={join} />

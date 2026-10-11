@@ -32,6 +32,7 @@ import {
   SkeletonCards,
   SkeletonRows,
 } from "../components/ui/Skeleton";
+import { GameArt } from "../components/ui/GameArt";
 
 type Filter = "all" | "live" | "paused" | "favorites" | "archived" | "trash";
 // Favorites, archived and trash only exist for the host's own rooms.
@@ -316,7 +317,7 @@ function OwnRoomCard({
             <span
               className={`lrow-art${art ? " has-art" : ""}${off ? " is-off" : ""}`}
             >
-              {art ? <img src={art} alt="" /> : initials(room.game)}
+              {art ? <GameArt src={art} /> : initials(room.game)}
             </span>
             <div className="lrow-main">
               <span className="lrow-title" title={room.name}>
@@ -375,7 +376,7 @@ function OwnRoomCard({
         className={`lcard-art${art ? " has-art" : ""}${off ? " is-off" : ""}`}
       >
         {art ? (
-          <img src={art} alt="" />
+          <GameArt src={art} />
         ) : (
           <span>{room.game.toUpperCase()}</span>
         )}

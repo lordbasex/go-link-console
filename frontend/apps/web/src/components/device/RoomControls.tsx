@@ -24,6 +24,7 @@ import {
   TrashIcon,
 } from "../Icons";
 import { useThumbKind, useThumbnail } from "./useThumbnail";
+import { GameArt } from "../ui/GameArt";
 
 export type Filter =
   "all" | "live" | "paused" | "favorites" | "archived" | "trash";
@@ -541,7 +542,7 @@ function StartDialog({
         <div className="groom-dialog-head">
           {art && (
             <span className="groom-dialog-art">
-              <img src={art} alt="" />
+              <GameArt src={art} />
             </span>
           )}
           <div className="stack-xxs">

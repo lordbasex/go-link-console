@@ -12,6 +12,7 @@ import { localName } from "../../pages/roomModel";
 import { SkeletonRows } from "../ui/Skeleton";
 import { useInfiniteList } from "../ui/useInfiniteList";
 import { useThumbKind, useThumbnail } from "./useThumbnail";
+import { GameArt } from "../ui/GameArt";
 
 type Filter = "all" | HistoryReason;
 const FILTERS: Filter[] = ["all", "archived", "deleted", "device_stopped", "failed"];
@@ -259,7 +260,7 @@ function HistoryRow({ item, thumb, onDownload, onDeleteRec, onDelete }: HistoryR
     <tr className="lrow">
       <td>
         <div className="lrow-room">
-          <span className={`lrow-art${art ? " has-art" : ""}`}>{art ? <img src={art} alt="" /> : initials(item.game)}</span>
+          <span className={`lrow-art${art ? " has-art" : ""}`}>{art ? <GameArt src={art} /> : initials(item.game)}</span>
           <div className="lrow-main">
             <span className="lrow-title" title={item.name}>
               <span className="lrow-name">{item.name || item.game}</span>
