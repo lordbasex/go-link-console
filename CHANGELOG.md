@@ -6,9 +6,61 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 
 ### Added (device)
 
-- **go-link HD rooms in H.264 from the Mac's hardware:** `--hd-room-codec auto` (the default) sends HD game rooms on macOS in H.264 from VideoToolbox, called directly (nothing to install: no ffmpeg; `pkg/encoder` vt_darwin.go, a keyframe as soon as a viewer joins), and VP8 elsewhere, at their own bitrate (`--hd-room-kbps`, 4,000 kbps at 720p and 8,000 at 1080p by default); recordings keep working (VP8 for the WebM). On an M1 at 1080p the encoding went from 28–90 % of a core to 12–14 %, with more than twice the bitrate.
-- **go-link HD rooms in H.264 from the graphics card on Linux and in Docker:** `--hd-room-codec auto` tries NVENC (NVIDIA), then VAAPI (Intel, AMD, through `/dev/dri`), through ffmpeg, with a short clip as the device starts, and uses the first that works; else VP8. `--hd-h264 nvenc|vaapi` forces one (refused at start when it does not work). `make device-docker-gpu` builds the `go-link-device:gpu` image with ffmpeg and the VA-API drivers; `docker-compose.yml` shows how to give it the card.
+- **go-link HD rooms in H.264 from the graphics card on Linux and in Docker:** `--hd-room-codec auto` tries NVENC (NVIDIA), then VAAPI (Intel, AMD, through `/dev/dri`), through ffmpeg, with a short clip as the device starts, and uses the first that works; else VP8. `--hd-h264 nvenc|vaapi` forces one (refused at start when it does not work). `make device-docker-gpu` builds the `go-link-console:gpu` image with ffmpeg and the VA-API drivers; `docker-compose.yml` shows how to give it the card.
 - **go-link HD rooms in H.264 from the graphics card on Windows:** `--hd-room-codec auto` uses the encoder Windows lists through Media Foundation (Intel Quick Sync, NVIDIA NVENC, AMD AMF), called directly through cgo (`pkg/encoder/mf_windows.go`: nothing to install, CBR, low latency, a keyframe when a viewer joins); without one the room keeps VP8. `--hd-h264 mediafoundation` forces it (Windows' software encoder when there is no card's), and `device hdbench --encoder mediafoundation` measures it.
+
+### Changed
+
+- **github.com/lordbasex/go-link is now the go-link.org index** (the project ecosystem), so GitHub no longer redirects the old name here. Its release `v0.4.0` has no files and points to this repository's 0.4.0, so a device running 0.3.x still sees the update and where to download it.
+
+## [0.4.0] - 2026-10-11
+
+### Changed
+
+- **The repository is now [lordbasex/go-link-console](https://github.com/lordbasex/go-link-console)** (the Go modules too: `github.com/lordbasex/go-link-console/...`). GitHub redirects the old name, so devices that check for updates and the Homebrew tap keep working.
+- **The app is go-link Console**: `go-link-console.app` (bundle `org.go-link.console`), the `go-link-console` command (`go-link-console.exe` on Windows), the Homebrew cask `go-link-console`, the Docker image `go-link-console`, release files `go-link-console-vX.Y.Z-…`, and the signalhub app `go-link-console` (a self-hosted signalhub must allow it in `ALLOWED_APPS`). Its folders are `~/go-link-console` and `<config dir>/go-link-console`: on the first start the old `~/go-link` and `<config dir>/go-link` move there, and `device.json` paths inside the old folder follow. The phone app is **go-link Console Player**.
+- **The landing, the guide and the tools moved to console.go-link.org.** go-link.org is now the index of go-link's WebRTC projects and sends every old address there.
+- **Invitations are `play.go-link.org/g/<invite>`**, the rooms' own address: the Player apps (App Links, Universal Links) and their QR reader take only that host, and play serves `.well-known/`. Invitations shared before as `go-link.org/g/…` no longer open; make a new one. The apps link to console.go-link.org for the terms, the privacy policy and the skin editor.
+
+## [0.3.3] - 2026-10-11
+
+### Changed (device)
+
+- **ANTÍDOTO 0.1.1** is go-link HD's free starter game: its enemies and bosses move smoothly (their bodies no longer jump sideways between frames).
+
+### Added (device)
+
+- **Starter games update:** a starter game installed in an older version shows the newer one: the window's Core › go-link HD › Games says "Installed · version X available" and downloads it again, and `device hd games` says so too (`device_status.hd.starter[].version`/`update`).
+
+## [0.3.2] - 2026-10-10
+
+### Added (device)
+
+- **go-link HD has its own page in the device window:** the sidebar's group is now **Core**, with **MAME** and **go-link HD**. go-link HD's page has two tabs: **Games** (the engine's state, its own games folder, how many games it has, and its free games to download in 720p or 1080p with their progress) and **Screen** (the size, 720p or 1080p, and the codec, automatic or VP8, of its rooms, used by the rooms started afterwards). From a terminal: `device hd dir`, `device hd screen`, `device hd games`, `device hd download`.
+- **go-link HD games have their own folder:** `~/go-link/hd-games` by default (`hd.games_dir` in `device.json`, changed from the window or `device hd dir`). Packages in the ROM folder keep working; the HD folder's wins over one of the same name.
+- **A free game to start:** the first time a linked browser connects, the device downloads **ANTÍDOTO** (published with go-link HD's engine, checked by its size and SHA-256 before it is used) in the size of its HD rooms and opens a room with it, ready to play; the host keeps, archives or deletes it like any room. It is offered once (`starter_games` in `device.json`; a factory reset offers it again), and a game the host deletes is never downloaded again by itself.
+
+### Changed (device)
+
+- **go-link HD rooms' size and codec are settings:** `hd.room_size` and `hd.codec` in `device.json` (go-link HD › Screen in the window), read as each room starts; `--hd-room-size` and `--hd-room-codec` now only override them for one run.
+
+### Added
+
+- **The demo video in Spanish and Portuguese:** `npm run demos` renders the three-minute demo in English, Spanish and Portuguese, each with the app recorded in its language, the narrator and burned-in subtitles, plus SubRip files; chapter titles and narration translated.
+
+### Changed (core patches)
+
+- **X-Men resumes exactly, and 13 more games resume better:** the missing state was the input ports' values latched at VBLANK (`0019`, generic: Snow Bros., Superman, Puzzle Bobble, Marvel Super Heroes, Slam Masters and others now resume with the same picture), the register each YM2151 writes to (`0020`) and X-Men's EEPROM count (`0021`); with `0015`, X-Men gives 600/600 identical pictures and sound frames. Sent to libretro as #2053 and #2054.
+
+## [0.3.1] - 2026-10-10
+
+### Changed (go-link HD)
+
+- **The engine shipped with the device is go-link HD's newest:** lives and a continue countdown per player (game over only when nobody is left), a moment of invulnerability after a hit, acts that share a level's art, longer levels (up to 1,792 cells and 224 enemies), four more enemy kinds (roller, hopper, puffer, splitter), bosses that evolve into a second form after they are beaten once, and credits rolling after the ending. Game packages that use them need this version.
+
+### Added (device)
+
+- **go-link HD rooms in H.264 from the Mac's hardware:** `--hd-room-codec auto` (the default) sends HD game rooms on macOS in H.264 from VideoToolbox, called directly (nothing to install: no ffmpeg; `pkg/encoder` vt_darwin.go, a keyframe as soon as a viewer joins), and VP8 elsewhere, at their own bitrate (`--hd-room-kbps`, 4,000 kbps at 720p and 8,000 at 1080p by default); recordings keep working (VP8 for the WebM). On an M1 at 1080p the encoding went from 28–90 % of a core to 12–14 %, with more than twice the bitrate.
 - **go-link HD games drawn at the room's size:** the device asks the engine for the room's size (`golinkhd_set_resolution`, go-link HD's API 2; `Engine.SetResolution`), so one package painted for 1080p plays at 1080p in a 1080p room and at 720p in a 720p room, its pictures made smaller by the engine as it loads; an older engine keeps the package's size.
 
 ### Fixed

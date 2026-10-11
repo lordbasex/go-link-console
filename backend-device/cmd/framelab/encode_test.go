@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/framelab"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/framelab"
 )
 
 func TestBitrates(t *testing.T) {

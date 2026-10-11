@@ -21,12 +21,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/pkg/cores"
-	"github.com/lordbasex/go-link/backend-device/pkg/emuproc"
-	"github.com/lordbasex/go-link/backend-device/pkg/framelab"
-	"github.com/lordbasex/go-link/backend-device/pkg/libretro"
-	"github.com/lordbasex/go-link/backend-device/pkg/romcheck"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/cores"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/emuproc"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/framelab"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/libretro"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/romcheck"
 )
 
 // cmdRomTest is "device romtest": the power-on test of a ROM set with the
@@ -52,7 +52,7 @@ func cmdRomTest(args []string) error {
 	frames := fs.Int("frames", services.RomTestFrames, "frames to run (600 to 3600)")
 	asJSON := fs.Bool("json", false, "print JSON")
 	shot := fs.String("shot", "", "save the last frame as this PNG")
-	corePath := fs.String("core", "", "the libretro core (default: the one in ~/go-link/cores)")
+	corePath := fs.String("core", "", "the libretro core (default: the one in ~/go-link-console/cores)")
 	inputFile := fs.String("input", "", "replay this input script (JSON) instead of the power-on test")
 	checkpoints := fs.String("checkpoints", "", "replay: frames to save as PNG, e.g. 300,600 (default: the script's)")
 	framesDir := fs.String("frames-dir", "", "replay: the folder for the PNG frames")

@@ -18,10 +18,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/pkg/cores"
-	"github.com/lordbasex/go-link/backend-device/pkg/libretro"
-	"github.com/lordbasex/go-link/backend-device/pkg/signalclient"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/cores"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/libretro"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/signalclient"
 )
 
 // fakeGame stands in for the emulator process.
@@ -916,5 +916,25 @@ func TestAListedRoomHasItsGamesSeats(t *testing.T) {
 	// The test library has no catalog: a game that does not say has 4 seats.
 	if got := h.room("c3").MaxPlayers; got != 4 {
 		t.Fatalf("max players %d", got)
+	}
+}
+
+func TestAnArchivedRoomWaitsForItsStart(t *testing.T) {
+	h := newRoomsHarness(t, 4, nil)
+	if h.rooms.HasRoomFor("robby") {
+		t.Fatal("a room before any was made")
+	}
+	if err := h.rooms.AddArchived("nope", true); err != ErrUnknownRom {
+		t.Fatalf("a game that is not there: %v", err)
+	}
+	if err := h.rooms.AddArchived("robby", true); err != nil {
+		t.Fatal(err)
+	}
+	h.mu.Lock()
+	saved := h.saved
+	games := len(h.games)
+	h.mu.Unlock()
+	if !h.rooms.HasRoomFor("robby") || len(saved) != 1 || saved[0].State != models.RoomArchived || !saved[0].Voice || games != 0 {
+		t.Fatalf("saved %+v, games started %d", saved, games)
 	}
 }

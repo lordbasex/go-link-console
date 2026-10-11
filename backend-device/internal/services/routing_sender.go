@@ -6,7 +6,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/signalclient"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/signalclient"
 )
 
 // ErrNoSender means there is no way to reach a peer right now.

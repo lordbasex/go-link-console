@@ -27,18 +27,18 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/internal/panel"
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/internal/telemetry"
-	"github.com/lordbasex/go-link/backend-device/pkg/encoder"
-	"github.com/lordbasex/go-link/backend-device/pkg/input"
-	"github.com/lordbasex/go-link/backend-device/pkg/instancelock"
-	"github.com/lordbasex/go-link/backend-device/pkg/jsonkeys"
-	"github.com/lordbasex/go-link/backend-device/pkg/libretro"
-	"github.com/lordbasex/go-link/backend-device/pkg/signalclient"
-	"github.com/lordbasex/go-link/backend-device/pkg/thumbnails"
-	"github.com/lordbasex/go-link/backend-device/web"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/panel"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/internal/telemetry"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/encoder"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/input"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/instancelock"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/jsonkeys"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/libretro"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/signalclient"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/thumbnails"
+	"github.com/lordbasex/go-link-console/backend-device/web"
 )
 
 // version is replaced at build time with -ldflags "-X main.version=...".
@@ -71,8 +71,8 @@ func run() error {
 		testPause  = flag.Bool("test-room-pause", false, "let the host pause the test pattern room (to try the pause and its requests without a game)")
 		testHD     = flag.String("test-room-hd", "", "go-link HD's experiment (T-31): the test room streams an HD scene (720p, 1080p, 2160p, or auto: the best this computer streams at 60 fps, checked) made of --hd-far and --hd-play")
 		hdCore     = flag.String("hd-core", "", "go-link HD's engine library (default: the one shipped with the device, else libgolinkhd in the cores folder): game rooms of .glhd packages run it; with --test-room-hd 720p, 1080p or 2160p the test room plays its built-in demo (its 640x360 screen enlarged x2, x3 or x6)")
-		hdRoomSize = flag.String("hd-room-size", "720p", "go-link HD game rooms' picture: 720p (x2) or 1080p (x3)")
-		hdRoomCdc  = flag.String("hd-room-codec", "auto", "go-link HD game rooms' codec: vp8, h264 (--hd-h264's encoder) or auto (hardware H.264: the Mac's through VideoToolbox, the graphics card's through Media Foundation on Windows or NVENC/VAAPI with ffmpeg on Linux; vp8 without one)")
+		hdRoomSize = flag.String("hd-room-size", "", "go-link HD game rooms' picture for this run: 720p (x2) or 1080p (x3) (default: go-link HD's Screen setting, else 720p)")
+		hdRoomCdc  = flag.String("hd-room-codec", "", "go-link HD game rooms' codec for this run: vp8, h264 (--hd-h264's encoder) or auto (hardware H.264: the Mac's through VideoToolbox, the graphics card's through Media Foundation on Windows or NVENC/VAAPI with ffmpeg on Linux; vp8 without one) (default: go-link HD's Screen setting, else auto)")
 		hdRoomKbps = flag.Int("hd-room-kbps", 0, "go-link HD game rooms' bitrate at high quality (default by size: 4000 at 720p, 8000 at 1080p)")
 		hdFar      = flag.String("hd-far", "", "the HD scene's far picture (with --test-room-hd)")
 		hdPlay     = flag.String("hd-play", "", "the HD scene's play picture, #FF00FF transparent (with --test-room-hd)")
@@ -84,7 +84,7 @@ func run() error {
 		udpPort    = flag.Int("udp-port", 0, "carry every WebRTC connection on this UDP port, to forward it on a router (default: udp_port in device.json, else random ports)")
 		announce   = flag.String("announce", "", "comma-separated addresses where browsers reach --udp-port through a forwarding router (default: announce_ips in device.json)")
 		webURL     = flag.String("web-url", "", "website shown in the window for linking, for this run (default: web_url in device.json, else "+models.DefaultWebURL+")")
-		corePath   = flag.String("core", "", "libretro core to run games (default: ~/go-link/cores/mame2003_plus_libretro)")
+		corePath   = flag.String("core", "", "libretro core to run games (default: ~/go-link-console/cores/mame2003_plus_libretro)")
 		panelAddr  = flag.String("panel", panel.DefaultAddr, "address of the local web panel, which a headless device opens on the LAN (token: `device panel token`)")
 		noPanel    = flag.Bool("no-panel", false, "do not open the local web panel when running headless")
 	)
@@ -171,26 +171,40 @@ func run() error {
 		library.SetHDCore(*hdCore)
 		library.Scan()
 	}
-	hdRoomScale := 0
-	switch *hdRoomSize {
-	case "720p":
-		hdRoomScale = 2
-	case "1080p":
-		hdRoomScale = 3
-	default:
+	// go-link HD rooms' screen: the flags for this run, else the host's
+	// setting (go-link HD's page), read again as each room starts.
+	if *hdRoomSize != "" && !slices.Contains(models.HDRoomSizes, *hdRoomSize) {
 		return fmt.Errorf("--hd-room-size: %q is not 720p or 1080p", *hdRoomSize)
 	}
-	roomH264, roomKbps, err := hdRoomVideo(*hdRoomCdc, *hdH264, *hdRoomKbps, hdRoomScale, runtime.GOOS, encoder.FFmpegPath, func() string { return encoder.HardwareH264(runtime.GOOS) })
-	if err != nil {
-		return err
-	}
-	if *hdRoomCdc == "h264" && (roomH264 == "nvenc" || roomH264 == "vaapi") {
-		// a graphics card asked for by name: tried now, not when the first room opens
-		if err := encoder.TryH264(roomH264); err != nil {
-			return fmt.Errorf("--hd-h264 %s does not work on this computer (%v): --hd-room-codec auto keeps VP8 without it", roomH264, err)
+	// the hardware encoder is looked for once (on Linux it tries a short clip)
+	hardware := sync.OnceValue(func() string { return encoder.HardwareH264(runtime.GOOS) })
+	hdRoom := func() (scale int, h264 string, kbps int, err error) {
+		hd := settings.HD()
+		size, codec := hd.RoomSize, hd.Codec
+		if *hdRoomSize != "" {
+			size = *hdRoomSize
 		}
+		if *hdRoomCdc != "" {
+			codec = *hdRoomCdc
+		}
+		scale = 2
+		if size == models.HD1080p {
+			scale = 3
+		}
+		h264, kbps, err = hdRoomVideo(codec, *hdH264, *hdRoomKbps, scale, runtime.GOOS, encoder.FFmpegPath, hardware)
+		return scale, h264, kbps, err
 	}
-	logger.Info("go-link HD rooms", "size", *hdRoomSize, "codec", map[bool]string{true: "h264 " + roomH264, false: "vp8"}[roomH264 != ""], "kbps", roomKbps)
+	if _, roomH264, roomKbps, err := hdRoom(); err != nil {
+		return err
+	} else {
+		if *hdRoomCdc == "h264" && (roomH264 == "nvenc" || roomH264 == "vaapi") {
+			// a graphics card asked for by name: tried now, not when the first room opens
+			if err := encoder.TryH264(roomH264); err != nil {
+				return fmt.Errorf("--hd-h264 %s does not work on this computer (%v): --hd-room-codec auto keeps VP8 without it", roomH264, err)
+			}
+		}
+		logger.Info("go-link HD rooms", "codec", map[bool]string{true: "h264 " + roomH264, false: "vp8"}[roomH264 != ""], "kbps", roomKbps)
+	}
 	if *testHD == "auto" {
 		// go-link HD picks the size and codec this computer streams at 60 fps (hdAuto)
 		if *hdFar == "" {
@@ -251,7 +265,7 @@ func run() error {
 	links.SetTransport(stream.SendControl, stream.RemoveViewer)
 	pairing.SetAuth(links)
 	stream.SetLinkGate(links.Trusted)
-	// Each room's telemetry (~/go-link/telemetry.db): runs, samples and
+	// Each room's telemetry (~/go-link-console/telemetry.db): runs, samples and
 	// events, kept until the room is deleted for good.
 	tele, err := telemetry.Open(filepath.Join(base, "telemetry.db"))
 	if err != nil {
@@ -319,17 +333,23 @@ func run() error {
 	// run at once. The list lives in device.json.
 	systemDir := filepath.Join(base, "system")
 	history := services.NewHistoryService(filepath.Join(base, "history.json"))
-	// Recordings of game rooms, only for the host (~/go-link/rec).
+	// Recordings of game rooms, only for the host (~/go-link-console/rec).
 	recordings := services.NewRecordingService(filepath.Join(base, "rec"), nil)
 	history.SetRecordings(recordings)
 	probes := saveProbes(library)
 	games := services.NewRoomsService(services.RoomsConfig{
-		Library:    library,
-		Status:     status,
-		ICE:        ice,
-		Stream:     streamCfg,
-		HDH264:     roomH264,
-		HDKbps:     roomKbps,
+		Library: library,
+		Status:  status,
+		ICE:     ice,
+		Stream:  streamCfg,
+		HDVideo: func() (string, int) {
+			_, h264, kbps, err := hdRoom()
+			if err != nil {
+				logger.Warn("go-link HD rooms' screen", "err", err)
+				return "", 0
+			}
+			return h264, kbps
+		},
 		Opener:     opener,
 		HostName:   hostName(),
 		SavesDir:   filepath.Join(base, "saves"),
@@ -360,7 +380,7 @@ func run() error {
 		NewSource: func(rom, state string, onReady func(libretro.AVInfo)) services.RoomSource {
 			upscale, hd := 0, library.IsHD(rom)
 			if hd {
-				upscale = hdRoomScale
+				upscale, _, _, _ = hdRoom()
 			}
 			return services.NewWorkerSource(services.WorkerConfig{
 				CorePath: library.CoreFor(rom), RomPath: library.RomPath(rom), SystemDir: systemDir,
@@ -376,6 +396,30 @@ func run() error {
 		status.SetVideoQuality(q)
 	})
 
+	// go-link HD's free starter games: downloaded once, when a browser
+	// first links, each with a room to play it.
+	hdGames := services.NewHDGamesService(services.HDGamesConfig{
+		Library:  library,
+		Status:   status,
+		Settings: settings,
+		Logger:   logger,
+		Offered:  cfg.StarterGames,
+		SaveOffered: func() error {
+			return updateConfig(store, &cfg, func(c *models.Config) { c.StarterGames = true })
+		},
+		OpenRoom: func(rom string) error {
+			if games.HasRoomFor(rom) {
+				return nil
+			}
+			err := games.Create(services.GameRequest{Rom: rom, Voice: true}, func(services.GameReply) {})
+			if errors.Is(err, services.ErrTooManyRooms) {
+				// the device already runs its limit: the room waits archived
+				return games.AddArchived(rom, true)
+			}
+			return err
+		},
+	})
+
 	// Guests see whether the host can answer a request for a pause: a
 	// linked browser of the host is connected (or the host is in the room).
 	var hostMu sync.Mutex
@@ -389,6 +433,10 @@ func run() error {
 		}
 		hostLinked = on
 		games.SetHostLinked(on)
+		if on {
+			// the free starter games, once: downloaded and given a room
+			hdGames.OfferStarter(ctx)
+		}
 		if testManager != nil {
 			testManager.SetHostLinked(on)
 		}
@@ -628,6 +676,7 @@ func run() error {
 				err := factoryReset(ctx, resetParts{
 					games: games, history: history, recordings: recordings, telemetry: tele,
 					settings: settings, library: library, romsDir: filepath.Join(base, "roms"),
+					hdDir: filepath.Join(base, "hd-games"), hdGames: hdGames,
 					config: func(change func(*models.Config)) error { return updateConfig(store, &cfg, change) },
 				})
 				res := map[string]any{"type": "factory_reset_result", "ok": err == nil}
@@ -883,6 +932,7 @@ func run() error {
 		status:   status,
 		library:  library,
 		games:    games,
+		hdGames:  hdGames,
 		logger:   logger,
 	})
 	logger.Info("shutting down")

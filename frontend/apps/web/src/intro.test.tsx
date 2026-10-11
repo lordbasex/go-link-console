@@ -75,7 +75,7 @@ describe("room code field", () => {
 
     await user.clear(field);
     await user.click(field);
-    await user.paste("https://go-link.org/g/AbCdEfGhIjKlMnOpQrStUv");
-    expect(field.value).toBe("https://go-link.org/g/AbCdEfGhIjKlMnOpQrStUv");
+    await user.paste("https://play.go-link.org/g/AbCdEfGhIjKlMnOpQrStUv");
+    expect(field.value).toBe("https://play.go-link.org/g/AbCdEfGhIjKlMnOpQrStUv");
   });
 });

@@ -1,6 +1,6 @@
 # Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com>
 #
-# The go-link Player Android app end to end: an Android emulator (KVM on
+# The go-link Console Player Android app end to end: an Android emulator (KVM on
 # the Linux runner) joins the e2e stack's test pattern room (its own
 # signalhub, headless device and website) as a guest. It is slow, so it
 # runs weekly and by hand, not on every push (ci.yml runs the web e2e).

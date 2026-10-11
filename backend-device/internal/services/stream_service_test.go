@@ -5,7 +5,7 @@ package services
 import (
 	"testing"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/input"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/input"
 )
 
 func TestPanelStartPressesAnotherPortsStart(t *testing.T) {

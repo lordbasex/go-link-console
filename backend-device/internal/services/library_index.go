@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/pkg/romcheck"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/romcheck"
 )
 
 // A ROM folder can hold thousands of sets (a full MAME 0.78 collection is

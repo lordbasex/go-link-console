@@ -104,7 +104,7 @@ export interface SignalProviderProps {
   panelUrl?: string;
   /**
    * No connection at all and no device link: the landing's own site
-   * (go-link.org), whose pages never need the signaling server.
+   * (console.go-link.org), whose pages never need the signaling server.
    */
   offline?: boolean;
   children: ReactNode;

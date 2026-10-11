@@ -2,8 +2,8 @@
 blank_issues_enabled: true
 contact_links:
   - name: Questions and ideas
-    url: https://github.com/lordbasex/go-link/discussions
+    url: https://github.com/lordbasex/go-link-console/discussions
     about: Ask how to do something, share your setup or propose an idea.
   - name: User guide
-    url: https://go-link.org/docs
+    url: https://console.go-link.org/docs
     about: Install, link, add ROMs, invite friends, controls and troubleshooting.

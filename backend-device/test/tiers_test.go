@@ -14,7 +14,7 @@ import (
 
 	"github.com/pion/webrtc/v4"
 
-	"github.com/lordbasex/go-link/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
 )
 
 // Two guests of a tiered stream (go-link HD) show the video at different

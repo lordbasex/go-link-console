@@ -52,7 +52,7 @@ jobs:
       - name: Build and push
         working-directory: backend-device
         run: |
-          IMAGE="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/go-link-device"
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/go-link-console"
           docker buildx build -f build/docker.Dockerfile --build-arg VERSION="$TAG" \
             --build-context legal=../dist/.legal --platform linux/amd64,linux/arm64 \
             --label org.opencontainers.image.source="https://github.com/${GITHUB_REPOSITORY}" \
@@ -69,6 +69,6 @@ jobs:
       - name: Copy to Docker Hub
         if: env.DOCKERHUB_TOKEN != ''
         run: |
-          SRC="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/go-link-device:$TAG"
-          DST="docker.io/${DOCKERHUB_USERNAME}/go-link-device"
+          SRC="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/go-link-console:$TAG"
+          DST="docker.io/${DOCKERHUB_USERNAME}/go-link-console"
           docker buildx imagetools create -t "$DST:$TAG" -t "$DST:latest" "$SRC"

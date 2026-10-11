@@ -18,7 +18,7 @@ const TRACKS: readonly RecordingTrack[] = ["video", "game", "voice-p1", "voice-p
 export const RECORDING_MAX_MS = 2 * 60 * 60 * 1000;
 export const RECORDING_MAX_BYTES = 2 * 1024 ** 3;
 
-/** One finished recording, kept on the device (~/go-link/rec). */
+/** One finished recording, kept on the device (~/go-link-console/rec). */
 export interface RecordingInfo {
   /** "<room id>/<file>": what download and delete_recording name. */
   id: string;

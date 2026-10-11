@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { editCode, editCodeFromChange, groupCode, parseInvite } from "../src";
 
-const LINK = "https://go-link.org/g/AbCdEfGhIjKlMnOpQrStUv";
+const LINK = "https://play.go-link.org/g/AbCdEfGhIjKlMnOpQrStUv";
 
 /** Types `keys` one by one at the end of the field. */
 function type(keys: string): { text: string; caret: number } {

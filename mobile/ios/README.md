@@ -1,5 +1,5 @@
 <!-- Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com> -->
-# go-link Player for iOS
+# go-link Console Player for iOS
 
 The native iPhone and iPad app for joining a go-link game as a player: the iOS counterpart of [the Android app](../android/README.md). SwiftUI, iOS 17 or newer, bundle id `org.golink.player`. It speaks the same signalhub and WebRTC protocol as the website ([docs/mobile.md](../../docs/mobile.md), [docs/protocol.md](../../docs/protocol.md)). It only joins rooms; hosting stays on the device app.
 
@@ -40,7 +40,7 @@ TEST_RUNNER_GL_LANG=es TEST_RUNNER_GL_SHOTS=/tmp/shots \
   -only-testing:GoLinkPlayerUITests/PlayerUITests/testScreens
 
 # A live join (a test pattern room invitation and its PIN from the website):
-TEST_RUNNER_GL_INVITE=https://go-link.org/g/<invite> TEST_RUNNER_GL_PIN=<pin> \
+TEST_RUNNER_GL_INVITE=https://play.go-link.org/g/<invite> TEST_RUNNER_GL_PIN=<pin> \
   xcodebuild test ... -only-testing:GoLinkPlayerUITests/PlayerUITests/testLiveJoin
 ```
 
@@ -50,7 +50,7 @@ TEST_RUNNER_GL_INVITE=https://go-link.org/g/<invite> TEST_RUNNER_GL_PIN=<pin> \
 
 Debug builds (never release builds) accept:
 
-- `-invite https://go-link.org/g/<invite>` as a launch argument: opens the PIN screen for that invitation, through the same strict parser as Universal Links (only the invitation is read). Universal Links need the published association file and a signed app, so this is how the Simulator opens an invitation: `xcrun simctl launch booted org.golink.player -invite https://go-link.org/g/<invite>`.
+- `-invite https://play.go-link.org/g/<invite>` as a launch argument: opens the PIN screen for that invitation, through the same strict parser as Universal Links (only the invitation is read). Universal Links need the published association file and a signed app, so this is how the Simulator opens an invitation: `xcrun simctl launch booted org.golink.player -invite https://play.go-link.org/g/<invite>`.
 - `-signal ws://127.0.0.1:8090/ws`: a signaling server; debug builds also accept `ws://` to `localhost` and `127.0.0.1` in Settings, for a local signalhub.
 - `-silentOutput`: computes the level of the sound it would play (for the probe) but plays silence, for automated runs on a desk.
 - `-padLab`: opens a pad lab instead of the app: the room's console layouts with the on-screen pad and no room, listing every held-buttons value sent (`testPadAcrossRotations` rotates it and presses the pad).
@@ -84,7 +84,7 @@ Details: [docs/mobile.md](../../docs/mobile.md#your-name).
 
 ## Version
 
-Home and Settings show **go-link Player v*X.Y.Z* (build *N*)** (" · debug" in debug builds; a long press copies it). `CFBundleShortVersionString` and `CFBundleVersion` come from the build settings `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` (defaults 0.1.0 and 1 in `Config/Base.xcconfig`). A release passes the version: `make device-build VERSION=0.1.5` (also `build-sim` and `test-ui`) computes build 105 with the Android rule (major × 10000 + minor × 100 + patch), or give both to `xcodebuild` (`MARKETING_VERSION=0.1.5 CURRENT_PROJECT_VERSION=105`).
+Home and Settings show **go-link Console Player v*X.Y.Z* (build *N*)** (" · debug" in debug builds; a long press copies it). `CFBundleShortVersionString` and `CFBundleVersion` come from the build settings `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` (defaults 0.1.0 and 1 in `Config/Base.xcconfig`). A release passes the version: `make device-build VERSION=0.1.5` (also `build-sim` and `test-ui`) computes build 105 with the Android rule (major × 10000 + minor × 100 + patch), or give both to `xcodebuild` (`MARKETING_VERSION=0.1.5 CURRENT_PROJECT_VERSION=105`).
 
 ## Sound and the microphone
 
@@ -135,7 +135,7 @@ export ASC_KEY_PATH=/path/to/AuthKey_<ASC_KEY_ID>.p8
 
 ## TestFlight
 
-App Store Connect has the app **go-link Player** (bundle id `org.golink.player`, SKU `golink-player`) and two TestFlight groups:
+App Store Connect has the app **go-link Console Player** (bundle id `org.golink.player`, SKU `golink-player`) and two TestFlight groups:
 
 - **Equipo** (internal): the team's own App Store Connect users, every build as soon as Apple processes it (about 10 minutes after `make testflight`), no review.
 - **Amigos** (external): anyone with the public link, up to 100 people. Each new build is added to the group and submitted to Beta App Review (`betaAppReviewSubmissions`); once approved, the link installs it through the TestFlight app. The beta's description, feedback email, review contact and What to Test are set in English, Spanish and Portuguese.
@@ -144,9 +144,9 @@ A tester installs **TestFlight** from the App Store, opens the link (or the emai
 
 ## Universal Links
 
-The app claims `https://go-link.org/g/*` (`applinks:go-link.org` in `GoLinkPlayer/GoLinkPlayer.entitlements`, generated from `project.yml`). Only the invitation is read from the link, never a PIN or a signaling server.
+The app claims `https://play.go-link.org/g/*` (`applinks:play.go-link.org` in `GoLinkPlayer/GoLinkPlayer.entitlements`, generated from `project.yml`). Only the invitation is read from the link, never a PIN or a signaling server.
 
-The website publishes `frontend/apps/web/public/.well-known/apple-app-site-association` (JSON, no extension). Its `appIDs` holds a placeholder, `TEAMID00000.org.golink.player`: replace `TEAMID00000` with the Team ID that signs the app before deploying the website. The CDN must serve the file at `https://go-link.org/.well-known/apple-app-site-association` with `Content-Type: application/json`, without redirects. Apple's CDN caches it; while developing, `applinks:go-link.org?mode=developer` in the entitlements (with the device's Developer Mode on) makes the phone fetch it directly.
+The website publishes `frontend/apps/web/public/.well-known/apple-app-site-association` (JSON, no extension). Its `appIDs` holds a placeholder, `TEAMID00000.org.golink.player`: replace `TEAMID00000` with the Team ID that signs the app before deploying the website. The CDN must serve the file at `https://play.go-link.org/.well-known/apple-app-site-association` with `Content-Type: application/json`, without redirects. Apple's CDN caches it; while developing, `applinks:play.go-link.org?mode=developer` in the entitlements (with the device's Developer Mode on) makes the phone fetch it directly.
 
 ## What it does
 

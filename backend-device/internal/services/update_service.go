@@ -12,11 +12,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
 )
 
 // DefaultReleasesURL lists go-link's releases, newest first.
-const DefaultReleasesURL = "https://api.github.com/repos/lordbasex/go-link/releases?per_page=10"
+const DefaultReleasesURL = "https://api.github.com/repos/lordbasex/go-link-console/releases?per_page=10"
 
 // UpdateConfig configures UpdateService.
 type UpdateConfig struct {
@@ -94,7 +94,7 @@ func (u *UpdateService) Check(ctx context.Context) (models.UpdateInfo, error) {
 		return models.UpdateInfo{}, err
 	}
 	req.Header.Set("Accept", "application/vnd.github+json")
-	req.Header.Set("User-Agent", "go-link-device/"+u.cfg.Current)
+	req.Header.Set("User-Agent", "go-link-console/"+u.cfg.Current)
 	resp, err := u.cfg.Client.Do(req)
 	if err != nil {
 		return models.UpdateInfo{}, err

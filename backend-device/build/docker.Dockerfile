@@ -6,9 +6,9 @@
 # volume, /data. The emulator core is downloaded the first time, never
 # bundled; the ROMs are the host's own.
 #
-#   docker buildx build -f build/docker.Dockerfile -t go-link-device --load .
+#   docker buildx build -f build/docker.Dockerfile -t go-link-console --load .
 #   docker run -d --name go-link --network host -v go-link:/data \
-#     -v /path/to/roms:/data/go-link/roms go-link-device
+#     -v /path/to/roms:/data/go-link-console/roms go-link-console
 # The licenses (LICENSE, THIRD_PARTY_NOTICES.md) come from the repository
 # root: the Makefile passes them as the "legal" build context. A plain
 # `docker build` gets this empty stage instead.
@@ -30,7 +30,7 @@ ARG VERSION=dev
 # libvpx and libopus go inside the binary (see linux.Dockerfile).
 RUN mkdir /static && ln -s /usr/lib/*-linux-gnu/libvpx.a /usr/lib/*-linux-gnu/libopus.a /static/ && \
     CGO_ENABLED=1 CGO_LDFLAGS="-L/static" go build -trimpath -tags headless \
-      -ldflags "-s -w -X main.version=$VERSION" -o /out/go-link-device ./cmd/device
+      -ldflags "-s -w -X main.version=$VERSION" -o /out/go-link-console ./cmd/device
 COPY --from=golinkhd / /golinkhd
 RUN mkdir -p /out/lib && if [ -f /golinkhd/Makefile ]; then make -s -B -C /golinkhd && cp /golinkhd/libgolinkhd.so /out/lib/; fi
 
@@ -47,12 +47,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
       ffmpeg mesa-va-drivers intel-media-va-driver i965-va-driver; fi && \
     rm -rf /var/lib/apt/lists/* && \
     useradd --create-home --home-dir /data --uid 1000 --groups video golink && \
-    mkdir -p /data/go-link/cores /data/go-link/roms /data/go-link/thumbnails/MAME \
-      /data/go-link/saves /data/go-link/logs && chown -R golink:golink /data/go-link
+    mkdir -p /data/go-link-console/cores /data/go-link-console/roms /data/go-link-console/thumbnails/MAME \
+      /data/go-link-console/saves /data/go-link-console/logs && chown -R golink:golink /data/go-link-console
 # The folders exist in the image, owned by golink: a new volume gets them
-# with that owner. Otherwise mounting the ROMs at /data/go-link/roms makes
+# with that owner. Otherwise mounting the ROMs at /data/go-link-console/roms makes
 # Docker create go-link/ as root, and the device cannot write its core.
-COPY --from=build /out/go-link-device /usr/local/bin/go-link-device
+COPY --from=build /out/go-link-console /usr/local/bin/go-link-console
 # go-link HD's engine beside the program, where the device looks for it.
 COPY --from=build /out/lib/ /usr/local/bin/
 COPY --from=legal / /usr/share/doc/go-link/
@@ -64,4 +64,4 @@ WORKDIR /data
 # else is needed; on a bridge network publish a fixed --udp-port and
 # --announce the host's LAN address (see the README).
 EXPOSE 7373/tcp
-ENTRYPOINT ["go-link-device", "--headless", "--config", "/data/device.json"]
+ENTRYPOINT ["go-link-console", "--headless", "--config", "/data/device.json"]

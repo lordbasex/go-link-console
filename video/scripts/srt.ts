@@ -21,6 +21,9 @@ for (const [voice, subs] of files) {
   console.log(`${out}: ${list.length} subtitles`);
 }
 
-const demo = demoCaptions("en");
-writeFileSync("../dist/video/go-link-demo-en.en.srt", demo.map((c, i) => `${i + 1}\n${stamp(c.from)} --> ${stamp(c.to)}\n${c.text}\n`).join("\n"));
-console.log(`../dist/video/go-link-demo-en.en.srt: ${demo.length} subtitles`);
+for (const lang of ["en", "es", "pt"] as const) {
+  const demo = demoCaptions(lang);
+  const file = `../dist/video/go-link-demo-${lang}.${lang}.srt`;
+  writeFileSync(file, demo.map((c, i) => `${i + 1}\n${stamp(c.from)} --> ${stamp(c.to)}\n${c.text}\n`).join("\n"));
+  console.log(`${file}: ${demo.length} subtitles`);
+}

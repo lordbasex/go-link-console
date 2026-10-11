@@ -9,8 +9,8 @@ import (
 	"slices"
 	"sync"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/pkg/thumbnails"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/thumbnails"
 )
 
 // ErrBadSetting is a settings value the device cannot use.
@@ -34,13 +34,18 @@ type SettingsService struct {
 	video     string
 	saveVideo func(string) error
 	onVideo   []func(string)
+
+	// go-link HD's rooms' screen (size and codec), saved by saveHD; the
+	// rooms started after a change use it.
+	hd     models.HDSettings
+	saveHD func(models.HDSettings) error
 }
 
 // NewSettingsService applies the saved settings. defaultDir is the
 // thumbnails folder used when none is set; save keeps changes in
 // device.json.
 func NewSettingsService(library *LibraryService, saved models.ThumbnailSettings, defaultDir string, save func(models.ThumbnailSettings) error) *SettingsService {
-	s := &SettingsService{library: library, defaultDir: defaultDir, save: save, thumbnails: normalize(saved), video: models.DefaultVideoQuality}
+	s := &SettingsService{library: library, defaultDir: defaultDir, save: save, thumbnails: normalize(saved), video: models.DefaultVideoQuality, hd: normalizeHD(models.HDSettings{})}
 	s.apply()
 	return s
 }
@@ -155,6 +160,65 @@ func (s *SettingsService) OnVideoQuality(fn func(string)) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.onVideo = append(s.onVideo, fn)
+}
+
+// UseHD sets go-link HD's saved settings (empty or unknown values are the
+// defaults) and how a change is saved in device.json.
+func (s *SettingsService) UseHD(saved models.HDSettings, save func(models.HDSettings) error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.hd, s.saveHD = normalizeHD(saved), save
+}
+
+// normalizeHD fills go-link HD's defaults.
+func normalizeHD(h models.HDSettings) models.HDSettings {
+	if !slices.Contains(models.HDRoomSizes, h.RoomSize) {
+		h.RoomSize = models.HDRoomSizes[0]
+	}
+	if !slices.Contains(models.HDCodecs, h.Codec) {
+		h.Codec = models.HDCodecs[0]
+	}
+	return h
+}
+
+// HD returns go-link HD's settings, with the defaults filled in.
+func (s *SettingsService) HD() models.HDSettings {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.hd
+}
+
+// SetHDScreen changes go-link HD rooms' screen: size 720p or 1080p and
+// codec auto or vp8 (ErrBadSetting otherwise). Rooms started afterwards
+// use it; running ones keep theirs until they start again.
+func (s *SettingsService) SetHDScreen(size, codec string) error {
+	if !slices.Contains(models.HDRoomSizes, size) || !slices.Contains(models.HDCodecs, codec) {
+		return ErrBadSetting
+	}
+	return s.changeHD(func(h *models.HDSettings) { h.RoomSize, h.Codec = size, codec })
+}
+
+// SetHDGamesDir records go-link HD's games folder (the library checks
+// and uses it; this only keeps it in device.json).
+func (s *SettingsService) SetHDGamesDir(dir string) error {
+	return s.changeHD(func(h *models.HDSettings) { h.GamesDir = dir })
+}
+
+func (s *SettingsService) changeHD(fn func(h *models.HDSettings)) error {
+	s.mu.Lock()
+	fn(&s.hd)
+	hd, save := s.hd, s.saveHD
+	listeners := slices.Clone(s.onChange)
+	s.mu.Unlock()
+	if save != nil {
+		if err := save(hd); err != nil {
+			return err
+		}
+	}
+	for _, fn := range listeners {
+		fn()
+	}
+	return nil
 }
 
 // OnChange is called after any setting changes (the window repaints).

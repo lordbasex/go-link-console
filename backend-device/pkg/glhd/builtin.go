@@ -56,7 +56,7 @@ func DemoIndex(path string) (int, bool) {
 }
 
 // BundledLibrary is where a release ships the engine library next to the
-// device's executable: inside go-link.app's Frameworks folder on macOS,
+// device's executable: inside go-link-console.app's Frameworks folder on macOS,
 // beside the program elsewhere. It returns "" when there is none.
 func BundledLibrary(goos string) string {
 	exe, err := os.Executable()

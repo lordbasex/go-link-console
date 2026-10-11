@@ -18,12 +18,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/internal/telemetry"
-	"github.com/lordbasex/go-link/backend-device/pkg/libretro"
-	"github.com/lordbasex/go-link/backend-device/pkg/romcheck"
-	"github.com/lordbasex/go-link/backend-device/pkg/signalclient"
-	"github.com/lordbasex/go-link/backend-device/pkg/thumbnails"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/telemetry"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/libretro"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/romcheck"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/signalclient"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/thumbnails"
 )
 
 // Errors returned when a game room cannot be created or changed.
@@ -169,8 +169,11 @@ type RoomsConfig struct {
 	// HDKbps is go-link HD rooms' bitrate at high quality (their picture is
 	// 720p or 1080p, not a 2x arcade game); 0 keeps the qualities' own.
 	HDKbps int
-	Logger *slog.Logger
-	Now    func() time.Time
+	// HDVideo, when set, gives HDH264 and HDKbps for each room as it
+	// starts (the host's go-link HD screen settings can change).
+	HDVideo func() (h264 string, kbps int)
+	Logger  *slog.Logger
+	Now     func() time.Time
 }
 
 // RoomsService turns the device into a game server: each room is one game,
@@ -213,6 +216,8 @@ type RoomPauseAskEvent struct {
 type gameRoom struct {
 	saved models.SavedRoom
 	game  string // the game's title
+	// hdKbps is a go-link HD room's bitrate at high quality, from its start.
+	hdKbps int
 
 	cancel  context.CancelFunc
 	stream  *StreamService
@@ -495,6 +500,43 @@ func (r *RoomsService) Create(req GameRequest, reply func(GameReply)) error {
 		return err
 	}
 	r.persist()
+	return nil
+}
+
+// HasRoomFor reports whether a room (in any state but the trash) plays a
+// game.
+func (r *RoomsService) HasRoomFor(rom string) bool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	for _, gr := range r.rooms {
+		if gr.saved.Rom == rom && gr.saved.State != models.RoomTrash {
+			return true
+		}
+	}
+	return false
+}
+
+// AddArchived adds a room for a game without starting it: it is listed
+// with the archived ones, ready to Start.
+func (r *RoomsService) AddArchived(rom string, voice bool) error {
+	lib := r.cfg.Library
+	if !lib.HasRom(rom) {
+		return ErrUnknownRom
+	}
+	now := r.cfg.Now()
+	game := r.title(rom)
+	gr := &gameRoom{
+		saved: models.SavedRoom{
+			ID: newRoomID(), Name: game, Rom: rom, Voice: voice,
+			State: models.RoomArchived, CreatedAt: now, Since: now,
+		},
+		game: game,
+	}
+	r.mu.Lock()
+	r.rooms = append(r.rooms, gr)
+	r.mu.Unlock()
+	r.persist()
+	r.publish()
 	return nil
 }
 
@@ -799,7 +841,12 @@ func (r *RoomsService) Close(reply func(GameReply)) {
 func (r *RoomsService) launch(gr *gameRoom, statePath string) error {
 	streamCfg := r.cfg.Stream
 	if r.isHD(gr) {
-		streamCfg.H264Encoder = r.cfg.HDH264
+		h264, kbps := r.cfg.HDH264, r.cfg.HDKbps
+		if r.cfg.HDVideo != nil {
+			h264, kbps = r.cfg.HDVideo()
+		}
+		streamCfg.H264Encoder = h264
+		gr.hdKbps = kbps
 	}
 	stream, err := NewStreamService(streamCfg, r.cfg.ICE)
 	if err != nil {
@@ -964,9 +1011,9 @@ func (r *RoomsService) launch(gr *gameRoom, statePath string) error {
 // conversion, the bitrate and, for a 2x picture, the encoder check that
 // falls back to saver when 2x does not fit this computer.
 func (r *RoomsService) applyVideo(gr *gameRoom, stream *StreamService, source RoomSource, plan VideoPlan) {
-	if r.cfg.HDKbps > 0 && r.isHD(gr) {
+	if gr.hdKbps > 0 && r.isHD(gr) {
 		// a go-link HD room's picture is 720p or 1080p: its own bitrate, less for the lower qualities
-		plan.Kbps = hdPlanKbps(r.cfg.HDKbps, plan.Quality)
+		plan.Kbps = hdPlanKbps(gr.hdKbps, plan.Quality)
 	}
 	scale := 1
 	if vs, ok := source.(videoModeSetter); ok {

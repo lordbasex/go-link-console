@@ -16,11 +16,11 @@ import (
 	"github.com/pion/webrtc/v4"
 	"github.com/pion/webrtc/v4/pkg/media"
 
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/pkg/encoder"
-	"github.com/lordbasex/go-link/backend-device/pkg/input"
-	"github.com/lordbasex/go-link/backend-device/pkg/signalclient"
-	"github.com/lordbasex/go-link/backend-device/pkg/testpattern"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/encoder"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/input"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/signalclient"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/testpattern"
 )
 
 // browserPeer plays the web's role with Pion: it answers the device's

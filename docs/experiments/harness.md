@@ -26,8 +26,8 @@ source ~/.nvm/nvm.sh && nvm use 22.23.2
 (cd frontend && npm ci)            # links @go-link/cps1 and @go-link/cps1-sim
 # ffmpeg for the MP4s (/usr/local/bin/ffmpeg, or set FFMPEG=...)
 # the device CLI with "romtest --input": make device-darwin-universal
-#   -> dist/device/darwin-universal/go-link.app/Contents/MacOS/go-link-device
-# the emulator core: device core download (~/go-link/cores)
+#   -> dist/device/darwin-universal/go-link-console.app/Contents/MacOS/go-link-console
+# the emulator core: device core download (~/go-link-console/cores)
 ```
 
 The Laya player needs Python, PyTorch, Transformers and the `laya` package, and the model on disk:
@@ -164,11 +164,11 @@ The runner starts the player with `/bin/sh -c COMMAND` and talks JSON lines on i
 ## The real core
 
 ```sh
-go-link-device romtest --input FILE.json [--frames N] [--checkpoints 300,600] \
+go-link-console romtest --input FILE.json [--frames N] [--checkpoints 300,600] \
     [--frames-dir DIR] [--png-every K] [--mp4 FILE] [--json] ZIP
 ```
 
-It runs the script frame by frame on the exact core (the one in `~/go-link/cores`, `--core` for another), unpaced, from power on, with a fresh system folder in `~/go-link/tmp/romreplay-<pid>/` (deleted at the end) and a copy of the zip named after the set. It saves the checkpoint frames (and every K-th) as `DIR/fNNNNNN.png` at the core's size, with `--mp4` every frame as an MP4 like the runner's, and with `--wav FILE` the core's stereo sound (48 kHz, 16-bit; task T-26). `--json` prints `{type: "rom_replay", set, core, fps, width, height, frames, seconds, checkpoints: [{frame, png, hash}], pngs, mp4}`. It never reads `device.json` or the ROM folder and does not touch a running device. The core gives no RAM access through libretro here, so the core's run has pictures but no lab state.
+It runs the script frame by frame on the exact core (the one in `~/go-link-console/cores`, `--core` for another), unpaced, from power on, with a fresh system folder in `~/go-link-console/tmp/romreplay-<pid>/` (deleted at the end) and a copy of the zip named after the set. It saves the checkpoint frames (and every K-th) as `DIR/fNNNNNN.png` at the core's size, with `--mp4` every frame as an MP4 like the runner's, and with `--wav FILE` the core's stereo sound (48 kHz, 16-bit; task T-26). `--json` prints `{type: "rom_replay", set, core, fps, width, height, frames, seconds, checkpoints: [{frame, png, hash}], pngs, mp4}`. It never reads `device.json` or the ROM folder and does not touch a running device. The core gives no RAM access through libretro here, so the core's run has pictures but no lab state.
 
 ## Comparing frames
 
@@ -253,7 +253,7 @@ To replay a finding, on the simulator and on the real core, and compare the pict
 
 ```sh
 node rom/tools/lab/run.mjs ZIP --out SIM --script DIR/findings/03-stuck.min.json --checkpoints 600,1200,1800,2400,3000,3462
-go-link-device romtest --input DIR/findings/03-stuck.min.json --checkpoints 600,1200,1800,2400,3000,3462 --frames-dir CORE ZIP
+go-link-console romtest --input DIR/findings/03-stuck.min.json --checkpoints 600,1200,1800,2400,3000,3462 --frames-dir CORE ZIP
 node rom/tools/lab/compare.mjs SIM/frames CORE --tolerance 0
 ```
 

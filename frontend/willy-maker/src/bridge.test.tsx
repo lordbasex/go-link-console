@@ -4,7 +4,7 @@ import { BRIDGE_TAG, MAKER_STORAGE_PREFIX } from "@go-link/shared";
 import { BridgeClient } from "./bridge";
 import { importGames } from "./importGames";
 
-const SITE = "https://go-link.org";
+const SITE = "https://console.go-link.org";
 
 /** A page that opens the bridge tab: the tab is a fake window, its messages are handed in by hand. */
 function setup() {
@@ -23,7 +23,7 @@ function setup() {
 }
 
 describe("BridgeClient", () => {
-  it("opens the go-link.org bridge tab and follows the link's state", () => {
+  it("opens the console.go-link.org bridge tab and follows the link's state", () => {
     const { client, page, say } = setup();
     expect(client.getStatus()).toBeNull();
     client.connect();

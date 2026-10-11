@@ -10,7 +10,7 @@ Acceptance item 6 of [experiment 1](../README.md#acceptance): every item of [Gam
 |---|---|---|
 | CPS-1, laid out as `slammast` (4 ports × 3 buttons) | met | `rom/tools/build.mjs slammast`: 28 files, names and sizes of the set; level 3 step `files` |
 | Runs on the stock mame2003-plus core | met | level 4 (`evidence/acceptance/level4.json`); 5 scripts replayed on the core, 41 checkpoints identical (`evidence/runs/replay-all.json`) |
-| Runs in a go-link room | met, note | the room runs the same core (`device romtest` loads the device's own `~/go-link/cores` core); not played in a room in this case: `rom/tools/room-test.mjs` starts its own signalhub and device, which this case did not run on the user's machine |
+| Runs in a go-link room | met, note | the room runs the same core (`device romtest` loads the device's own `~/go-link-console/cores` core); not played in a room in this case: `rom/tools/room-test.mjs` starts its own signalhub and device, which this case did not run on the user's machine |
 
 ## Screen and size
 

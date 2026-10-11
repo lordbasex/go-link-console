@@ -3,9 +3,9 @@
 import XCTest
 
 /**
- * Drives go-link Player in the simulator. testScreens saves screenshots of
+ * Drives go-link Console Player in the simulator. testScreens saves screenshots of
  * the main screens (GL_SHOTS: folder, GL_LANG: en/es/pt). testLiveJoin
- * joins a real room when GL_INVITE (https://go-link.org/g/<invite>) and
+ * joins a real room when GL_INVITE (https://play.go-link.org/g/<invite>) and
  * GL_PIN are given, and is skipped otherwise. testPadAcrossRotations
  * rotates the debug pad lab and presses the on-screen pad. Pass them to xcodebuild as
  * TEST_RUNNER_GL_* environment variables.

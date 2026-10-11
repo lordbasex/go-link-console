@@ -11674,7 +11674,7 @@ index 0000000..82c26eb
 +```sh
 +node rom/tools/lab/acceptance.mjs docs/experiments/case-c/build/slammast.zip --script docs/experiments/case-c/runs/clear.json \
 +  --out /tmp/case-c-acceptance --bot-games 5 --laya-games 3 \
-+  --device dist/device/darwin-universal/go-link.app/Contents/MacOS/go-link-device
++  --device dist/device/darwin-universal/go-link-console.app/Contents/MacOS/go-link-console
 +node rom/tools/lab/run.mjs docs/experiments/case-c/build/slammast.zip --out /tmp/damage --script docs/experiments/case-c/runs/damage.json
 +node rom/tools/lab/run.mjs docs/experiments/case-c/build/slammast.zip --out /tmp/odd --script docs/experiments/case-c/runs/odd-inputs.json
 +```

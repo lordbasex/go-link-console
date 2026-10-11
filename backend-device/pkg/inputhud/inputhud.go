@@ -10,7 +10,7 @@
 package inputhud
 
 import (
-	"github.com/lordbasex/go-link/backend-device/pkg/input"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/input"
 )
 
 // Rect is a part of the frame in fractions of its size (0 to 1).

@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/encoder"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/encoder"
 	"github.com/pion/webrtc/v4"
 	"github.com/pion/webrtc/v4/pkg/media"
 )

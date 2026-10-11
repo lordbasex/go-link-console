@@ -4,7 +4,7 @@ import Foundation
 
 /**
  * What an invitation points at: the 22-character invite of a
- * https://go-link.org/g/<invite> link (and its QR code), or the room's
+ * https://play.go-link.org/g/<invite> link (and its QR code), or the room's
  * 9-digit code. The PIN is never part of either: the person types it.
  */
 public enum InviteTarget: Equatable, Hashable, Sendable {
@@ -25,20 +25,20 @@ public enum InviteTarget: Equatable, Hashable, Sendable {
 
 public enum Invites {
     /** The only site whose invitation links the app follows. */
-    public static let host = "go-link.org"
+    public static let host = "play.go-link.org"
 
     /** Largest text worth looking at: a QR code can carry kilobytes. */
     static let maxInput = 200
 
     private static let invite = try! NSRegularExpression(pattern: "^[A-Za-z0-9_-]{22}$")
-    private static let link = try! NSRegularExpression(pattern: "^https://go-link\\.org/g/([A-Za-z0-9_-]{22})/?$")
+    private static let link = try! NSRegularExpression(pattern: "^https://play\\.go-link\\.org/g/([A-Za-z0-9_-]{22})/?$")
     private static let path = try! NSRegularExpression(pattern: "^/g/([A-Za-z0-9_-]{22})/?$")
     private static let code = try! NSRegularExpression(pattern: "^[0-9]{9}$")
     private static let separators = try! NSRegularExpression(pattern: "[\\s.-]")
 
     /**
      * Reads a scanned QR code. Only two things are accepted: exactly an
-     * https://go-link.org/g/<invite> link, or a 9-digit code. Anything
+     * https://play.go-link.org/g/<invite> link, or a 9-digit code. Anything
      * else (another site, a signaling server, a PIN, parameters) is
      * rejected, so a hostile QR code can never point the app elsewhere.
      */
@@ -63,7 +63,7 @@ public enum Invites {
     }
 
     /**
-     * Reads a Universal Link: scheme https, host go-link.org, path
+     * Reads a Universal Link: scheme https, host play.go-link.org, path
      * /g/<invite>. Query and fragment are ignored, never used.
      */
     public static func parseAppLink(scheme: String?, host: String?, path: String?) -> InviteTarget? {

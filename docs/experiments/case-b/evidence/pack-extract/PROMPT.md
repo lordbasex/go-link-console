@@ -94,7 +94,7 @@ Ready: no errors, 0 warnings.
 4. Get the core the device uses (`device core download`), build the frame capture tool and run the set in it:
    ```sh
    (cd backend-device && go build -o /tmp/framelab ./cmd/framelab)
-   /tmp/framelab capture -log -core ~/go-link/cores/mame2003_plus_libretro.dylib -rom rom/build/slammast.zip -out /tmp/rom-run -frames 860 -script "60-63:coin 110-113:start 140-400:right"
+   /tmp/framelab capture -log -core ~/go-link-console/cores/mame2003_plus_libretro.dylib -rom rom/build/slammast.zip -out /tmp/rom-run -frames 860 -script "60-63:coin 110-113:start 140-400:right"
    ```
    (The core is a .so on Linux.) The core's log must have no "WRONG CHECKSUMS", "NOT FOUND" or "INCORRECT LENGTH" line.
 5. Play it in a real go-link room: `node rom/tools/room-test.mjs` (it needs the signalhub repository next to go-link).

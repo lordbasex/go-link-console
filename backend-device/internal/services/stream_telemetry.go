@@ -10,8 +10,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/telemetry"
-	"github.com/lordbasex/go-link/backend-device/pkg/input"
+	"github.com/lordbasex/go-link-console/backend-device/internal/telemetry"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/input"
 	"github.com/pion/rtcp"
 	"github.com/pion/webrtc/v4"
 )

@@ -25,7 +25,7 @@ body:
     id: version
     attributes:
       label: go-link version
-      description: Shown in the app's window, or run `go-link-device --help`.
+      description: Shown in the app's window, or run `go-link-console --help`.
       placeholder: v0.1.2
     validations:
       required: true
@@ -45,5 +45,5 @@ body:
     id: logs
     attributes:
       label: Logs
-      description: The end of `~/go-link/logs/device.log`, or the terminal output. Remove anything private.
+      description: The end of `~/go-link-console/logs/device.log`, or the terminal output. Remove anything private.
       render: text

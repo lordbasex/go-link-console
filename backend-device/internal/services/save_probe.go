@@ -14,7 +14,7 @@ import (
 	"path/filepath"
 	"slices"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/emuproc"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/emuproc"
 )
 
 // probeSound is how many samples that are not silence mean "the game made a

@@ -15,7 +15,7 @@
 #   VERSION=0.1.0 CODESIGN_IDENTITY="Developer ID Application: Name (TEAMID)" \
 #     NOTARY_PROFILE=go-link-notary ./scripts/release.sh
 #
-# Other knobs: REPO=owner/name (default lordbasex/go-link), SKIP_BUILD=1
+# Other knobs: REPO=owner/name (default lordbasex/go-link-console), SKIP_BUILD=1
 # (pack what is already in dist/device), DOCKER=0 (skip the Docker image, built by default as
 # an OCI archive), ANDROID=0 (skip the signed Android APK, built by default:
 # it needs ANDROID_SIGNING, see mobile/android/README.md), GITHUB_RELEASE=0
@@ -28,11 +28,11 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VERSION="${VERSION:?Set VERSION, e.g. VERSION=0.1.0}"
 VERSION="${VERSION#v}"
 TAG="v$VERSION"
-REPO="${REPO:-lordbasex/go-link}"
+REPO="${REPO:-lordbasex/go-link-console}"
 CODESIGN_IDENTITY="${CODESIGN_IDENTITY:--}"
 DEVICE="$ROOT/dist/device"
 OUT="$ROOT/dist/release/$TAG"
-NAME="go-link-$TAG"
+NAME="go-link-console-$TAG"
 
 if [[ "$CODESIGN_IDENTITY" == "-" || -z "${NOTARY_PROFILE:-}" ]]; then
   DEV=1
@@ -48,7 +48,7 @@ if [[ "${SKIP_BUILD:-0}" != "1" ]]; then
   make -C "$ROOT" panel
   make -C "$ROOT" device VERSION="$TAG" CODESIGN_IDENTITY="$CODESIGN_IDENTITY"
   if [[ "$(uname -s)" == "Darwin" ]]; then
-    app="$DEVICE/darwin-universal/go-link.app"
+    app="$DEVICE/darwin-universal/go-link-console.app"
     if [[ "$DEV" == "0" ]]; then
       # the app's own ticket, stapled before it goes into the disk image
       "$ROOT/backend-device/build/macos/notarize.sh" "$app"
@@ -82,28 +82,28 @@ fi
 # Linux: a .tar.gz per build; "headless" is the one without a window
 # (Raspberry Pi, servers), which opens the web panel.
 for variant in linux-amd64 linux-arm64 linux-amd64-headless linux-arm64-headless; do
-  bin="$DEVICE/$variant/go-link-device"
+  bin="$DEVICE/$variant/go-link-console"
   [[ -f "$bin" ]] || { echo "  (no $variant build, skipped)"; continue; }
   cp "$ROOT/LICENSE" "$ROOT/THIRD_PARTY_NOTICES.md" "$DEVICE/$variant/"
   [[ -f "$DEVICE/$variant/libgolinkhd.so" ]] || { echo "✗ $variant has no go-link HD engine (libgolinkhd.so)"; exit 1; }
-  tar -C "$DEVICE/$variant" -czf "$OUT/$NAME-$variant.tar.gz" go-link-device libgolinkhd.so LICENSE THIRD_PARTY_NOTICES.md
+  tar -C "$DEVICE/$variant" -czf "$OUT/$NAME-$variant.tar.gz" go-link-console libgolinkhd.so LICENSE THIRD_PARTY_NOTICES.md
 done
 
 # Windows: a .zip with the .exe (no console; the log goes to a file).
 for arch in amd64 arm64; do
-  exe="$DEVICE/windows-$arch/go-link-device.exe"
+  exe="$DEVICE/windows-$arch/go-link-console.exe"
   [[ -f "$exe" ]] || { echo "  (no windows-$arch build, skipped)"; continue; }
   cp "$ROOT/LICENSE" "$ROOT/THIRD_PARTY_NOTICES.md" "$DEVICE/windows-$arch/"
   [[ -f "$DEVICE/windows-$arch/golinkhd.dll" ]] || { echo "✗ windows-$arch has no go-link HD engine (golinkhd.dll)"; exit 1; }
-  (cd "$DEVICE/windows-$arch" && zip -q -j "$OUT/$NAME-windows-$arch.zip" go-link-device.exe golinkhd.dll LICENSE THIRD_PARTY_NOTICES.md)
+  (cd "$DEVICE/windows-$arch" && zip -q -j "$OUT/$NAME-windows-$arch.zip" go-link-console.exe golinkhd.dll LICENSE THIRD_PARTY_NOTICES.md)
 done
 
-oci="$ROOT/dist/docker/go-link-device-$TAG.oci.tar"
+oci="$ROOT/dist/docker/go-link-console-$TAG.oci.tar"
 if [[ -f "$oci" ]]; then
   gzip -c "$oci" > "$OUT/$NAME-docker.oci.tar.gz"
 fi
 
-# Android: the go-link Player app, signed with the release key.
+# Android: the go-link Console Player app, signed with the release key.
 apk="$ROOT/dist/android/go-link-player-$TAG.apk"
 if [[ -f "$apk" ]]; then
   cp "$apk" "$OUT/$NAME-android.apk"
@@ -121,8 +121,8 @@ echo "▶ SHA256SUMS"
 echo "▶ Website downloads (frontend/apps/web/src/release.json)"
 "$ROOT/scripts/release-info.sh" "$OUT"
 
-echo "▶ Updating Casks/go-link.rb"
-CASK="$ROOT/Casks/go-link.rb"
+echo "▶ Updating Casks/go-link-console.rb"
+CASK="$ROOT/Casks/go-link-console.rb"
 sed -i '' -e "s/^  version \".*\"/  version \"$VERSION\"/" "$CASK"
 f="$OUT/$NAME-macos-universal.dmg"
 if [[ -f "$f" ]]; then
@@ -133,7 +133,7 @@ fi
 # gh may live in a PATH only the login shell knows (Homebrew, ~/.local/bin).
 GH="$(command -v gh || /bin/zsh -lc 'command -v gh' 2>/dev/null || true)"
 if [[ -n "$GH" && "${GITHUB_RELEASE:-1}" == "1" ]]; then
-  flags=(--repo "$REPO" --title "go-link $VERSION" --generate-notes)
+  flags=(--repo "$REPO" --title "go-link Console $VERSION" --generate-notes)
   [[ "$DEV" == "1" ]] && flags+=(--prerelease)
   echo "▶ Creating the GitHub release $TAG on $REPO"
   "$GH" release create "$TAG" "$OUT"/* "${flags[@]}" \

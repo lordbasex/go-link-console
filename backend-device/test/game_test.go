@@ -15,12 +15,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/pkg/cores"
-	"github.com/lordbasex/go-link/backend-device/pkg/libretro"
-	"github.com/lordbasex/go-link/backend-device/pkg/romcheck"
-	"github.com/lordbasex/go-link/backend-device/pkg/signalclient"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/cores"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/libretro"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/romcheck"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/signalclient"
 )
 
 // hubSender plays signalhub for the rooms: every room_open is answered
@@ -64,10 +64,10 @@ func buildDevice(t *testing.T) string {
 }
 
 // TestGameRoomsWithRealCore needs the mame2003-plus core and the robby
-// and looping ROM sets in ~/go-link; it is skipped otherwise.
+// and looping ROM sets in ~/go-link-console; it is skipped otherwise.
 func TestGameRoomsWithRealCore(t *testing.T) {
 	home, _ := os.UserHomeDir()
-	base := filepath.Join(home, "go-link")
+	base := filepath.Join(home, "go-link-console")
 	romsDir := filepath.Join(base, "roms")
 	coresDir := filepath.Join(base, "cores")
 	if _, err := os.Stat(filepath.Join(coresDir, cores.FileName(cores.DefaultCore, runtime.GOOS))); err != nil {

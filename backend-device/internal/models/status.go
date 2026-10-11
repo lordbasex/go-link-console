@@ -5,8 +5,8 @@ package models
 import (
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/romcheck"
-	"github.com/lordbasex/go-link/backend-device/pkg/sysinfo"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/romcheck"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/sysinfo"
 )
 
 // Signal connection states.
@@ -42,6 +42,34 @@ type Status struct {
 	// VideoQuality is the host's choice for game rooms (high, normal or
 	// saver); each room's Video says what it really sends.
 	VideoQuality string `json:"video_quality"`
+	// HD is go-link HD's screen settings and its starter games.
+	HD *HDStatus `json:"hd,omitempty"`
+}
+
+// HDStatus is go-link HD's side of the device: its rooms' screen and the
+// free starter games it can download.
+type HDStatus struct {
+	RoomSize string        `json:"room_size"` // 720p or 1080p
+	Codec    string        `json:"codec"`     // auto or vp8
+	Starter  []StarterGame `json:"starter"`
+}
+
+// StarterGame is a free game go-link HD can download into its games
+// folder.
+type StarterGame struct {
+	Name      string `json:"name"`
+	Title     string `json:"title"`
+	Installed bool   `json:"installed"`
+	// Size is the screen size of the installed package (720p or 1080p).
+	Size string `json:"size,omitempty"`
+	// Version is the installed package's version, and Update the newer one
+	// that can be downloaded (empty when it is up to date).
+	Version     string `json:"version,omitempty"`
+	Update      string `json:"update,omitempty"`
+	Downloading string `json:"downloading,omitempty"` // the size being downloaded
+	Done        int64  `json:"done,omitempty"`
+	Total       int64  `json:"total,omitempty"`
+	Error       string `json:"error,omitempty"`
 }
 
 // UpdateInfo is a newer release of go-link than this build.
@@ -61,6 +89,11 @@ type Library struct {
 	Summary LibrarySummary `json:"summary"`
 	Core    CoreStatus     `json:"core"`
 	Disk    *sysinfo.Disk  `json:"disk,omitempty"` // the volume of Dir
+	// HDDir is go-link HD's games folder; HDGames and HDBytes count the
+	// packages (.glhd) in it.
+	HDDir   string `json:"hd_dir"`
+	HDGames int    `json:"hd_games"`
+	HDBytes int64  `json:"hd_bytes"`
 	// ThumbnailsDir holds the host's thumbnails, one folder per kind.
 	ThumbnailsDir string `json:"thumbnails_dir"`
 	// ThumbKind is the kind of thumbnail the host chose to show (boxart,

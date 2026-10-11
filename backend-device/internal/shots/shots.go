@@ -27,8 +27,8 @@ import (
 	"golang.org/x/image/font/basicfont"
 	"golang.org/x/image/math/fixed"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/cores"
-	"github.com/lordbasex/go-link/backend-device/pkg/romcheck"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/cores"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/romcheck"
 )
 
 // Game is one invented game of the library.
@@ -57,7 +57,7 @@ var Games = []Game{
 func rgb(r, g, b uint8) color.RGBA { return color.RGBA{r, g, b, 0xff} }
 
 // Seed writes the invented library into base (a go-link data folder, like
-// ~/go-link): the zips in roms/, the game list in cores/ and a Boxart per
+// ~/go-link-console): the zips in roms/, the game list in cores/ and a Boxart per
 // game in thumbnails/MAME. With placeholderCore it also leaves an empty file
 // where the emulator core goes, so the library reads as ready; that file
 // is not a core and must never be started.

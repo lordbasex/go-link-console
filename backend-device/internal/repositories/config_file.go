@@ -13,8 +13,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/pkg/ids"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/ids"
 )
 
 // ConfigFile stores models.Config as JSON. The file holds no secrets yet,
@@ -23,15 +23,15 @@ type ConfigFile struct {
 	path string
 }
 
-// DefaultConfigPath returns <user config dir>/go-link/device.json,
-// for example ~/Library/Application Support/go-link/device.json on
-// macOS or %AppData%\go-link\device.json on Windows.
+// DefaultConfigPath returns <user config dir>/go-link-console/device.json,
+// for example ~/Library/Application Support/go-link-console/device.json on
+// macOS or %AppData%\go-link-console\device.json on Windows.
 func DefaultConfigPath() (string, error) {
 	dir, err := os.UserConfigDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(dir, "go-link", "device.json"), nil
+	return filepath.Join(dir, "go-link-console", "device.json"), nil
 }
 
 // NewConfigFile uses the file at path.

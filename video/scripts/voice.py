@@ -47,8 +47,10 @@ for lang in sys.argv[1:] or ["en"]:
     durations[lang] = {}
     for scene, text in narration["lines"][lang].items():
         # "go-link" reads better as two words.
-        # A web address is read with its dots ("play dot go link dot org").
-        spoken = re.sub(r"\b([a-z-]+(?:\.[a-z-]+)+)\b", lambda m: m.group(1).replace(".", " dot "), text)
+        # A web address is read with its dots ("play dot go link dot org"),
+        # in the line's language.
+        dot = {"es": " punto ", "pt": " ponto "}.get(lang, " dot ")
+        spoken = re.sub(r"\b([a-z-]+(?:\.[a-z-]+)+)\b", lambda m: m.group(1).replace(".", dot), text)
         samples, rate = k.create(spoken.replace("go-link", "go link"), voice=voices["voices"][lang], speed=1.0, lang=voices["kokoroLang"][lang])
         sf.write(raw / f"{scene}.wav", samples, rate)
         # -16 LUFS (YouTube and social media), the peaks held under -1 dBTP.

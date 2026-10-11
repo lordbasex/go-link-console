@@ -1,6 +1,6 @@
 /* Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com> */
 /* Generated from the Android app's strings.xml (same keys), then iOS strings added. */
-"app_name" = "go-link Player";
+"app_name" = "go-link Console Player";
 "app_subtitle" = "Player";
 "back" = "Back";
 "home_title" = "Join a game";
@@ -10,27 +10,27 @@
 "home_paste" = "Paste the invitation link";
 "home_paste_invalid" = "The clipboard has no go-link invitation.";
 "home_pin_note" = "Every invitation has its own 6-digit PIN, good for one person. The PIN is never in the link or the QR code.";
-"home_host_hint" = "Want to host games? Install go-link on your computer: go-link.org";
+"home_host_hint" = "Want to host games? Install go-link on your computer: console.go-link.org";
 "home_custom_server" = "Custom signaling server: %1$@";
 "scan_title" = "Scan the invitation";
 "scan_hint" = "Point the camera at the QR code the host shows you.";
 "scan_invalid" = "That QR code is not a go-link invitation.";
 "scan_type_instead" = "Type the code instead";
 "perm_camera_title" = "Camera for the QR code";
-"perm_camera_text" = "go-link Player uses the camera only on this screen, to read the invitation's QR code. Nothing is recorded or sent.";
+"perm_camera_text" = "go-link Console Player uses the camera only on this screen, to read the invitation's QR code. Nothing is recorded or sent.";
 "perm_camera_denied" = "The camera is blocked. You can still type the room code, or allow the camera in the system settings.";
 "perm_mic_title" = "Microphone for voice chat";
 "perm_mic_text" = "Seated players can talk to each other. The microphone only sends while you turn it on in the room. Without it you can still play and listen.";
 "perm_mic_denied" = "The microphone is blocked: you can play and listen. To talk, allow it in the system settings.";
 "perm_bt_title" = "Headphones";
-"perm_bt_text" = "Allow nearby devices so go-link Player can use your Bluetooth headphones or earbuds for the game sound and your voice. Wired headphones work without it. With no headphones, the sound plays on the loudspeaker.";
+"perm_bt_text" = "Allow nearby devices so go-link Console Player can use your Bluetooth headphones or earbuds for the game sound and your voice. Wired headphones work without it. With no headphones, the sound plays on the loudspeaker.";
 "perm_allow" = "Allow";
 "perm_not_now" = "Not now";
 "perm_open_settings" = "Open settings";
 "join_title" = "Join the game";
 "join_invitation" = "Invitation";
 "join_code_label" = "Room code or invitation link";
-"join_code_hint" = "The 9-digit code, or the go-link.org/g/… link";
+"join_code_hint" = "The 9-digit code, or the play.go-link.org/g/… link";
 "join_pin_label" = "PIN";
 "join_pin_hint" = "The 6-digit PIN the host gave you. It works for one person.";
 "join_terms" = "I accept the terms of use and the privacy policy.";
@@ -141,7 +141,7 @@
 "settings_perm_bt" = "Nearby devices (Bluetooth headphones)";
 "settings_perm_on" = "Allowed";
 "settings_perm_off" = "Not allowed";
-"settings_about" = "go-link Player %1$@. You play games that run on the host's computer (based on MAME, mame2003-plus engine). Nothing is installed on this phone but the app.";
+"settings_about" = "go-link Console Player %1$@. You play games that run on the host's computer (based on MAME, mame2003-plus engine). Nothing is installed on this phone but the app.";
 "pin_wrong_one" = "Wrong PIN: 1 try left.";
 "pin_wrong_other" = "Wrong PIN: %d tries left.";
 "pin_locked_one" = "Too many wrong PINs in this room. Try again in %d minute.";
@@ -169,7 +169,7 @@
 "sound_ipad_mic" = "iPad microphone";
 "sound_iphone_mic" = "iPhone microphone";
 "scan_no_camera" = "No camera is available. Type the room code instead.";
-"settings_about_ios" = "go-link Player %1$@. You play games that run on the host's computer (based on MAME, mame2003-plus engine). Nothing is installed on this device but the app.";
+"settings_about_ios" = "go-link Console Player %1$@. You play games that run on the host's computer (based on MAME, mame2003-plus engine). Nothing is installed on this device but the app.";
 "settings_permissions_note" = "Camera and microphone are asked for only when you use them. You can change them in the system settings.";
 "help_title" = "How to play";
 "help_intro" = "go-link streams the game from the host's computer. You play on this device: nothing else to install and no ROMs on your side.";
@@ -238,7 +238,7 @@
 "test_screen" = "Screen: %1$@ · 1 frame %2$@ ms";
 "test_start" = "Start";
 "test_pressed" = "pressed";
-"app_version" = "go-link Player v%1$@ (build %2$@)";
+"app_version" = "go-link Console Player v%1$@ (build %2$@)";
 "app_version_copy" = "Copy the version";
 
 /* Game settings (the dock's gear) and the picture styles */
@@ -277,13 +277,13 @@
 /* Gamepad skins (Game settings › Skin) */
 "skin_title" = "Skin";
 "skin_note" = "A console shell around the picture. Only on this phone.";
-"skin_folder_hint" = "More skins: put skin files in the Files app, On My iPhone › go-link Player › Skins.";
+"skin_folder_hint" = "More skins: put skin files in the Files app, On My iPhone › go-link Console Player › Skins.";
 "room_show_menu" = "Show the menu";
 
 /* Install a skin by pasting its JSON (Settings and Game settings › Skin) */
 "skin_install" = "Install skin";
 "skin_install_title" = "Install skin";
-"skin_install_explain" = "Paste a skin's JSON (made in the skin editor at go-link.org/tools/skin-editor, or shared by someone). The app checks it and shows it before installing.";
+"skin_install_explain" = "Paste a skin's JSON (made in the skin editor at console.go-link.org/tools/skin-editor, or shared by someone). The app checks it and shows it before installing.";
 "skin_install_text" = "The skin's JSON";
 "skin_install_paste" = "Paste";
 "skin_install_check" = "Check";

@@ -1,12 +1,12 @@
 # Legal: terms of use, privacy, copyright and licenses
 
-Version **2026-10-07**. This English text is the reference; the website shows it in English, Spanish and Portuguese, and if a translation differs, this version prevails. The same texts are published at [go-link.org/terms](https://go-link.org/terms) and [go-link.org/privacy](https://go-link.org/privacy).
+Version **2026-10-07**. This English text is the reference; the website shows it in English, Spanish and Portuguese, and if a translation differs, this version prevails. The same texts are published at [console.go-link.org/terms](https://console.go-link.org/terms) and [console.go-link.org/privacy](https://console.go-link.org/privacy).
 
 This document is not legal advice. It describes how the project works and the conditions under which it is offered.
 
 ## 1. What go-link is
 
-go-link is free, open-source software. A person (the **host**) runs the go-link app (the **device**) on their own computer, with their own game files, and invites friends (**guests**) who play from a web browser. The project also runs a website (go-link.org) and a signaling server (signal.go-link.org) that only introduce the host and the guests to each other.
+go-link is free, open-source software. A person (the **host**) runs the go-link app (the **device**) on their own computer, with their own game files, and invites friends (**guests**) who play from a web browser. The project also runs a website (console.go-link.org) and a signaling server (signal.go-link.org) that only introduce the host and the guests to each other.
 
 go-link is independent and non-profit. It has no accounts, no payments, no advertising and asks for no donations.
 

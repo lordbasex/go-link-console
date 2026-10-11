@@ -7,6 +7,6 @@ export const PORTS = { signal: 8191, web: 5191, maker: 5192, site: 5193, play: 5
 /** Willy Maker's own site in the test stack. */
 export const MAKER_URL = `http://localhost:${PORTS.maker}`;
 
-/** The two builds of the website, each on its own origin: the landing (go-link.org) and the rooms (play.go-link.org). */
+/** The two builds of the website, each on its own origin: the landing (console.go-link.org) and the rooms (play.go-link.org). */
 export const SITE_URL = `http://localhost:${PORTS.site}`;
 export const PLAY_URL = `http://localhost:${PORTS.play}`;

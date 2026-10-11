@@ -18,11 +18,11 @@ import (
 	"syscall"
 	"text/tabwriter"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/pkg/instancelock"
-	"github.com/lordbasex/go-link/backend-device/pkg/ownsets"
-	"github.com/lordbasex/go-link/backend-device/pkg/romcheck"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/instancelock"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/ownsets"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/romcheck"
 )
 
 // usage prints the help of the device and its subcommands.
@@ -49,10 +49,16 @@ Usage:
                                          show or change which thumbnail is shown
   device video quality [high|normal|saver]
                                          show or change the video quality of game rooms
+  device hd dir [PATH|default]           show or change go-link HD's games folder
+  device hd screen [720p|1080p] [auto|vp8]
+                                         show or change go-link HD rooms' size and codec
+  device hd games                        list go-link HD's free starter games
+  device hd download GAME [--size 720p|1080p]
+                                         download a starter game into the games folder
   device panel token [--new]             show (or replace) the web panel token
-  device rec list [--json]               list the recordings of game rooms (~/go-link/rec)
+  device rec list [--json]               list the recordings of game rooms (~/go-link-console/rec)
   device rec rm ID...|--all              delete recordings
-  device telemetry rooms                 list the rooms with telemetry (~/go-link/telemetry.db)
+  device telemetry rooms                 list the rooms with telemetry (~/go-link-console/telemetry.db)
   device telemetry runs ROOM             the times a room was on, with their game ids
   device telemetry events ROOM|#GAME [--warn] [--since 30m]
                                          a room's (or one game's) log of events
@@ -107,6 +113,10 @@ func runCommand(args []string) (handled bool, err error) {
 		"thumbnails kind":     cmdThumbnailsKind,
 		"panel token":         cmdPanelToken,
 		"video quality":       cmdVideoQuality,
+		"hd dir":              cmdHDDir,
+		"hd screen":           cmdHDScreen,
+		"hd games":            cmdHDGames,
+		"hd download":         cmdHDDownload,
 		"rec list":            cmdRecList,
 		"rec rm":              cmdRecRm,
 		"telemetry rooms":     cmdTelemetryRooms,
@@ -501,7 +511,7 @@ func cmdThumbnailsDir(args []string) error {
 }
 
 // thumbnailsDir shows the thumbnails folder, or sets it ("default" goes
-// back to ~/go-link/thumbnails/MAME).
+// back to ~/go-link-console/thumbnails/MAME).
 func thumbnailsDir(w io.Writer, settings *services.SettingsService, args []string) error {
 	if len(args) == 0 {
 		fmt.Fprintln(w, settings.ThumbnailsDir())

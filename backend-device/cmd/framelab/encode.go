@@ -18,8 +18,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/encoder"
-	"github.com/lordbasex/go-link/backend-device/pkg/framelab"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/encoder"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/framelab"
 )
 
 // FrameResult is the quality of one frame as players see it.

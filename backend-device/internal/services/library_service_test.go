@@ -18,10 +18,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/pkg/ownsets"
-	"github.com/lordbasex/go-link/backend-device/pkg/romcheck"
-	"github.com/lordbasex/go-link/backend-device/pkg/thumbnails"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/ownsets"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/romcheck"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/thumbnails"
 )
 
 func TestLibraryScan(t *testing.T) {

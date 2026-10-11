@@ -21,7 +21,7 @@ import { pairingCode } from "../stack";
 // The engine's built-in games (the platformer and the showcase), with the
 // engine shipped inside a packaged app:
 //   E2E_HD_CORE=1 E2E_HD_BUILTIN=1 E2E_HD_GAME=glhd_platformer \
-//     E2E_DEVICE_COMMAND="HOME=$PWD/.state/home exec /path/go-link.app/Contents/MacOS/go-link-device --headless \
+//     E2E_DEVICE_COMMAND="HOME=$PWD/.state/home exec /path/go-link-console.app/Contents/MacOS/go-link-console --headless \
 //     --config $PWD/.state/device.json --server-signaling ws://127.0.0.1:8191/ws --panel 127.0.0.1:7391 \
 //     --web-url http://localhost:5191" npx playwright test tests/hd-core.spec.ts --project=web
 

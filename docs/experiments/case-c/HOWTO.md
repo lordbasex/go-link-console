@@ -37,7 +37,7 @@ brew install m68k-elf-binutils m68k-elf-gcc z80asm ffmpeg
 source ~/.nvm/nvm.sh && nvm use 22.23.2      # Node 22.18 or newer: the tools import TypeScript
 ```
 
-The device CLI is only needed for level 4, the real-core replay and a room: `make device-darwin-universal` builds `dist/device/darwin-universal/go-link.app`, and `go-link.app/Contents/MacOS/go-link-device core download` fetches the core once (it lives in `~/go-link/cores/`).
+The device CLI is only needed for level 4, the real-core replay and a room: `make device-darwin-universal` builds `dist/device/darwin-universal/go-link-console.app`, and `go-link-console.app/Contents/MacOS/go-link-console core download` fetches the core once (it lives in `~/go-link-console/cores/`).
 
 ### 1.2 The code: the branch, or the patches on `23806b8`
 
@@ -270,7 +270,7 @@ The canvas tells its view in its `data-view` attribute (`x,y,zoom`), which is ho
 **Play on my go-link** (step 81) powers the created set on with the linked device's real core: validation level 4, the device's room core in a worker, without touching the ROM folder (D-011). The recording had no device linked, so the card says how to link one. With a device linked (**My device**, its 9-digit code) the same button runs the ten device steps. The same check from the device's CLI:
 
 ```sh
-go-link.app/Contents/MacOS/go-link-device romtest ~/Downloads/slammast.zip
+go-link-console.app/Contents/MacOS/go-link-console romtest ~/Downloads/slammast.zip
 #   ok zip, set, identity ("not a go-link set: it shows as the core's original game"), core.loaded (384x224 at 60.00 Hz),
 #   ok core.files (28 files differ from the original set: the core warns and runs them), video.picture, video.alive,
 #   ok audio (silent), input.reacts (Coin at frame 300), time.realtime
@@ -281,7 +281,7 @@ go-link.app/Contents/MacOS/go-link-device romtest ~/Downloads/slammast.zip
 
 ```sh
 mkdir /tmp/wm-roms && cp ~/Downloads/slammast.zip /tmp/wm-roms/
-go-link-device roms check --dir /tmp/wm-roms
+go-link-console roms check --dir /tmp/wm-roms
 # slammast  ok  Saturday Night Slam Masters (World 930713)
 ```
 
@@ -294,7 +294,7 @@ So the room path, **not run in case C**, is the device's normal one:
 ## Acceptance (to compare with the case's results)
 
 ```sh
-DEV=dist/device/darwin-universal/go-link.app/Contents/MacOS/go-link-device
+DEV=dist/device/darwin-universal/go-link-console.app/Contents/MacOS/go-link-console
 ZIP=/tmp/session/slammast.zip       # or docs/experiments/case-c/build/slammast.zip
 node rom/tools/lab/acceptance.mjs $ZIP --script docs/experiments/case-c/runs/clear.json \
   --out /tmp/case-c-acceptance --bot-games 5 --skip laya --device $DEV        # about 76 s
@@ -325,7 +325,7 @@ Each of these happened in the case ([journal.md](journal.md)) or in the reproduc
 | `session.mjs` cannot import Playwright | A worktree has no `e2e/node_modules` (reproduction) | `PLAYWRIGHT=/path/to/a/checkout/e2e/node_modules/playwright/index.mjs` |
 | `session.mjs` cannot reach the site | It defaults to `http://localhost:5302` | `WM_URL=http://localhost:5401` (the port you used in 1.5) |
 | `publish.mjs` cannot find ffmpeg | It defaults to `/usr/local/bin/ffmpeg` (Intel Homebrew) | `FFMPEG=$(command -v ffmpeg)` (Apple silicon: `/opt/homebrew/bin/ffmpeg`) |
-| `romtest` fails to start | No core yet | `go-link-device core download` |
+| `romtest` fails to start | No core yet | `go-link-console core download` |
 | Another zip hash after a session by hand | A click landed on another cell, or a typed value differs | Compare your screen with each screenshot; or run 1.6, which gives the exact zip |
 
 ## What you should get

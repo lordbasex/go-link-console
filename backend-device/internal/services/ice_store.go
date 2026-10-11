@@ -6,7 +6,7 @@ import (
 	"slices"
 	"sync"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/signalclient"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/signalclient"
 )
 
 // ICEStore keeps the STUN/TURN servers received from signalhub in memory.

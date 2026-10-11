@@ -1,15 +1,15 @@
 # Willy Maker
 
-**Willy Maker** is go-link's arcade game maker, on its own site, [maker.go-link.org](https://maker.go-link.org) (before 2026-10-05 it was **Tools › Willy Maker** on go-link.org; those addresses redirect there) for making arcade games for go-link visually: draw a level, drop in characters, test-play it in the browser at once, and turn it into a ROM that runs in MAME and in a go-link room.
+**Willy Maker** is go-link Console's arcade game maker, on its own site, [maker.go-link.org](https://maker.go-link.org) (before 2026-10-05 it was **Tools › Willy Maker** on go-link.org; those addresses redirect there) for making arcade games for go-link Console visually: draw a level, drop in characters, test-play it in the browser at once, and turn it into a ROM that runs in MAME and in a go-link Console room.
 
-It takes the idea of a game maker, where you build and play at the same time with instant tries, and applies it to real arcade hardware. The design, names, art, icons and sounds are all go-link's own. Nothing is taken from any other game maker.
+It takes the idea of a game maker, where you build and play at the same time with instant tries, and applies it to real arcade hardware. The design, names, art, icons and sounds are all go-link Console's own. Nothing is taken from any other game maker.
 
 This page is the source of truth before any code is written. More detail lives in:
 
 - [architecture.md](architecture.md): the module, its layers and what it shares with `rom/`.
 - [file-format.md](file-format.md): the project file, the `.zip` layout, the AI pack and its prompt.
 - [validation.md](validation.md): the four validation levels, from live rules to a power-on test on the device.
-- [vision.md](vision.md): where Willy Maker is going: every genre, a ladder of boards from the CPS-1 to go-link's own engine, and the principles that keep the code ready for it.
+- [vision.md](vision.md): where Willy Maker is going: every genre, a ladder of boards from the CPS-1 to go-link Console's own engine, and the principles that keep the code ready for it.
 - [editor.md](editor.md): the editor (Modernist look, zones over a picture, layers and groups, My games), the default since step 8 (the classic one behind `?editor=classic`), and its steps.
 - [code.md](code.md): the second evolution, games with their own code (blocks and scripts run by go-link HD), planned.
 - [genres.md](genres.md): the game genres as a roadmap (today the platform shooter, and the platformer on the same engine), with the mechanics, parts, board limits, controls and size of each.
@@ -19,13 +19,13 @@ Willy Maker builds on the ROM project:
 - [docs/rom/README.md](../rom/README.md): why CPS-1 and how the core runs our sets.
 - [art-spec.md](../rom/art-spec.md): sizes, colors, grid, collision tags and objects.
 - [hardware.md](../rom/hardware.md): the board's real limits.
-- [journal.md](../rom/journal.md): the prototype in `rom/`, which already proved every rule below in the core and in a go-link room.
+- [journal.md](../rom/journal.md): the prototype in `rom/`, which already proved every rule below in the core and in a go-link Console room.
 
 ## Who it is for
 
-- People who want to make their own arcade game and play it with friends in a go-link room. They need no assembly, no 68000 and no knowledge of how a board stores graphics.
+- People who want to make their own arcade game and play it with friends in a go-link Console room. They need no assembly, no 68000 and no knowledge of how a board stores graphics.
 - Artists and level designers who deliver to the ROM project: Willy Maker checks their work against [art-spec.md](../rom/art-spec.md) while they work, not after.
-- go-link itself: the missions of *Willy Gorklingo: The Lag Protocol* ([story.md](../rom/story.md)) are built with it.
+- go-link Console itself: the missions of *Willy Gorklingo: The Lag Protocol* ([story.md](../rom/story.md)) are built with it.
 
 ## Platforms
 
@@ -58,7 +58,7 @@ The prototype's 68000 program is turned into a **data-driven engine**: levels, c
 - Encrypt the sound program the way the board expects (`kabuki.ts` in the same package).
 - Lay everything out as the set's files and zip it.
 
-All of it can run in the browser (WebAssembly where it helps, for example a fast zip or quantizer). A **Create and play** button then sends the `.zip` to the user's go-link device over the existing `files` channel (as ROM uploads already do) and opens a room with it.
+All of it can run in the browser (WebAssembly where it helps, for example a fast zip or quantizer). A **Create and play** button then sends the `.zip` to the user's go-link Console device over the existing `files` channel (as ROM uploads already do) and opens a room with it.
 
 ### Phase 3: more boards
 
@@ -93,9 +93,9 @@ Live meters in the top bar, from the board profile, always visible while buildin
 | Unique tiles and sprite cells vs graphics ROM | 6 MB |
 | Sprites on screen | 256 entries |
 | Program and data size | 2 MB (68000 program ROM: the engine in the first megabyte, the game's data in the second) |
-| Sound samples | 4 MB (QSound: go-link's engine uses about 0.4 MB of synthesized effects and instruments) |
+| Sound samples | 4 MB (QSound: go-link Console's engine uses about 0.4 MB of synthesized effects and instruments) |
 
-A meter turns amber near its limit and red over it. The meters count what go-link's engine already takes (its sprites, the font, 25 of the 32 sprite palettes and its program, from `engine.json`). **Board usage** (since experiment 1's verdict, T-27): the top bar's **CPS-1 · %** chip shows the most used limit; it opens a panel with every meter as a bar, the live estimate while building, and **Measure exactly**, which packs the game as Create ROM does and shows the real graphics, program and sprite palette numbers (`rom/usage.ts`, `ui/organisms/BoardUsage.tsx`).
+A meter turns amber near its limit and red over it. The meters count what go-link Console's engine already takes (its sprites, the font, 25 of the 32 sprite palettes and its program, from `engine.json`). **Board usage** (since experiment 1's verdict, T-27): the top bar's **CPS-1 · %** chip shows the most used limit; it opens a panel with every meter as a bar, the live estimate while building, and **Measure exactly**, which packs the game as Create ROM does and shows the real graphics, program and sprite palette numbers (`rom/usage.ts`, `ui/organisms/BoardUsage.tsx`).
 
 ### Characters
 
@@ -204,7 +204,7 @@ Two tabs of the IDE (`src/maker/game/`, texts in `i18n/game.*.ts` and `i18n/menu
   | START / COIN | Join or pause / a credit |
 
 - **Each player's character**: a project hero or the built-in Willy, plus a shirt for Willy (own colors or one of three recruit shirts; an own hero keeps its colors). New games: Willy for player 1, recruits for players 2-4. Play mode and the ROM draw an own hero with its own animations (idle, walk or run, jump, fire), at the size it was saved. How many play is also a selector in the top bar.
-- **Your controller**: the connected controller (Gamepad API) drawn with its own button names (`src/controllers`) and lit while pressed; press-to-assign remapping of the keyboard and of each controller model for Up, Down, Left, Right, B1-B3, Start and Coin; the on-screen pad in play mode (automatic on touch screens, always or never); and "go-link defaults". The mapping is the site's button map in this browser (`go-link.input`), so play mode and go-link rooms use it; the touch choice is `go-link.wm.touchpad`.
+- **Your controller**: the connected controller (Gamepad API) drawn with its own button names (`src/controllers`) and lit while pressed; press-to-assign remapping of the keyboard and of each controller model for Up, Down, Left, Right, B1-B3, Start and Coin; the on-screen pad in play mode (automatic on touch screens, always or never); and "go-link Console defaults". The mapping is the site's button map in this browser (`go-link.input`), so play mode and go-link Console rooms use it; the touch choice is `go-link.wm.touchpad`.
 - **DIP switches**: difficulty (Easy, Normal, Hard, Lag), lives (1-5), free play and demo sound, saved with the game. Play mode uses the lives and the difficulty; in the ROM the lives are the hits a player takes, and free play needs no credit. The difficulty (task T-15) sets how often an enemy fires and how fast its shot flies: Easy every 150 frames at 2 px per frame, Normal 90 at 3 (the prototype's), Hard 60 at 4, Lag 40 at 5; the ROM reads it from the header's flags (bits 5-6, `WM_F_DIFFICULTY`).
 - **Rules**: hits an enemy takes, points per enemy, rescue and crate, touch damage, enemies that chase or shoot, an exit that needs every enemy down (with `ENEMY n` in the HUD and a message when the exit is reached early), what a hit does (back near the camera, or blink in place, with the blink's length), how a 32 px crate is climbed (by jumping, the default, or by walking into it) and what Start does on a port past the game's players ("coming soon" or nothing). Play mode and the ROM read the same values ([engine.md](engine.md#rules-the-game-tab)); **Default rules** clears them.
 - **Checks**: the live rules of the game settings and menus (below), each with Go.
@@ -212,7 +212,7 @@ Two tabs of the IDE (`src/maker/game/`, texts in `i18n/game.*.ts` and `i18n/menu
 **Menus tab**
 
 - Seven screens: **Title**, **Demo** (attract, with its demo level), **Player select**, **HUD**, **Continue**, **Game over** and **High scores**.
-- Each one has a live 384 × 224 preview drawn with go-link's 8 × 8 board font (`@go-link/cps1` `font.ts`, the same glyphs the ROM prototype uses), its text fields (lowercase is shown as uppercase, as the board draws it), a background (a level's first screen darkened, or a solid board color), a music slot (a reference only until sound arrives in Phase 2) and the credits line (`(C) 2026 go-link` by default, shown per screen).
+- Each one has a live 384 × 224 preview drawn with go-link Console's 8 × 8 board font (`@go-link/cps1` `font.ts`, the same glyphs the ROM prototype uses), its text fields (lowercase is shown as uppercase, as the board draws it), a background (a level's first screen darkened, or a solid board color), a music slot (a reference only until sound arrives in Phase 2) and the credits line (`(C) 2026 go-link` by default, shown per screen).
 - **Fit checks**, live under each field and on the preview: the text must fit the 48 × 28 character text layer (a HUD join prompt fits its player's slot), should stay inside the safe area (2 characters in from each edge), and may use only the font's glyphs.
 - Play mode uses the HUD texts (join prompt, ammo, level clear) and draws the Game over screen in the board font.
 
@@ -250,7 +250,7 @@ Export also has a **Power-on test**: drop a ROM `.zip` (for example the one an A
 
 ## UI overview
 
-The screens match the mocks being designed on the go-link design canvas:
+The screens match the mocks being designed on the go-link Console design canvas:
 
 | Screen | What is on it |
 |---|---|
@@ -259,7 +259,7 @@ The screens match the mocks being designed on the go-link design canvas:
 | **Sprite import** | the dropped sheet with detected frames, animation slots, pivot editor, palette zones with their 15-color meters, CPS-1 snap preview, 1x and 2x preview |
 | **Play test** | the 2× game view with HUD, debug overlay switches, the controller panel with live buttons, Pause / Edit / Resume / Restart here |
 | **Game settings** | players, buttons and actions, controller mapping, menus, DIP switches, level order |
-| **Export / Build** | validation checklist, Export project, Export AI pack (with a preview of the prompt), Create ROM (its steps, the power-on test at once with its picture, Download ROM, the symbol map, Play on my go-link, notes on what the ROM leaves out), the power-on test of a ROM `.zip` |
+| **Export / Build** | validation checklist, Export project, Export AI pack (with a preview of the prompt), Create ROM (its steps, the power-on test at once with its picture, Download ROM, the symbol map, Play on my go-link Console, notes on what the ROM leaves out), the power-on test of a ROM `.zip` |
 
 ### Keyboard shortcuts
 
@@ -301,8 +301,8 @@ The screens match the mocks being designed on the go-link design canvas:
 ## Open questions
 
 - **The engine's data format** for Phase 2: answered by `wm_data` ([engine.md](engine.md#the-data-block-wm_data)), a translation of the project format.
-- **A room with a created set** (built 2026-10-04, device 0.1.9): **Play on my go-link** sends the game to the device's own Willy Maker folder (`~/go-link/maker/`, never the ROM folder) and opens its room (`@maker`, one per device: a new game replaces it), and the site opens that room ([protocol](../protocol.md)).
+- **A room with a created set** (built 2026-10-04, device 0.1.9): **Play on my go-link Console** sends the game to the device's own Willy Maker folder (`~/go-link-console/maker/`, never the ROM folder) and opens its room (`@maker`, one per device: a new game replaces it), and the site opens that room ([protocol](../protocol.md)).
 - **Sound** in the maker: QSound samples on `slammast` need a sound driver first (journal: pending). Phase 1 only stores references.
 - **Our sets' identity**: the device's allow-list of go-link-owned sets by hash, so the library shows the user's title and art instead of the original set's ([docs/rom/README.md](../rom/README.md#how-the-core-finds-the-game)). It is needed before Create and play.
-- **Sharing projects between users**: Phase 1 is files only. A gallery would need storage, which go-link does not have by choice.
+- **Sharing projects between users**: Phase 1 is files only. A gallery would need storage, which go-link Console does not have by choice.
 - **Where the shared CPS-1 code lives** (see [architecture.md](architecture.md#shared-code-with-rom)).

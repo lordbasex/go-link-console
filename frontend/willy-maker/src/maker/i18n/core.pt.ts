@@ -456,7 +456,7 @@ export const corePt: CoreMessages = {
   },
   site: {
     by: "do go-link",
-    home: "go-link.org",
+    home: "console.go-link.org",
     language: "Idioma",
     lightTheme: "Tema claro",
     darkTheme: "Tema escuro",

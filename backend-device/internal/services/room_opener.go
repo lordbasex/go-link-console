@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"sync"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/signalclient"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/signalclient"
 )
 
 // RoomOpener opens rooms for everyone that shares the device's signaling

@@ -5,7 +5,7 @@
 <dict>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>applinks:go-link.org</string>
+		<string>applinks:play.go-link.org</string>
 	</array>
 </dict>
 </plist>

@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/pkg/emuproc"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/emuproc"
 )
 
 // videoGame is a fakeGame that takes a video mode, like WorkerSource.

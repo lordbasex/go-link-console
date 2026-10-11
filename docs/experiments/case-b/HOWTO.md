@@ -21,12 +21,12 @@ The records behind it: step 1 [decisions.md](decisions.md), [journal.md](journal
 - `brew install m68k-elf-binutils m68k-elf-gcc z80asm ffmpeg` (the ROM toolchain and the MP4s).
 - Node 22.18 or newer (`source ~/.nvm/nvm.sh && nvm use 22.23.2`; the tools import TypeScript).
 - Go, `pkg-config`, libvpx and opus for the go-link room (`brew install go pkg-config libvpx opus`), and the signalhub repository next to go-link (`../signaling`) or `SIGNALING_DIR`.
-- The device CLI with `romtest --input` (`make device-darwin-universal`, or a release's `go-link.app/Contents/MacOS/go-link-device`) and the core: `go-link-device core download` (it goes to `~/go-link/cores`).
+- The device CLI with `romtest --input` (`make device-darwin-universal`, or a release's `go-link-console.app/Contents/MacOS/go-link-console`) and the core: `go-link-console core download` (it goes to `~/go-link-console/cores`).
 - Optional, for the Laya games: the venv and the model of [harness.md › Setup](../harness.md#setup).
 - Free ports: the guide uses **5401** for Willy Maker and **5408-5409** for the room test. Pick others if they are taken.
 
 ```sh
-git clone https://github.com/lordbasex/go-link.git go-link && cd go-link   # or: git worktree add --detach ../case-b 23806b8
+git clone https://github.com/lordbasex/go-link-console.git go-link && cd go-link   # or: git worktree add --detach ../case-b 23806b8
 git checkout --detach 23806b8
 git log --oneline -1
 ```
@@ -441,7 +441,7 @@ Expected: the clear run prints `frame 600: playing, P1 x 484 y 416`, `frame 1200
 
 ```sh
 (cd backend-device && go build -o /tmp/framelab ./cmd/framelab)          # about 25 s
-/tmp/framelab capture -log -core ~/go-link/cores/mame2003_plus_libretro.dylib \
+/tmp/framelab capture -log -core ~/go-link-console/cores/mame2003_plus_libretro.dylib \
   -rom docs/experiments/case-b/build/slammast.zip -out /tmp/case-b-framelab -frames 860 \
   -script "60-63:coin 110-113:start 140-400:right" 2> /tmp/case-b-framelab.log
 grep -c "WRONG CHECKSUMS" /tmp/case-b-framelab.log; grep -c -E "NOT FOUND|INCORRECT LENGTH" /tmp/case-b-framelab.log
@@ -452,7 +452,7 @@ Expected: `28` and `0`. The pack says there must be no `WRONG CHECKSUMS` line; a
 ## 2.9 Level 4 and the acceptance (18:50-19:47)
 
 ```sh
-DEV=/path/to/go-link.app/Contents/MacOS/go-link-device       # e.g. dist/device/darwin-universal/… of a built checkout
+DEV=/path/to/go-link-console.app/Contents/MacOS/go-link-console       # e.g. dist/device/darwin-universal/… of a built checkout
 $DEV romtest docs/experiments/case-b/build/slammast.zip
 ```
 
@@ -484,7 +484,7 @@ Expected (`acceptance.json` `summary`): `level3` true, `level4` true, `scripted`
 
 ## 2.10 A go-link room
 
-The case skipped this (D-115: `room-test.mjs` uses the fixed ports 8192 and 7392 and the run had no port assigned). This guide ran it on the same bytes. It starts its own signalhub and headless device with a throwaway HOME whose ROM folder holds only the set (the core is copied from `~/go-link/cores`), opens the device's local panel in Chromium, starts a New game, and plays through the room's keyboard; it never touches a running go-link app, its `device.json` or your ROM folder.
+The case skipped this (D-115: `room-test.mjs` uses the fixed ports 8192 and 7392 and the run had no port assigned). This guide ran it on the same bytes. It starts its own signalhub and headless device with a throwaway HOME whose ROM folder holds only the set (the core is copied from `~/go-link-console/cores`), opens the device's local panel in Chromium, starts a New game, and plays through the room's keyboard; it never touches a running go-link app, its `device.json` or your ROM folder.
 
 ```sh
 cp docs/experiments/case-b/build/slammast.zip rom/build/slammast.zip       # room-test plays rom/build/<set>.zip
@@ -516,7 +516,7 @@ and in `rom/build/room/device.log`: `game running … rom=slammast.zip core="MAM
 | ![New game](howto/room/1-new-game.jpg) New game on the device's panel | ![Room page](howto/room/2-room-page.jpg) The room |
 | ![Credit](howto/room/3-credit.png) The title after a coin: `WILLY GORKLINGO`, `THE LAG PROTOCOL`, `PUSH START`, `CREDITS 1`, `(C) 2026 GO-LINK` | ![Playing](howto/room/8-later.png) Playing: the 4-player HUD, `LIVES 3`, `BOMB 09`, the woman on the ledge |
 
-To play it yourself instead, put `slammast.zip` in a go-link device's ROM folder (My device › ROMs on the website, or `go-link-device roms dir`) and start a New game with it. The device shows it as the core's original title (it is not in the device's list of go-link sets).
+To play it yourself instead, put `slammast.zip` in a go-link device's ROM folder (My device › ROMs on the website, or `go-link-console roms dir`) and start a New game with it. The device shows it as the core's original title (it is not in the device's list of go-link sets).
 
 # The finished ROM
 

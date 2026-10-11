@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/encoder"
-	"github.com/lordbasex/go-link/backend-device/pkg/input"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/encoder"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/input"
 )
 
 func TestFrameSizeAndClock(t *testing.T) {

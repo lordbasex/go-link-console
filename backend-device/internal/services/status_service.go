@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
 )
 
 // StatusService keeps the live device state and notifies listeners (the
@@ -61,6 +61,11 @@ func (s *StatusService) update(mutate func(st *models.Status)) {
 // SetVideoQuality records the host's video quality for game rooms.
 func (s *StatusService) SetVideoQuality(q string) {
 	s.update(func(st *models.Status) { st.VideoQuality = q })
+}
+
+// SetHD publishes go-link HD's screen settings and starter games.
+func (s *StatusService) SetHD(hd models.HDStatus) {
+	s.update(func(st *models.Status) { st.HD = &hd })
 }
 
 // SetConnected records a live signalhub link and the ICE URLs it offered.
@@ -212,6 +217,11 @@ func clone(st models.Status) models.Status {
 		// shares it (a large folder holds thousands of sets).
 		lib := *st.Library
 		st.Library = &lib
+	}
+	if st.HD != nil {
+		hd := *st.HD
+		hd.Starter = slices.Clone(hd.Starter)
+		st.HD = &hd
 	}
 	if st.Peers == nil {
 		st.Peers = []models.LinkedPeer{}

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
 )
 
 func TestUpdateServiceFindsANewerRelease(t *testing.T) {
@@ -45,12 +45,12 @@ func TestUpdateServiceFindsANewerRelease(t *testing.T) {
 }
 
 func TestTheUpdateReachesLinkedBrowsers(t *testing.T) {
-	st := models.Status{DeviceID: "d", Version: "v0.1.0", Update: &models.UpdateInfo{Latest: "v0.1.1", URL: "https://github.com/lordbasex/go-link/releases/tag/v0.1.1"}}
+	st := models.Status{DeviceID: "d", Version: "v0.1.0", Update: &models.UpdateInfo{Latest: "v0.1.1", URL: "https://github.com/lordbasex/go-link-console/releases/tag/v0.1.1"}}
 	b, err := json.Marshal(NewDeviceStatusMessage(st))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(b), `"update":{"latest":"v0.1.1","url":"https://github.com/lordbasex/go-link/releases/tag/v0.1.1"}`) {
+	if !strings.Contains(string(b), `"update":{"latest":"v0.1.1","url":"https://github.com/lordbasex/go-link-console/releases/tag/v0.1.1"}`) {
 		t.Fatalf("device_status = %s", b)
 	}
 }

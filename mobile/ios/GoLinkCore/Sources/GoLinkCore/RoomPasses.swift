@@ -82,8 +82,8 @@ public final class RoomPasses {
 public enum Terms {
     /** Must equal TERMS_VERSION in frontend/apps/web/src/legal.ts (a test checks it). */
     public static let version = "2026-10-07"
-    public static let termsURL = "https://go-link.org/terms"
-    public static let privacyURL = "https://go-link.org/privacy"
+    public static let termsURL = "https://console.go-link.org/terms"
+    public static let privacyURL = "https://console.go-link.org/privacy"
     public static let storeKey = "go-link.terms"
 
     public static func accepted(_ store: KeyValueStore) -> Bool {

@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/pkg/signalclient"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/signalclient"
 )
 
 const deviceID = "7f3c2a10-1b2c-4d3e-8f90-a1b2c3d4e5f6"

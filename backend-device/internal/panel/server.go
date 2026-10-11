@@ -33,9 +33,9 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/pkg/ids"
-	"github.com/lordbasex/go-link/backend-device/pkg/signalclient"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/ids"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/signalclient"
 )
 
 // DefaultAddr is where the panel listens: every interface, so other

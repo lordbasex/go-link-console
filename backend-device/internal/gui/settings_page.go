@@ -18,9 +18,9 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/pkg/thumbnails"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/thumbnails"
 )
 
 // The categories of the Settings page, in order.
@@ -259,13 +259,13 @@ func labelIndex(labels []string, label string) int {
 	return 0
 }
 
-// savesDir is where saved games live: ~/go-link/saves.
+// savesDir is where saved games live: ~/go-link-console/saves.
 func savesDir() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return filepath.Join("~", "go-link", "saves")
+		return filepath.Join("~", "go-link-console", "saves")
 	}
-	return filepath.Join(home, "go-link", "saves")
+	return filepath.Join(home, "go-link-console", "saves")
 }
 
 // refresh shows the current thumbnail settings.

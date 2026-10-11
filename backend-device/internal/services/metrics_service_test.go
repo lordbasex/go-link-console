@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
 )
 
 func TestDeviceStatusCarriesStorageSizes(t *testing.T) {

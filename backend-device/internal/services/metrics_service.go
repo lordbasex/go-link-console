@@ -6,8 +6,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/pkg/sysinfo"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/sysinfo"
 )
 
 // DeviceStatusMessage is sent to linked browsers on the "control"

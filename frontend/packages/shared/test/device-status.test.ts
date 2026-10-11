@@ -5,8 +5,8 @@ import { parseDeviceStatus, parsePauseAskEvent, parseRomsPage, romFile, queryRom
 describe("device update", () => {
   const base = { type: "device_status", device_id: "d", version: "v0.1.0" };
   it("offers only go-link's own releases", () => {
-    const ok = parseDeviceStatus({ ...base, update: { latest: "v0.2.0", url: "https://github.com/lordbasex/go-link/releases/tag/v0.2.0" } });
-    expect(ok?.update).toEqual({ latest: "v0.2.0", url: "https://github.com/lordbasex/go-link/releases/tag/v0.2.0" });
+    const ok = parseDeviceStatus({ ...base, update: { latest: "v0.2.0", url: "https://github.com/lordbasex/go-link-console/releases/tag/v0.2.0" } });
+    expect(ok?.update).toEqual({ latest: "v0.2.0", url: "https://github.com/lordbasex/go-link-console/releases/tag/v0.2.0" });
     const evil = parseDeviceStatus({ ...base, update: { latest: "v9.9.9", url: "https://evil.example/go-link.dmg" } });
     expect(evil?.update).toBeUndefined();
     expect(parseDeviceStatus(base)?.update).toBeUndefined();
@@ -142,5 +142,25 @@ describe("a device before 0.2.9", () => {
     expect(queryRomsLocally(lib.legacyRoms!, { filter: "missing" }).total).toBe(1);
     // a newer device sends the summary only
     expect(parseDeviceStatus({ type: "device_status", device_id: "d", library: { dir: "/r", roms: [{ name: "x" }], summary: { total: 9 } } })!.library!.legacyRoms).toBeUndefined();
+  });
+});
+
+describe("go-link HD in device_status", () => {
+  it("reads its screen, folder and starter games", () => {
+    const st = parseDeviceStatus({
+      type: "device_status",
+      device_id: "d",
+      library: { dir: "/r", hd_dir: "/h", hd_games: 1, hd_bytes: 117389971, core: {} },
+      hd: { room_size: "1080p", codec: "vp8", starter: [{ name: "antidoto", title: "ANTÍDOTO", installed: true, size: "720p", version: "0.1.0", update: "0.1.1", downloading: "1080p", done: 10, total: 100 }, { title: "no name" }] },
+    });
+    expect(st?.hd).toEqual({
+      roomSize: "1080p",
+      codec: "vp8",
+      starter: [{ name: "antidoto", title: "ANTÍDOTO", installed: true, size: "720p", version: "0.1.0", update: "0.1.1", downloading: "1080p", done: 10, total: 100, error: undefined }],
+    });
+    expect([st?.library?.hdDir, st?.library?.hdGames, st?.library?.hdBytes]).toEqual(["/h", 1, 117389971]);
+    // An older device: no hd, unknown values fall back to the defaults.
+    expect(parseDeviceStatus({ type: "device_status", device_id: "d" })?.hd).toBeUndefined();
+    expect(parseDeviceStatus({ type: "device_status", device_id: "d", hd: { room_size: "4k" } })?.hd).toEqual({ roomSize: "720p", codec: "auto", starter: [] });
   });
 });

@@ -5,6 +5,7 @@
 package gui
 
 import (
+	"archive/zip"
 	"context"
 	"image"
 	"image/png"
@@ -18,10 +19,10 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/test"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/internal/shots"
-	"github.com/lordbasex/go-link/backend-device/pkg/sysinfo"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/internal/shots"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/sysinfo"
 )
 
 // TestShots renders the real window with made-up data (an invented game
@@ -48,6 +49,10 @@ func TestShots(t *testing.T) {
 		capture(t, u, filepath.Join(dir, "win-overview.png"))
 		u.showRoms()
 		capture(t, u, filepath.Join(dir, "win-roms.png"))
+		u.show(pageHD)
+		capture(t, u, filepath.Join(dir, "win-hd.png"))
+		u.hd.showTab(hdTabScreen)
+		capture(t, u, filepath.Join(dir, "win-hd-screen.png"))
 	}
 	setLanguage("en")
 }
@@ -59,7 +64,7 @@ func shotUI(t *testing.T, lang string, pairing bool) (*ui, *services.StatusServi
 	a := test.NewTempApp(t)
 	a.Settings().SetTheme(arcadeTheme{})
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	base := filepath.Join(t.TempDir(), "go-link")
+	base := filepath.Join(t.TempDir(), "go-link-console")
 	if err := shots.Seed(base, true); err != nil {
 		t.Fatal(err)
 	}
@@ -67,8 +72,17 @@ func shotUI(t *testing.T, lang string, pairing bool) (*ui, *services.StatusServi
 	status := services.NewStatusService(id, "v0.1.4", "wss://signal.go-link.org/ws", filepath.Join(base, "roms"))
 	lib := services.NewLibraryService(filepath.Join(base, "roms"), status, logger)
 	lib.SetCore(filepath.Join(base, "cores"), "")
+	// go-link HD: its engine and the starter game, installed at 720p
+	hdDir := filepath.Join(base, "hd-games")
+	engine := filepath.Join(base, "cores", "libgolinkhd.dylib")
+	_ = os.MkdirAll(hdDir, 0o755)
+	_ = os.WriteFile(engine, []byte("engine"), 0o644)
+	lib.SetHDCore(engine)
+	lib.UseHDDir(hdDir)
+	shotPackage(t, filepath.Join(hdDir, "antidoto.glhd"))
 	settings := services.NewSettingsService(lib, models.ThumbnailSettings{}, filepath.Join(base, "thumbnails", "MAME"), func(models.ThumbnailSettings) error { return nil })
 	lib.Scan()
+	hdGames := services.NewHDGamesService(services.HDGamesConfig{Library: lib, Status: status, Settings: settings, Offered: true, Logger: logger})
 
 	now := time.Now()
 	status.SetConnected("device-1", nil)
@@ -77,7 +91,7 @@ func shotUI(t *testing.T, lang string, pairing bool) (*ui, *services.StatusServi
 		Hardware: sysinfo.Hardware{Hostname: "arcade-pc", OS: "darwin", Arch: "arm64", Platform: "macOS 15.6", CPUModel: "Apple M1", Cores: 8, MemTotal: 16 << 30},
 		Usage:    sysinfo.Usage{CPUPercent: 23, ProcessCPUPercent: 61, MemUsed: 9 << 30, ProcessRSS: 180 << 20, NetSentBps: 412_000, NetRecvBps: 38_000},
 	})
-	opts := Options{Ctx: context.Background(), Status: status, Library: lib, Settings: settings, Version: "v0.1.4", Language: lang, Logger: logger, WebURL: "https://play.go-link.org"}
+	opts := Options{Ctx: context.Background(), Status: status, Library: lib, Settings: settings, HDGames: hdGames, Version: "v0.1.4", Language: lang, Logger: logger, WebURL: "https://play.go-link.org"}
 	if pairing {
 		opts.Links = services.NewLinkService(services.LinkConfig{DeviceID: id, Logger: logger}, status)
 	} else {
@@ -92,9 +106,28 @@ func shotUI(t *testing.T, lang string, pairing bool) (*ui, *services.StatusServi
 	u.settings.background = func(f func()) { f() }
 	u.render(status.Snapshot())
 	// The real folder is a temporary one: show the default path instead.
-	u.roms.dir.SetText("~/go-link/roms")
+	u.roms.dir.SetText("~/go-link-console/roms")
+	u.hd.dir.SetText("~/go-link-console/hd-games")
 	u.win.Resize(fyne.NewSize(1240, 800))
 	return u, status
+}
+
+// shotPackage writes a small stand-in for the starter game's package.
+func shotPackage(t *testing.T, path string) {
+	t.Helper()
+	f, err := os.Create(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	z := zip.NewWriter(f)
+	for name, body := range map[string]string{"manifest.json": `{"format": 3, "title": "ANTÍDOTO", "resolution": "720p", "levels": [{"level": "l.json"}]}`, "l.json": "{}"} {
+		w, _ := z.Create(name)
+		w.Write([]byte(body))
+	}
+	if err := z.Close(); err != nil {
+		t.Fatal(err)
+	}
 }
 
 // capture saves the window at twice its size (a sharp picture on Retina

@@ -9,7 +9,7 @@
     "test:android:camera": "playwright test --project=android-camera",
     "test:android:skins": "playwright test --project=android-skins",
     "shots": "E2E_SHOTS=1 playwright test --project=shots",
-    "video": "E2E_SHOTS=1 E2E_CORE_DIR=${E2E_CORE_DIR:-$HOME/go-link/cores} playwright test --project=video",
+    "video": "E2E_SHOTS=1 E2E_CORE_DIR=${E2E_CORE_DIR:-$HOME/go-link-console/cores} playwright test --project=video",
     "report": "playwright show-report"
   },
   "devDependencies": {

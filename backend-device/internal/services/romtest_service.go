@@ -22,9 +22,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/emuproc"
-	"github.com/lordbasex/go-link/backend-device/pkg/ownsets"
-	"github.com/lordbasex/go-link/backend-device/pkg/romcheck"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/emuproc"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/ownsets"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/romcheck"
 )
 
 // The ROM test (validation level 4, docs/willy-maker/validation.md): the
@@ -102,7 +102,7 @@ type RomTestResult struct {
 // RomTestConfig sets up the ROM tests.
 type RomTestConfig struct {
 	// Dir holds each test's files: Dir/<id>/<set>.zip and its system
-	// folders (~/go-link/tmp/romtest).
+	// folders (~/go-link-console/tmp/romtest).
 	Dir      string
 	CorePath func() string
 	Catalog  func() *romcheck.Catalog // nil or returning nil: the set check is skipped

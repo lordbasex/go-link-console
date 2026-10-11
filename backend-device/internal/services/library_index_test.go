@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/pkg/romcheck"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/romcheck"
 )
 
 func testRoms() []models.RomInfo {

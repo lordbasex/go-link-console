@@ -2,7 +2,7 @@
 
 package services
 
-import "github.com/lordbasex/go-link/backend-device/pkg/signalclient"
+import "github.com/lordbasex/go-link-console/backend-device/pkg/signalclient"
 
 // Dispatcher fans signalhub events out to several handlers, in order.
 type Dispatcher []signalclient.Handler

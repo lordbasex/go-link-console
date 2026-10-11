@@ -10,7 +10,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
 )
 
 // The tabs of the MAME page.
@@ -19,7 +19,7 @@ const (
 	mameTabThumbs
 )
 
-// mamePage is the MAME emulator, under Emulators in the sidebar: a header
+// mamePage is the MAME emulator, under Core in the sidebar: a header
 // with the core's state and two tabs, the ROM sets and their thumbnails.
 type mamePage struct {
 	u        *ui

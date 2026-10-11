@@ -5,7 +5,7 @@ package services
 import (
 	"testing"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/signalclient"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/signalclient"
 )
 
 type countingSender struct{ to []string }

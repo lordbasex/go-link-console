@@ -25,18 +25,23 @@ export interface Shot {
   rate?: number;
   phone?: boolean;
   focus?: { x: number; y: number; zoom: number; at: number };
+  /** Where the shot starts in another language's take, when it differs. */
+  fromBy?: Partial<Record<Lang, number>>;
 }
 
 export interface Chapter {
   n: number;
-  title: string;
+  title: Record<Lang, string>;
   shots: Shot[];
 }
+
+/** Where a shot starts in the take of a language. */
+export const shotFrom = (shot: Shot, lang: Lang) => shot.fromBy?.[lang] ?? shot.from;
 
 export const CHAPTERS: Chapter[] = [
   {
     n: 1,
-    title: "Your arcade, online",
+    title: { en: "Your arcade, online", es: "Tu arcade, online", pt: "Seu fliperama, online" },
     shots: [
       { id: "hero", take: "landing", from: 3.5 },
       { id: "steps", take: "landing", from: 15 },
@@ -44,7 +49,7 @@ export const CHAPTERS: Chapter[] = [
   },
   {
     n: 2,
-    title: "Link your computer",
+    title: { en: "Link your computer", es: "Vincula tu computadora", pt: "Conecte seu computador" },
     shots: [
       { id: "code", take: "link", from: 3, rate: 0.6, focus: { x: 0.5, y: 0.3, zoom: 1.25, at: 30 } },
       { id: "dashboard", take: "link", from: 10 },
@@ -53,7 +58,7 @@ export const CHAPTERS: Chapter[] = [
   },
   {
     n: 3,
-    title: "Open a room",
+    title: { en: "Open a room", es: "Abre una sala", pt: "Abra uma sala" },
     shots: [
       { id: "room", take: "room", from: 10 },
       { id: "controls", take: "room", from: 15, focus: { x: 0.86, y: 0.45, zoom: 1.45, at: 20 } },
@@ -62,7 +67,7 @@ export const CHAPTERS: Chapter[] = [
   },
   {
     n: 4,
-    title: "Invite your friends",
+    title: { en: "Invite your friends", es: "Invita a tus amigos", pt: "Convide seus amigos" },
     shots: [
       { id: "invite", take: "room", from: 39, rate: 0.9, focus: { x: 0.45, y: 0.55, zoom: 1.35, at: 25 } },
       { id: "join", take: "guest", from: 6, focus: { x: 0.5, y: 0.4, zoom: 1.4, at: 12 } },
@@ -71,12 +76,12 @@ export const CHAPTERS: Chapter[] = [
   },
   {
     n: 5,
-    title: "Your phone is a console",
+    title: { en: "Your phone is a console", es: "Tu celular es una consola", pt: "Seu celular é um console" },
     shots: [{ id: "phone", take: "phone", from: 4, phone: true }],
   },
   {
     n: 6,
-    title: "Make your own game",
+    title: { en: "Make your own game", es: "Crea tu propio juego", pt: "Crie seu próprio jogo" },
     shots: [
       { id: "wizard", take: "maker", from: 0.5, rate: 0.9 },
       { id: "editor", take: "maker", from: 9 },
@@ -86,7 +91,7 @@ export const CHAPTERS: Chapter[] = [
   },
   {
     n: 7,
-    title: "Every millisecond, measured",
+    title: { en: "Every millisecond, measured", es: "Cada milisegundo, medido", pt: "Cada milissegundo, medido" },
     shots: [
       { id: "charts", take: "network", from: 3.5 },
       { id: "log", take: "network", from: 20 },

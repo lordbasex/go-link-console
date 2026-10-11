@@ -1,6 +1,6 @@
 # go-link HD: the engine's base (specification)
 
-go-link HD is step 3 of Willy Maker's [board ladder](willy-maker/vision.md#the-board-ladder): go-link's own 2D engine, a "virtual board" with modern console-class quality. Its games play in a go-link room like any MAME set does. This page lists, before anything is built, **what the engine supports and what could be done with it**. It is the base for the roadmap ([status.md](status.md)); nothing here exists yet except the streaming path, which the [HD experiment](experiments/hd-streaming.md) proved.
+go-link HD is step 3 of Willy Maker's [board ladder](willy-maker/vision.md#the-board-ladder): go-link Console's own 2D engine, a "virtual board" with modern console-class quality. Its games play in a go-link Console room like any MAME set does. This page lists, before anything is built, **what the engine supports and what could be done with it**. It is the base for the roadmap ([status.md](status.md)); nothing here exists yet except the streaming path, which the [HD experiment](experiments/hd-streaming.md) proved.
 
 Every item is marked:
 
@@ -12,16 +12,16 @@ Every item is marked:
 
 | Question | Decision | Why |
 |---|---|---|
-| What it is | **An engine of our own with its own API** (`libgolinkhd`, `include/golink_hd.h` in the `golink-hd` repository) that runs a game package; the device runs it in a worker process per room, next to MAME (which it runs through libretro) | Rooms, voice, controllers, recordings, invitations, saves and phones work for both engines. go-link HD is meant to become go-link's main engine and MAME the second one |
+| What it is | **An engine of our own with its own API** (`libgolinkhd`, `include/golink_hd.h` in the `golink-hd` repository) that runs a game package; the device runs it in a worker process per room, next to MAME (which it runs through libretro) | Rooms, voice, controllers, recordings, invitations, saves and phones work for both engines. go-link HD is meant to become go-link Console's main engine and MAME the second one |
 | Look | **Pixel art on a 640 × 360 screen**, scaled ×3 to 1080p (×6 to 4K); real HD art (1920 × 1080) supported too | Pixel art is quicker to draw and to make with an image AI, and fits the arcade look; HD art stays possible for who has it |
-| Language | **C99**, with no dependencies (changed on 2026-10-07; it was Go) | Portable to every platform and to WebAssembly for Willy Maker's play mode (clang's wasm32 target); go-link's device calls it from Go (`pkg/golinkhd`, cgo) |
-| Its own API, not libretro's (2026-10-08) | A small versioned API: create, load a package, one frame (controllers in, picture and sound out), save states | It first followed libretro's API, which inspired it; its own lets it grow with what go-link needs (events for the room, views per player, several engines in one program) without libretro's limits. MAME keeps running through libretro |
-| Repository | Its own public repository, `golink-hd` (next to this one, like signalhub) | libretro takes cores from their own repositories; the core knows nothing about go-link |
+| Language | **C99**, with no dependencies (changed on 2026-10-07; it was Go) | Portable to every platform and to WebAssembly for Willy Maker's play mode (clang's wasm32 target); go-link Console's device calls it from Go (`pkg/golinkhd`, cgo) |
+| Its own API, not libretro's (2026-10-08) | A small versioned API: create, load a package, one frame (controllers in, picture and sound out), save states | It first followed libretro's API, which inspired it; its own lets it grow with what go-link Console needs (events for the room, views per player, several engines in one program) without libretro's limits. MAME keeps running through libretro |
+| Repository | Its own public repository, `golink-hd` (next to this one, like signalhub) | libretro takes cores from their own repositories; the core knows nothing about go-link Console |
 | Compatibility | Versioned save states (`GLHD` header, layout version, checksum, little endian words) and versioned packages | A save state or package of another version is refused cleanly, never misread; a new core keeps reading older packages |
 | First genre | **Platformer** (then the beat 'em up) | Both have engines and level-checked rules on the CPS-1, so the HD version can be compared with them |
-| License | MIT, like go-link | Our own code: no MAME license (non-commercial) limits |
+| License | MIT, like go-link Console | Our own code: no MAME license (non-commercial) limits |
 
-## How it fits go-link
+## How it fits go-link Console
 
 ```
 Willy Maker project ──export──► game package (.glhd)
@@ -142,14 +142,14 @@ Willy Maker project ──export──► game package (.glhd)
 | Tracker music (MOD/XM) | Idea | Small files, chiptune style |
 | Positional sound (left or right by where the source is on screen) | Later | |
 
-Voice chat between players stays go-link's; the engine only makes the game's sound.
+Voice chat between players stays go-link Console's; the engine only makes the game's sound.
 
 ## 5. Controls
 
 | Feature | Level | Notes |
 |---|---|---|
 | 4 players | Base | Ports P1-P4 of the room |
-| D-pad, 6 buttons, Start, Coin per player | Base | What go-link's `input` packet carries ([protocol](protocol.md#input-channel)) |
+| D-pad, 6 buttons, Start, Coin per player | Base | What go-link Console's `input` packet carries ([protocol](protocol.md#input-channel)) |
 | Analog sticks | Base | The packet already has left and right stick X and Y |
 | L2, R2, L3, R3 | Later | The packet has the bits; MAME games never get them (`retroButton` in `game_core.go`), our engine can |
 | Up to 8 players | Idea | Needs more ports in the room |
@@ -185,14 +185,14 @@ Voice chat between players stays go-link's; the engine only makes the game's sou
 | Feature | Level | Notes |
 |---|---|---|
 | One `.glhd` file (a zip): manifest, levels, characters, rules, pictures (PNG), sound, fonts | Base | Built by Willy Maker's export; never compiled |
-| Manifest: title, version, engine version, logical size, players, controls, languages, box art | Base | The device shows title, art and controls from it, as it does for go-link's own sets |
-| Identified by its SHA-256 | Base | As go-link's own CPS-1 sets are today |
+| Manifest: title, version, engine version, logical size, players, controls, languages, box art | Base | The device shows title, art and controls from it, as it does for go-link Console's own sets |
+| Identified by its SHA-256 | Base | As go-link Console's own CPS-1 sets are today |
 | Format and engine versions, with old games running on newer engines | Base | |
 | Size limit (proposed 256 MB) | Base | |
 | Import from Aseprite and from sprite sheets | Later | The sheet detection exists in Willy Maker |
 | Signed packages | Idea | Only matters if packages are shared publicly |
 
-## 9. In go-link
+## 9. In go-link Console
 
 | Feature | Level | Notes |
 |---|---|---|
@@ -233,7 +233,7 @@ Voice chat between players stays go-link's; the engine only makes the game's sou
 ## 12. Not in scope
 
 - **3D.** go-link HD is a 2D engine; 3D-looking effects come from layers (Mode 7, roads).
-- **Netplay or online code in the game.** go-link streams from the host; the engine never talks to the network.
+- **Netplay or online code in the game.** go-link Console streams from the host; the engine never talks to the network.
 - **A store or paid games.**
 - **Running MAME sets.** MAME stays the core for arcade games.
 
@@ -245,15 +245,15 @@ Voice chat between players stays go-link's; the engine only makes the game's sou
 | 2 | Game rooms on the HD path; H.264 recordings (proof of concept done on 2026-10-07: `.glhd` packages in the ROM folder are listed and start game rooms with go-link HD's core at 720p or 1080p; the tiers, H.264 and recordings for those rooms are next) | 2 sessions |
 | 3 | Willy Maker's go-link HD board: export, play mode in WebAssembly, validation (proof of concept done on 2026-10-07: a platformer's Export tab downloads a `.glhd` with its first level and the city tiles, [file-format.md](willy-maker/file-format.md#the-go-link-hd-package-glhd-beta); the end to end test plays it in a game room) | 3-4 sessions |
 | 4 | Later items: skeletal animation, lights, post effects, Mode 7, more genres. **Part A, the engine's effects, done on 2026-10-08** (repository `golink-hd`, its README lists them with their measured cost): 4:3 and vertical screens, up to 8 players, both sticks and L2/R2/L3/R3, blend modes, outlines and shadows, sprites turned and scaled, Mode 7, the pseudo 3D road, skeletal animation, fades and color grading (presets and LUTs), bloom, blur, waves, pixelate, 2D lights, the camera's zoom, dialog boxes with accents, low pass and echo, A*; package format 2 carries a level's effects; the showcase demo has a scene for each. Next: part B (the other genres as engine modules) and part C (Willy Maker's bone, particle and block editors, Aseprite import) | by parts |
-| 5 | Distribution: **done on 2026-10-08 in go-link 0.2.8, shipped inside the device** instead of downloaded: the engine's repository is public (github.com/lordbasex/golink-hd, its own CI on Linux, macOS and Windows), every device build compiles its committed HEAD (`make golinkhd-src`, `GOLINK_HD_DIR`) into go-link.app's Frameworks (universal), the Linux and Windows archives and the Docker image, and the device lists the engine's built-in games (the platformer and the showcase) | done |
+| 5 | Distribution: **done on 2026-10-08 in go-link Console 0.2.8, shipped inside the device** instead of downloaded: the engine's repository is public (github.com/lordbasex/golink-hd, its own CI on Linux, macOS and Windows), every device build compiles its committed HEAD (`make golinkhd-src`, `GOLINK_HD_DIR`) into go-link-console.app's Frameworks (universal), the Linux and Windows archives and the Docker image, and the device lists the engine's built-in games (the platformer and the showcase) | done |
 | 6 | **Code (Willy Maker's second evolution):** games with their own scripts, compiled to a WebAssembly module that the engine runs sandboxed, with its memory in the save state and a per-frame budget; blocks in Willy Maker generate the same code ([code.md](willy-maker/code.md), its phases C1 to C5) | 10-15 sessions |
-| 7 | **API v2, system services:** like a console's system libraries, a game asks the host for what the platform shows the same way in every game, and go-link (the room) decides how: achievements, the player's progress saved apart from save states, game events for the room ("level 3 cleared", "P2 is out", shown in the room and the lobby, recorded in the room's telemetry), a view per player, rumble. Functions are only added (`GOLINKHD_API_VERSION` 2); a v1 host keeps working | 3-4 sessions |
+| 7 | **API v2, system services:** like a console's system libraries, a game asks the host for what the platform shows the same way in every game, and go-link Console (the room) decides how: achievements, the player's progress saved apart from save states, game events for the room ("level 3 cleared", "P2 is out", shown in the room and the lobby, recorded in the room's telemetry), a view per player, rumble. Functions are only added (`GOLINKHD_API_VERSION` 2); a v1 host keeps working | 3-4 sessions |
 | 8 | **A draw list:** the engine records each frame as a list of drawing commands (layers, sprites, effects) and a backend runs it: today's software renderer, later WebGL or Metal where it is faster. The game's logic never changes, and the hash gates decide whether a backend draws exactly the same (answers open question 1) | 3-4 sessions |
 | 9 | **The AI kit:** what an AI needs to make a whole game with the SDK alone, without Willy Maker: (1) the API reference as one document, every function of the host API, the scripting API (phase 6) and the system services (phase 7) with its rules, limits and budgets; (2) the scripting API's type file, so the AI's code is checked before it runs; (3) small complete examples and templates (a platformer, a top-down game, a menu, saved progress); (4) a command-line loop the AI drives by itself: write the code, `glhd pack` and `check`, `hdrun` with a button script and screenshots to see the result, `bench` for the frame budget and the hash gates for regressions, with readable errors that name the file and line. Its test: an AI given only the kit builds a 2D mining and building game (side view: blocks to dig and place, caves lit by torches, creatures that chase with A*, day and night, crafting, the world kept as saved progress, up to 4 players in a room), with its own names and art | 3-4 sessions, after phases 6 and 7 |
 
 ## The go-link HD SDK
 
-Together, these parts are go-link HD's SDK, open (MIT) and free, the way a console maker gives its developers a kit: the API (`include/golink_hd.h`, versioned, only functions added), the game format (`.glhd` packages), the tools (`tools/glhd` to pack and check, `tools/hdrun` to play and record without a screen, `tools/bench`), the conformance tests (the hash gates every engine build and backend must match), the test bench (go-link's rooms and Willy Maker's play mode), the editor (Willy Maker, visual and later with code, [code.md](willy-maker/code.md)) and the scripting API. Phase 7 adds the system services and phase 9 the AI kit (the reference, the type file, examples and the command-line loop); the kit is published as one download, with its documentation and examples, once the scripting API exists.
+Together, these parts are go-link HD's SDK, open (MIT) and free, the way a console maker gives its developers a kit: the API (`include/golink_hd.h`, versioned, only functions added), the game format (`.glhd` packages), the tools (`tools/glhd` to pack and check, `tools/hdrun` to play and record without a screen, `tools/bench`), the conformance tests (the hash gates every engine build and backend must match), the test bench (go-link Console's rooms and Willy Maker's play mode), the editor (Willy Maker, visual and later with code, [code.md](willy-maker/code.md)) and the scripting API. Phase 7 adds the system services and phase 9 the AI kit (the reference, the type file, examples and the command-line loop); the kit is published as one download, with its documentation and examples, once the scripting API exists.
 
 ## Open questions
 

@@ -32,9 +32,9 @@ jobs:
           set -euo pipefail
           test "$(uname -m)" = arm64
           hdiutil attach -nobrowse -mountpoint /tmp/go-link-dmg ./*-macos-universal.dmg
-          cp -R /tmp/go-link-dmg/go-link.app "$RUNNER_TEMP/"
+          cp -R /tmp/go-link-dmg/go-link-console.app "$RUNNER_TEMP/"
           hdiutil detach /tmp/go-link-dmg
-          BIN="$RUNNER_TEMP/go-link.app/Contents/MacOS/go-link-device"
+          BIN="$RUNNER_TEMP/go-link-console.app/Contents/MacOS/go-link-console"
           lipo -archs "$BIN" | tee /dev/stderr | grep -q "arm64"
           lipo -archs "$BIN" | grep -q "x86_64"
           otool -l "$BIN" | grep -A3 LC_BUILD_VERSION | grep -q "minos 12.0"
@@ -51,5 +51,5 @@ jobs:
           cat help.txt
           grep -q "go-link device $TAG" help.txt
           arch -arm64 "$BIN" core download
-          ls -la "$HOME/go-link/cores/"
-          test -s "$HOME/go-link/cores/mame2003_plus.romcheck"
+          ls -la "$HOME/go-link-console/cores/"
+          test -s "$HOME/go-link-console/cores/mame2003_plus.romcheck"

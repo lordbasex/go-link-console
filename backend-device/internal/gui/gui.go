@@ -23,13 +23,13 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/layout"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/pkg/trayicon"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/trayicon"
 )
 
 // appID identifies the application to the operating system.
-const appID = "org.go-link.device"
+const appID = "org.go-link.console"
 
 // Options wires the window to the device.
 type Options struct {
@@ -38,6 +38,7 @@ type Options struct {
 	Status   *services.StatusService
 	Library  *services.LibraryService
 	Games    *services.GameService     // nil when rooms are disabled
+	HDGames  *services.HDGamesService  // go-link HD's starter games; nil (tests) hides them
 	Links    *services.LinkService     // remembered browsers; nil (tests) means linked
 	Settings *services.SettingsService // host preferences; nil (tests) shows them read-only
 	WebURL   string                    // where hosts type the pairing code
@@ -61,12 +62,14 @@ type section struct {
 const (
 	pageOverview = iota
 	pageMAME
+	pageHD
 	pageSettings
 )
 
 var sections = []section{
 	pageOverview: {"Overview", "device", violet, ""},
-	pageMAME:     {"MAME", "arcade", magenta, "Emulators"},
+	pageMAME:     {"MAME", "arcade", magenta, "Core"},
+	pageHD:       {"go-link HD", "gamepad", azure, "Core"},
 	pageSettings: {"Settings", "gear", emerald, ""},
 }
 
@@ -86,6 +89,7 @@ type ui struct {
 	onboarding *onboardingView
 	overview   *overviewPage
 	mame       *mamePage
+	hd         *hdPage
 	roms       *romsTab
 	thumbs     *thumbnailsTab
 	settings   *settingsPage
@@ -136,7 +140,7 @@ func Run(opts Options) {
 		}
 	}()
 	u.win.Show()
-	styleWindow("go-link")
+	styleWindow("go-link Console")
 	a.Run()
 	close(stopped)
 	if opts.Quit != nil {
@@ -163,7 +167,7 @@ func newUI(a fyne.App, opts Options) *ui {
 	}
 	u := &ui{opts: opts, app: a}
 	setLanguage(opts.Language)
-	u.win = a.NewWindow("go-link")
+	u.win = a.NewWindow("go-link Console")
 	// The gradient reaches the window edges (Fyne pads by default).
 	u.win.SetPadded(false)
 	u.bg = background(violet)
@@ -190,8 +194,9 @@ func (u *ui) build() {
 	u.roms = newRomsTab(u)
 	u.thumbs = newThumbnailsTab(u)
 	u.mame = newMamePage(u)
+	u.hd = newHDPage(u)
 	u.settings = newSettingsPage(u)
-	u.pages = []fyne.CanvasObject{pageOverview: u.overview.content, pageMAME: u.mame.content, pageSettings: u.settings.content}
+	u.pages = []fyne.CanvasObject{pageOverview: u.overview.content, pageMAME: u.mame.content, pageHD: u.hd.content, pageSettings: u.settings.content}
 	u.page = container.NewStack()
 	u.rows, u.headings = nil, nil
 
@@ -213,7 +218,7 @@ func (u *ui) build() {
 			side.Add(row)
 		}
 	}
-	brand := container.New(layout.NewCustomPaddedLayout(4, 18, 10, 0), container.NewHBox(logo(24), text("go-link", 15, white, true)))
+	brand := container.New(layout.NewCustomPaddedLayout(4, 18, 10, 0), container.NewHBox(logo(24), text("go-link Console", 15, white, true)))
 	footer := container.New(layout.NewCustomPaddedLayout(0, 0, 10, 0), text(L("Device")+" "+u.opts.Version, 11, textFaint, false))
 	sideBg := canvas.NewRectangle(withAlpha(white, 0x0a))
 	divider := canvas.NewRectangle(cardStroke)
@@ -316,6 +321,7 @@ func (u *ui) render(st models.Status) {
 	u.onboarding.render(st)
 	u.overview.render(st)
 	u.mame.render(st)
+	u.hd.render(st)
 	u.roms.render(st)
 	u.thumbs.render(st)
 	u.settings.render(st)
@@ -342,7 +348,7 @@ func (u *ui) setupTray() {
 	u.trayCode = fyne.NewMenuItem("", nil)
 	u.trayCode.Disabled = true
 	show := fyne.NewMenuItem(L("Open go-link"), u.showWindow)
-	u.trayMenu = fyne.NewMenu("go-link", u.trayCode, fyne.NewMenuItemSeparator(), show)
+	u.trayMenu = fyne.NewMenu("go-link Console", u.trayCode, fyne.NewMenuItemSeparator(), show)
 	desk.SetSystemTrayMenu(u.trayMenu)
 	desk.SetSystemTrayIcon(trayResource())
 	u.win.SetCloseIntercept(u.win.Hide)

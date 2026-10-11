@@ -1,6 +1,6 @@
 # Willy Maker: validation
 
-Willy Maker must not let a user export or play a game that is broken. A broken game would fail to load, show a black screen, freeze, or show the core's "wrong checksums" warning in a go-link room. The rule is simple: **if Willy Maker says a game is ready, it boots in the mame2003-plus core the same way it boots on the board.**
+Willy Maker must not let a user export or play a game that is broken. A broken game would fail to load, show a black screen, freeze, or show the core's "wrong checksums" warning in a go-link Console room. The rule is simple: **if Willy Maker says a game is ready, it boots in the mame2003-plus core the same way it boots on the board.**
 
 A browser cannot prove that alone. The checks are split into four levels. Each level is slower than the one before and closer to the real machine. A project moves to the next level only when the current one passes.
 
@@ -9,9 +9,9 @@ A browser cannot prove that alone. The checks are split into four levels. Each l
 | 1. Live rules | browser, `editor/validate/` (pure TS) | on every change | the project fits the board and the engine: budgets, colors, reachability, required pieces | < 50 ms |
 | 2. Build checks | browser, `@go-link/cps1` + `io/` | on Export, Create ROM | the produced files are exactly what the set's loader expects, byte by byte | < 2 s |
 | 3. Power-on in the browser | browser, a Web Worker with a 68000 in WebAssembly | on Create ROM | the 68000 program starts, draws and keeps running on a model of the board | ~1 s for 10 s of game |
-| 4. Power-on on the device | the user's linked go-link device, the exact core | on **Create and play**, or **Test on my device** | the real core loads the set without warnings, shows a picture, plays sound and reacts to inputs | ~15 s |
+| 4. Power-on on the device | the user's linked go-link Console device, the exact core | on **Create and play**, or **Test on my device** | the real core loads the set without warnings, shows a picture, plays sound and reacts to inputs | ~15 s |
 
-**Create ROM** (Phase 2, built 2026-10-01, [engine.md](engine.md)) runs level 3 on the set it builds by itself, shows the steps and the picture, and offers **Play on my go-link**, which opens the game's room on the linked device (level 4 on a set stays in the Power-on test card). Levels 1 and 2 are needed for Phase 1, because the AI pack must already be correct. Level 3 is built as a power-on test of any ROM `.zip` the user drops (for example one an AI built from the pack); level 4 is reached from the same Export card (**Test on my go-link**, with a linked device); levels 3 and 4 run on their own in Phase 2, when Willy Maker builds the ROM. Level 4 is the ground truth. When level 4 disagrees with level 3, level 4 wins, and the case is added to level 3 or level 2 as a new rule.
+**Create ROM** (Phase 2, built 2026-10-01, [engine.md](engine.md)) runs level 3 on the set it builds by itself, shows the steps and the picture, and offers **Play on my go-link Console**, which opens the game's room on the linked device (level 4 on a set stays in the Power-on test card). Levels 1 and 2 are needed for Phase 1, because the AI pack must already be correct. Level 3 is built as a power-on test of any ROM `.zip` the user drops (for example one an AI built from the pack); level 4 is reached from the same Export card (**Test on my go-link Console**, with a linked device); levels 3 and 4 run on their own in Phase 2, when Willy Maker builds the ROM. Level 4 is the ground truth. When level 4 disagrees with level 3, level 4 wins, and the case is added to level 3 or level 2 as a new rule.
 
 ## Level 1: live rules
 
@@ -160,16 +160,16 @@ Tests: `io/fuzz.test.tsx`, with a seeded generator (mulberry32) so a failure rep
 What we found (2026-10-01):
 
 - The core's Makefile has a `platform=emscripten` target. libretro's web player serves a current build: `mame2003_plus_libretro.wasm` is **21.8 MB** (plus its JS glue), built as part of RetroArch's web player, not as a standalone core.
-- That server sends no `Access-Control-Allow-Origin` header, so go-link's pages cannot load it from there. go-link's CSP (`script-src 'self'`) forbids third-party scripts anyway.
+- That server sends no `Access-Control-Allow-Origin` header, so go-link Console's pages cannot load it from there. go-link Console's CSP (`script-src 'self'`) forbids third-party scripts anyway.
 - **License.** mame2003-plus is under the MAME 0.78 non-commercial license:
   - binaries may be given out only with their source or a link to it;
   - the code "cannot be used in a commercial product";
   - derivative works must have a different name.
 
-  go-link is MIT. Putting that code in go-link's repository, or serving a build from go-link.org, would add a non-commercial piece to an MIT project and make go-link a MAME distributor. The device avoids this today: it **downloads the core from libretro's buildbot** at the user's request and never bundles it. A web build would need the same arrangement, and nobody serves one with CORS.
+  go-link Console is MIT. Putting that code in go-link Console's repository, or serving a build from go-link Console's websites, would add a non-commercial piece to an MIT project and make go-link Console a MAME distributor. The device avoids this today: it **downloads the core from libretro's buildbot** at the user's request and never bundles it. A web build would need the same arrangement, and nobody serves one with CORS.
 - Even if allowed, 21.8 MB per visit is too heavy for a check that runs before every play.
 
-**Decision: go-link does not host or load the MAME core in the browser.** The exact core runs only on the device (level 4), where the user downloaded it.
+**Decision: go-link Console does not host or load the MAME core in the browser.** The exact core runs only on the device (level 4), where the user downloaded it.
 
 ### Option B: our own board model with Musashi (recommended)
 
@@ -252,9 +252,9 @@ All of them run with the inputs script, over 600 frames (10 s):
 
 ## Level 4: power-on on the device
 
-**Status (2026-10-01): built in the device**, from the website (`rom_test` over WebRTC) and the command line (`device romtest ZIP`). The exact protocol, steps and rules are in [protocol.md, ROM test](../protocol.md#rom-test) and [device.md, ROM test](../device.md#rom-test). Willy Maker reaches it from **Export › Power-on test**: after a ROM `.zip` is dropped (whether the browser test passed or not), **Test on my go-link** sends that same zip to the linked device with `testRomOnDevice` (`frontend/packages/shared/src/rom-test.ts`) and lists the device's steps (translated names for the steps above, any other name shown as it comes, the device's English `detail` under each), frames, seconds, a go-link set's title and the PNG of the last frame. The set name is the zip's name, or the set the browser test read when the name does not fit. `busy`, `not_found`, a refused upload, a dropped link and the 90 s timeout each get a translated message. Without a linked device, or with one that is offline, the card shows a short note with a link to My device. The site hands the link to the module (`WillyMakerApp`'s `device` prop, `ui/device.tsx`), so Willy Maker never opens a connection itself; tests: `ui/organisms/PowerOnCard.test.tsx` with a fake link. Building the ROM in the browser (Create ROM) still comes in Phase 2. Tested with the real core on the prototype's `slammast.zip` (every check passes in about 6.5 s on the Intel Mac) and on damaged copies (an erased program crashes the core or keeps the screen black; a missing file fails `set`; a short file fails `core.files`; a cut zip fails `zip`).
+**Status (2026-10-01): built in the device**, from the website (`rom_test` over WebRTC) and the command line (`device romtest ZIP`). The exact protocol, steps and rules are in [protocol.md, ROM test](../protocol.md#rom-test) and [device.md, ROM test](../device.md#rom-test). Willy Maker reaches it from **Export › Power-on test**: after a ROM `.zip` is dropped (whether the browser test passed or not), **Test on my go-link Console** sends that same zip to the linked device with `testRomOnDevice` (`frontend/packages/shared/src/rom-test.ts`) and lists the device's steps (translated names for the steps above, any other name shown as it comes, the device's English `detail` under each), frames, seconds, a go-link Console set's title and the PNG of the last frame. The set name is the zip's name, or the set the browser test read when the name does not fit. `busy`, `not_found`, a refused upload, a dropped link and the 90 s timeout each get a translated message. Without a linked device, or with one that is offline, the card shows a short note with a link to My device. The site hands the link to the module (`WillyMakerApp`'s `device` prop, `ui/device.tsx`), so Willy Maker never opens a connection itself; tests: `ui/organisms/PowerOnCard.test.tsx` with a fake link. Building the ROM in the browser (Create ROM) still comes in Phase 2. Tested with the real core on the prototype's `slammast.zip` (every check passes in about 6.5 s on the Intel Mac) and on damaged copies (an erased program crashes the core or keeps the screen black; a missing file fails `set`; a short file fails `core.files`; a cut zip fails `zip`).
 
-**Decision taken (2026-10-01): the allow-list by hash.** The device ships the list of go-link-made sets with the SHA-256 and size of **each file inside the zip** (`backend-device/pkg/ownsets/sets.json`, written by `rom/tools/ownsets.mjs`, which `build.mjs` runs after every build). A zip with exactly those files is shown as go-link's game (title, description, picture, controls, a "go-link" mark); a set that only matches by name stays the original game. See [device.md, go-link's own sets](../device.md#go-links-own-sets). Our own set name inside the core (a `willy` driver in a core fork) stays out: it would mean shipping a core.
+**Decision taken (2026-10-01): the allow-list by hash.** The device ships the list of go-link-made sets with the SHA-256 and size of **each file inside the zip** (`backend-device/pkg/ownsets/sets.json`, written by `rom/tools/ownsets.mjs`, which `build.mjs` runs after every build). A zip with exactly those files is shown as go-link Console's game (title, description, picture, controls, a "go-link" mark); a set that only matches by name stays the original game. See [device.md, go-link Console's own sets](../device.md#go-links-own-sets). Our own set name inside the core (a `willy` driver in a core fork) stays out: it would mean shipping a core.
 
 This is the only level that uses the exact core, so it is the only one that proves a game boots in go-link. It reuses what exists:
 
@@ -264,11 +264,11 @@ This is the only level that uses the exact core, so it is the only one that prov
 
 ### What was built, against the proposal below
 
-- **Upload:** `files` `begin` with `purpose: "rom_test"`, written to `~/go-link/tmp/romtest/<id>/<set>.zip` (0600, 16 MB, only the last upload waits), never the library. As proposed.
+- **Upload:** `files` `begin` with `purpose: "rom_test"`, written to `~/go-link-console/tmp/romtest/<id>/<set>.zip` (0600, 16 MB, only the last upload waits), never the library. As proposed.
 - **Request:** `rom_test {id, set, frames?}`. The `expect`, `script` and `snapshots` fields are **not** built: the identity comes from the device's own list (`identity` step and `own` in the result), the script is fixed (Coin at 300, Start at 360, right from 420, buttons 1-3 from 560), and the result carries one picture (`shot`, the last frame).
 - **Runs:** two worker processes (`device romtest --child`), with and without the script, each from power on with its own empty system folder; 60 s for the whole test; one test at a time (`code: "busy"`).
 - **Steps** (`steps[]` of `{name, ok, detail}`): `zip`, `set` (the library's `romcheck`), `identity`, `core.loaded`, `core.files`, `video.picture`, `video.alive`, `audio`, `input.reacts`, `time.realtime`, and `core.run` when a worker crashed or ran out of time. Differences with the table below:
-  - `core.no-warnings` became `core.files`: `NOT FOUND` and a wrong length fail, but a wrong checksum only warns, because **every** file of a go-link set differs from the original set's (the core logs `WRONG CHECKSUMS` 28 times for ours, and `mame2003-plus_skip_warnings` keeps the warning off screen).
+  - `core.no-warnings` became `core.files`: `NOT FOUND` and a wrong length fail, but a wrong checksum only warns, because **every** file of a go-link Console set differs from the original set's (the core logs `WRONG CHECKSUMS` 28 times for ours, and `mame2003-plus_skip_warnings` keeps the warning off screen).
   - `files.identity` became `identity`, against the shipped list instead of hashes sent by the browser.
   - `video.picture` allows up to frame 300 (5 s), so real boards with a slow boot pass; `video.alive` asks for 10 different pictures in the last 300 frames.
   - `audio.signal` became `audio`: the core must keep sending sound; silence passes with a note, because the prototype's sound program is still a stub.
@@ -287,7 +287,7 @@ Only the **linked owner** may use it, the same peers that may upload ROMs (`Stre
    text   {"type":"end","id":"t1"}
    ```
 
-   With `purpose: "rom_test"` the device does **not** import the file into the library. It writes it to `~/go-link/tmp/romtest/t1/slammast.zip` (0600) instead, with a 16 MB cap. It answers `upload_result` as usual. A test set therefore never collides with a real `slammast.zip` in the user's ROM folder, and never shows up in the game list.
+   With `purpose: "rom_test"` the device does **not** import the file into the library. It writes it to `~/go-link-console/tmp/romtest/t1/slammast.zip` (0600) instead, with a 16 MB cap. It answers `upload_result` as usual. A test set therefore never collides with a real `slammast.zip` in the user's ROM folder, and never shows up in the game list.
 
 2. The web asks for the test on `control`:
 
@@ -315,7 +315,7 @@ Only the **linked owner** may use it, the same peers that may upload ROMs (`Stre
     "log":"(the last 4 KB of the core's log)"}
    ```
 
-4. The device deletes `~/go-link/tmp/romtest/t1/` when the test ends, and also at startup.
+4. The device deletes `~/go-link-console/tmp/romtest/t1/` when the test ends, and also at startup.
 
 `rom_test` / `rom_test_result` are added to `docs/protocol.md`, and the `upload` `purpose` field to its files section, when this is built. The CLI gets the same feature for a headless device: `device rom test <zip> [--frames N] [--out DIR]`.
 

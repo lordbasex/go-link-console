@@ -5,7 +5,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as A from "../android";
 
-// The gamepad skins on the go-link Player Android app, in its debug lab
+// The gamepad skins on the go-link Console Player Android app, in its debug lab
 // (--es lab skin: a skin around the test card, no room): every built-in
 // skin in portrait and landscape, each control sends its own bit and then
 // 0, and in landscape the menu over the picture folds into its handle

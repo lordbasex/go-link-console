@@ -4,7 +4,7 @@
 
 package main
 
-import "github.com/lordbasex/go-link/backend-device/internal/gui"
+import "github.com/lordbasex/go-link-console/backend-device/internal/gui"
 
 // runUI shows the native window and tray icon, unless the device runs
 // headless. It blocks until the device stops.
@@ -19,6 +19,7 @@ func runUI(o uiOptions) {
 		Status:      o.status,
 		Library:     o.library,
 		Games:       o.games,
+		HDGames:     o.hdGames,
 		Links:       o.links,
 		Settings:    o.settings,
 		WebURL:      o.webURL,

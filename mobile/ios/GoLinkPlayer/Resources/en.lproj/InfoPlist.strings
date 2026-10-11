@@ -1,4 +1,4 @@
 /* Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com> */
-"CFBundleDisplayName" = "go-link Player";
-"NSCameraUsageDescription" = "go-link Player uses the camera only to read the invitation's QR code. Nothing is recorded or sent.";
+"CFBundleDisplayName" = "go-link Console Player";
+"NSCameraUsageDescription" = "go-link Console Player uses the camera only to read the invitation's QR code. Nothing is recorded or sent.";
 "NSMicrophoneUsageDescription" = "Seated players can talk to each other. The microphone only sends while you turn it on in the room.";

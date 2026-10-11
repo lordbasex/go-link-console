@@ -6,7 +6,7 @@ package models
 import "time"
 
 // App is the signalhub namespace of this project.
-const App = "go-link"
+const App = "go-link-console"
 
 // DefaultSignalURL is the public signalhub operated by the project. Users
 // who run their own server override it with --server-signaling or with
@@ -15,7 +15,7 @@ const App = "go-link"
 const DefaultSignalURL = "wss://signal.go-link.org/ws"
 
 // DefaultWebURL is the website where hosts type the pairing code: the rooms'
-// site (the landing, go-link.org, sends its /device there too).
+// site (the landing, console.go-link.org, sends its /device there too).
 const DefaultWebURL = "https://play.go-link.org"
 
 // Config is persisted in device.json with 0600 permissions.
@@ -58,7 +58,33 @@ type Config struct {
 	// VideoQuality of game rooms: high, normal or saver (see VideoHigh);
 	// empty means DefaultVideoQuality.
 	VideoQuality string `json:"video_quality,omitempty"`
+	// HD is go-link HD's settings: its games folder and its rooms' screen.
+	HD HDSettings `json:"hd,omitempty"`
+	// StarterGames is set once the free starter games were offered (on the
+	// first link): a game the host deletes is never downloaded again.
+	StarterGames bool `json:"starter_games,omitempty"`
 }
+
+// HDSettings are go-link HD's settings. Empty fields mean the defaults.
+type HDSettings struct {
+	GamesDir string `json:"games_dir,omitempty"` // default ~/go-link-console/hd-games
+	RoomSize string `json:"room_size,omitempty"` // 720p (default) or 1080p
+	Codec    string `json:"codec,omitempty"`     // auto (default) or vp8
+}
+
+// go-link HD rooms' screen sizes and codecs (HDSettings).
+const (
+	HD720p  = "720p"
+	HD1080p = "1080p"
+	HDAuto  = "auto"
+	HDVP8   = "vp8"
+)
+
+// HDRoomSizes and HDCodecs are the choices of HDSettings, the default first.
+var (
+	HDRoomSizes = []string{HD720p, HD1080p}
+	HDCodecs    = []string{HDAuto, HDVP8}
+)
 
 // Link is one browser linked to this device.
 type Link struct {
@@ -78,8 +104,8 @@ type Link struct {
 // linked again right away: its identity (device_id, device_secret), its
 // signaling server, its network settings (udp_port, announce_ips) and the
 // local panel's token. Links, rooms, the ROM and thumbnail folders, the
-// room limit, the website, the language and the video quality go back to
-// their defaults.
+// room limit, the website, the language, the video quality and go-link HD's
+// settings go back to their defaults (the starter games are offered again).
 func (c Config) FactoryDefaults() Config {
 	return Config{
 		DeviceID: c.DeviceID, DeviceSecret: c.DeviceSecret, SignalURL: c.SignalURL,
@@ -106,7 +132,7 @@ func (c Config) EffectiveSignalURL() string {
 // ThumbnailSettings say where the host's thumbnails are and which kind to
 // show. Empty fields mean the defaults.
 type ThumbnailSettings struct {
-	Dir  string `json:"dir,omitempty"`  // default ~/go-link/thumbnails/MAME
+	Dir  string `json:"dir,omitempty"`  // default ~/go-link-console/thumbnails/MAME
 	Kind string `json:"kind,omitempty"` // boxart (default), title or snap
 	Size string `json:"size,omitempty"` // small (default), medium or large, in the device window
 }

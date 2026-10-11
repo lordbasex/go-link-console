@@ -2,7 +2,7 @@
 
 package framelab
 
-import "github.com/lordbasex/go-link/backend-device/pkg/libretro"
+import "github.com/lordbasex/go-link-console/backend-device/pkg/libretro"
 
 // ToI420 converts a picture exactly like the device does before encoding
 // (libretro.ToI420: BT.601 limited range, chroma from the top-left pixel

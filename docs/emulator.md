@@ -4,7 +4,7 @@
 
 The device is a libretro **frontend**, like RetroArch: it loads a **core** (the emulator, a `.dylib`, `.dll` or `.so` library) and runs it frame by frame. Instead of drawing the picture in a window, it sends it over WebRTC. The glue is `backend-device/pkg/libretro` (cgo, one active core per process, callbacks routed through an atomic pointer).
 
-- **Core:** **mame2003-plus** (MAME 0.78), kept in `~/go-link/cores/`. It is downloaded from the official libretro buildbot, for the host's system and CPU: macOS (Intel and Apple Silicon), Windows x64, Linux x64 and 64/32-bit Linux ARM (Raspberry Pi). Download it from the website (My device) or with `device core download`. It is never bundled with go-link.
+- **Core:** **mame2003-plus** (MAME 0.78), kept in `~/go-link-console/cores/`. It is downloaded from the official libretro buildbot, for the host's system and CPU: macOS (Intel and Apple Silicon), Windows x64, Linux x64 and 64/32-bit Linux ARM (Raspberry Pi). Download it from the website (My device) or with `device core download`. It is never bundled with go-link.
 - **One process per game:** a core allows one instance per process, so each game room runs `device emulate …` as a child process (`WorkerSource`, protocol in `pkg/emuproc`). The worker sends video and sound to the device through a pipe; the device encodes and streams. A crashing game does not take the others down.
 - **Picture:** the core delivers XRGB8888 or RGB565 at the game's native resolution (for example 320×224). The worker converts it to I420 in one pass, as the host's [video quality](device.md#video-quality) says: enlarged 2x with nearest neighbour (`libretro.ToI420Double`, High and Normal: each game pixel keeps its own color sample) or at its own size with each 2x2 block's color averaged (`libretro.ToI420Box`, Saver). The mode travels with each frame (`emuproc` video messages carry the scale; the parent switches it with a `VideoMode` message, for a live change or the automatic fallback). The device encodes VP8 at that size and tells viewers the scale and the game's size (`stream_stats.video`, see [protocol.md](protocol.md#video-scale)); the website averages a 2x picture back to the game's pixels before its styles and scales it with the display aspect (`aspect`). The [video quality lab](quality.md) measured the choice.
 - **Sound:** stereo 48 kHz (a core option), straight to Opus.
@@ -14,10 +14,10 @@ The device is a libretro **frontend**, like RetroArch: it loads a **core** (the 
 
 ## Where ROMs come from
 
-go-link is based on MAME: the engine is mame2003-plus, which plays **MAME 0.78** sets.
+go-link Console is based on MAME: the engine is mame2003-plus, which plays **MAME 0.78** sets.
 
 - The project **does not** include, host, proxy or download ROMs or thumbnails, in the repository, the binaries or the website, and does not point to any site that offers them.
-- The host gets compatible sets on their own and puts them in the device's ROM folder (`~/go-link/roms` by default), or drops them on the device window or on the linked website (they go straight to the device over WebRTC).
+- The host gets compatible sets on their own and puts them in the device's ROM folder (`~/go-link-console/roms` by default), or drops them on the device window or on the linked website (they go straight to the device over WebRTC).
 - ROMs never pass through the signaling server. The browser never stores them (no OPFS or IndexedDB): the emulator runs on the device.
 - Every host is responsible for using only ROMs they have the right to use: sets you may use, or backups of arcade boards you own.
 
@@ -25,7 +25,7 @@ go-link is based on MAME: the engine is mame2003-plus, which plays **MAME 0.78**
 
 Each MAME version expects different files inside each `.zip`. A modern MAME romset has other names, other revisions and new files, and many games fail on mame2003-plus ("Required files are missing"). The device finds out **without running the game** (`pkg/romcheck`):
 
-1. **The core's game list.** The mame2003-plus project publishes an XML with the 5,000+ games it supports: name, title, year, manufacturer, parent and each ROM's name, size and CRC32, plus the control panel of each game. The device downloads it with the core, converts it to a compact index (`~/go-link/cores/mame2003_plus.romcheck`) and does not keep the XML.
+1. **The core's game list.** The mame2003-plus project publishes an XML with the 5,000+ games it supports: name, title, year, manufacturer, parent and each ROM's name, size and CRC32, plus the control panel of each game. The device downloads it with the core, converts it to a compact index (`~/go-link-console/cores/mame2003_plus.romcheck`) and does not keep the XML.
 2. **The index of each `.zip`.** A ZIP keeps the list of its files, with name, size and CRC32, at its end. The device reads only that list, without decompressing, so checking a whole folder takes milliseconds.
 3. **The same rules as the MAME 0.78 loader:**
    - Each ROM is looked up in the game's zip and then along its parent chain (`romof`: the original game of a clone, or a BIOS such as `neogeo`).
@@ -50,7 +50,7 @@ The game list also tells the website each game's controls (`<input buttons contr
 
 ## Thumbnails
 
-Thumbnails are the host's own image files, never downloaded by go-link. They follow the libretro naming, one folder per kind, under `~/go-link/thumbnails/MAME` (configurable):
+Thumbnails are the host's own image files, never downloaded by go-link. They follow the libretro naming, one folder per kind, under `~/go-link-console/thumbnails/MAME` (configurable):
 
 ```
 Named_Boxarts/<name>.png    the box or flyer
@@ -64,7 +64,7 @@ Note: in MAME, "artwork" means bezels and overlays, so these images are always c
 
 ## Save states
 
-- **Save:** `room_action save` stores the game state (a libretro save state) in `~/go-link/saves/<room>/slot-N.state`, with an optional name.
+- **Save:** `room_action save` stores the game state (a libretro save state) in `~/go-link-console/saves/<room>/slot-N.state`, with an optional name.
 - **Automatic save:** archiving a room or stopping the device writes `auto.state`. Turning the room on again offers to continue from it, start fresh or load a slot.
 - **Games that cannot be saved whole:** MAME 0.78 does not save every chip. For example, the Konami CPU (The Simpsons, Aliens) saves no registers, and some sound chips (QSound) save nothing. Loading such a save breaks the game: the board resets, loops in its RAM/ROM check, or plays without sound.
 
