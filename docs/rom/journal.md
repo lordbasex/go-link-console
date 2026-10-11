@@ -1,4 +1,4 @@
-# Lab journal: go-link's own CPS-1 ROM
+# Lab journal: go-link Console's own CPS-1 ROM
 
 A step-by-step record of the prototype, meant to become a guide. Every step lists the goal, what was read, the exact commands, the files, the result, what failed and what was learned. Dead ends stay in, marked **Dead end**. Hardware facts confirmed along the way are collected in [hardware.md](hardware.md).
 
@@ -28,7 +28,7 @@ Machine used: an Intel Mac on macOS 15.7.3, with Homebrew. Tool versions:
    node rom/tools/build.mjs captcomm     # rom/build/captcomm.zip (4 x 2, steps 1 and 2)
    node rom/tools/quality.mjs            # optional: before/after pictures of the sprites (rom/build/quality/)
    ```
-4. Build the frame capture tool. It runs a core exactly like a go-link room does:
+4. Build the frame capture tool. It runs a core exactly like a go-link Console room does:
    ```sh
    (cd backend-device && go build -o /tmp/framelab ./cmd/framelab)
    ```
@@ -45,7 +45,7 @@ Machine used: an Intel Mac on macOS 15.7.3, with Homebrew. Tool versions:
    (cd e2e && npm ci)          # Playwright 1.63.0, once
    node rom/tools/room-test.mjs          # the slammast set; `room-test.mjs captcomm` for the other
    ```
-   It needs the signalhub repository next to go-link (or `SIGNALING_DIR`). To play it on your own device, see [step 4, "In your own go-link"](#in-your-own-go-link). The pictures land in `rom/build/room/shots/` and the logs in `rom/build/room/`. See [step 3](#step-3--a-go-link-room).
+   It needs the signalhub repository next to go-link Console (or `SIGNALING_DIR`). To play it on your own device, see [step 4, "In your own go-link Console"](#in-your-own-go-link). The pictures land in `rom/build/room/shots/` and the logs in `rom/build/room/`. See [step 3](#step-3--a-go-link-room).
 
 ---
 
@@ -64,7 +64,7 @@ git sparse-checkout set --no-cone /src/drivers/cps1.c /src/vidhrdw/cps1_vidhrdw.
 - `src/drivers/cps1.c`: game list (L8111-8222), memory maps (L327-385), the vblank interrupt (L160), the `cps1` machine (L3969), graphics layouts (L3885-3925), the `captcomm` ROMs (L6219) and inputs (L2452).
 - `src/vidhrdw/cps1_vidhrdw.c`: the CPS-B configs (L194-266) and the per-game table (L270-443), register bases, tilemaps, palette, sprites and the graphics decode.
 - `src/common.c`: the ROM loader's verdicts (L1301-1385).
-- go-link's `backend-device/pkg/romcheck/romcheck.go` (`Check`, `has`).
+- go-link Console's `backend-device/pkg/romcheck/romcheck.go` (`Check`, `has`).
 
 **Choosing the set.** Candidates with a plain CPS-1 board (no QSound, no encryption):
 
@@ -76,11 +76,11 @@ git sparse-checkout set --no-cone /src/drivers/cps1.c /src/vidhrdw/cps1_vidhrdw.
 | **`captcomm`** | BATTRY_3 | **4** | No ID check, no banks, no kludge, full tile ranges |
 | `knights` | BATTRY_4 | 3 | — |
 
-**`captcomm` wins.** It has four players, like go-link's four seats, and the fewest special cases. Its limit is two buttons per player.
+**`captcomm` wins.** It has four players, like go-link Console's four seats, and the fewest special cases. Its limit is two buttons per player.
 
 **Findings** (all in [hardware.md](hardware.md)):
 - **The core only warns on a wrong file.** It looks a set up by its short name (`captcomm`). A file with the right name but the wrong CRC is a *warning* ("WRONG CHECKSUMS", `common.c` L1331-1335), and the game still runs; only a *missing* file is an error (L1351-1385).
-- **The device works the same way.** go-link's checker accepts a file when its name is there ("a wrong size or CRC only gives a warning", `romcheck.go` `has`). So a set with our own bytes and the right names should pass both the core and the device unchanged.
+- **The device works the same way.** go-link Console's checker accepts a file when its name is there ("a wrong size or CRC only gives a warning", `romcheck.go` `has`). So a set with our own bytes and the right names should pass both the core and the device unchanged.
 - **The board.** Video registers at 0x800100, graphics RAM at 0x900000, inputs at 0x800000/0x800018/0x800176/0x800178, vblank interrupt at level 2, a 384×224 screen, 4-bit tiles with pen 15 transparent, and 12-bit color with brightness.
 
 **Learned:** the "impersonation" route (option A in the [project README](README.md)) is possible on paper, with no change to the core or to the device's checker.
@@ -91,7 +91,7 @@ git sparse-checkout set --no-cone /src/drivers/cps1.c /src/vidhrdw/cps1_vidhrdw.
 
 *2026-10-01*
 
-**Goal:** the game needs at least three action buttons per player (jump, fire, special) and should keep *Destroy this page*'s move set. `captcomm` declares two, and MAME only passes a button the set declares, so a third button would never reach our program. Find the CPS-1 set that best gives, in this order: (1) three or more buttons; (2) as many players as possible, ideally 4 like go-link's seats; (3) the simplest board.
+**Goal:** the game needs at least three action buttons per player (jump, fire, special) and should keep *Destroy this page*'s move set. `captcomm` declares two, and MAME only passes a button the set declares, so a third button would never reach our program. Find the CPS-1 set that best gives, in this order: (1) three or more buttons; (2) as many players as possible, ideally 4 like go-link Console's seats; (3) the simplest board.
 
 **What was read:**
 - every `INPUT_PORTS_START` block and `GAME` line of [`cps1.c`](https://github.com/libretro/mame2003-plus-libretro/blob/0d9a325c96aa96460be7b2fe4310a7096981ff75/src/drivers/cps1.c), counted by a script (players × highest `IPT_BUTTONn` per player);
@@ -122,9 +122,9 @@ git sparse-checkout set --no-cone /src/drivers/cps1.c /src/vidhrdw/cps1_vidhrdw.
 - **No DIP switches** (EEPROM): settings would go in our own NVRAM menu.
 - Inputs: P1/P2 at 0x800000 as before with button 3 at bit 6; P3 at 0xf1c000, P4 at 0xf1c002 (bits 0-5 + coin 6 + start 7); button 3 of P3/P4 at bits 7/15 of 0x800000.
 
-**go-link's mapping:** the device maps the RetroPad B, A, Y, X, L, R to MAME buttons 1-6 on every seat (`backend-device/internal/services/game_core.go`, `retroButton`), and mame2003-plus routes `BUTTON3 | PLAYERn` to seat n wherever the bit lives, so button 3 reaches us from all four seats (Y on a gamepad, C on the website's keyboard).
+**go-link Console's mapping:** the device maps the RetroPad B, A, Y, X, L, R to MAME buttons 1-6 on every seat (`backend-device/internal/services/game_core.go`, `retroButton`), and mame2003-plus routes `BUTTON3 | PLAYERn` to seat n wherever the bit lives, so button 3 reaches us from all four seats (Y on a gamepad, C on the website's keyboard).
 
-**Options if 4 × 3 had not existed** (kept for the record): 2 players × 3 buttons (`ffight` layout, plain board, but half of go-link's seats), or 4 players × 2 buttons with the special as button 1 + button 2 together (`captcomm`; the prototype still supports it: `node rom/tools/build.mjs captcomm`).
+**Options if 4 × 3 had not existed** (kept for the record): 2 players × 3 buttons (`ffight` layout, plain board, but half of go-link Console's seats), or 4 players × 2 buttons with the special as button 1 + button 2 together (`captcomm`; the prototype still supports it: `node rom/tools/build.mjs captcomm`).
 
 **Learned:** the button count is a property of the set's input ports, not of the board. Picking a layout is picking an input map, so it must come before any game code.
 
@@ -169,7 +169,7 @@ node rom/tools/build.mjs
 - The core's log showed the 68000 at `PC=00004806`, piling exception frames onto the stack (`unmapped memory word write to 00F2xxxx = 2700 / 4804`). Our program is only 2102 bytes long, and `0x4804` is `0x0448` (our `default_handler`) with its two bytes swapped.
 - **Cause:** the loader's `ROM_LOAD16_WORD_SWAP` (`reverse=1` in the log) swaps the bytes of every word as it loads, so the program files must hold each word byte-swapped. A plain big-endian file reaches the CPU scrambled: the reset vector points nowhere, and the core eventually crashes.
 - **Fix:** `build.mjs` swaps every 16-bit word (`Buffer.swap16`) before writing `cce_23d.rom` and `cc_22d.rom`.
-- A second detail: with a folder named `captcomm` next to `captcomm.zip`, the core reads the folder. The build now keeps only the zip, as go-link would.
+- A second detail: with a folder named `captcomm` next to `captcomm.zip`, the core reads the folder. The build now keeps only the zip, as go-link Console would.
 
 **Result after the fix:** 300 frames with no crash.
 
@@ -177,7 +177,7 @@ node rom/tools/build.mjs
 
 *Frame 299: our font on scroll1 in three palettes, a row of test blocks on scroll2 (16×16), the night-blue background (palette entry 4095), and the vblank counter at 0x124 = 292 after 300 frames, so the level 2 interrupt arrives every frame.*
 
-The core logs "WRONG CHECKSUMS" for every file and keeps going. The 180-frame warning message goes to the frontend (go-link does not draw it), so nothing covers the picture.
+The core logs "WRONG CHECKSUMS" for every file and keeps going. The 180-frame warning message goes to the frontend (go-link Console does not draw it), so nothing covers the picture.
 
 **Learned:**
 - The stock mame2003-plus core runs our own CPS-1 program, with no patch.
@@ -190,7 +190,7 @@ The core logs "WRONG CHECKSUMS" for every file and keeps going. The 180-frame wa
 
 *2026-10-01*
 
-**Goal:** go-link's own characters on the board: Willy idle, running, jumping and shooting on player 1's inputs, two civilians to rescue, an invented night city on two scrolling layers, and Coin/Start like an arcade board.
+**Goal:** go-link Console's own characters on the board: Willy idle, running, jumping and shooting on player 1's inputs, two civilians to rescue, an invented night city on two scrolling layers, and Coin/Start like an arcade board.
 
 **What was read:** the sprite renderer and the layer order in `cps1_vidhrdw.c`:
 - [`cps1_render_sprites`](https://github.com/libretro/mame2003-plus-libretro/blob/0d9a325c96aa96460be7b2fe4310a7096981ff75/src/vidhrdw/cps1_vidhrdw.c#L1345-L1500) (block sprites, flips, the `code < total_elements` check);
@@ -258,7 +258,7 @@ The `-script` steps hold buttons for a range of frames on player 1, in the devic
 **Learned:**
 - **Sprites:** block sprites, X flip, 15-color palettes per character and the sprite/scroll layer order all behave as the driver says.
 - **Graphics format:** the 32×32 format is right too.
-- **Inputs:** player 1, coin 1 and start 1 arrive at 0x800000 and 0x800018 exactly as go-link's device sends them.
+- **Inputs:** player 1, coin 1 and start 1 arrive at 0x800000 and 0x800018 exactly as go-link Console's device sends them.
 - **Hand-check the compiler:** for anything that writes to the hardware, check gcc's output. An addressing mode whose order the CPU core defines differently breaks silently. Writing hardware tables through `volatile` pointers avoids this.
 - **The atlas lost the black shirt:** the published atlas has transparency holes wherever the original was black. A new converter (or the atlas cutter itself) should key the background by connectivity, not by color.
 
@@ -421,7 +421,7 @@ That makes 29: it fits, with level-specific sets loaded between scenes. Bosses w
 
 ---
 
-## Step 3 — A go-link room
+## Step 3 — A go-link Console room
 
 *2026-10-01 (run again with `slammast` and the new sprites)*
 
@@ -471,7 +471,7 @@ node rom/tools/room-test.mjs
 *Four frames of the room's WebRTC video, played from the browser's keyboard: the run, the machine gun, the bazooka, a jump.*
 
 **Learned:**
-- **Nothing in go-link had to change.** The whole path (library, check, New game, worker, WebRTC, four seats, three buttons) works with a set that is ours byte for byte.
+- **Nothing in go-link Console had to change.** The whole path (library, check, New game, worker, WebRTC, four seats, three buttons) works with a set that is ours byte for byte.
 - **What production needs** (not built in this prototype):
   - a list of go-link-owned sets, identified by the SHA-256 of our zip or files, so the library shows our title, maker and art instead of the original game's;
   - a way to tell our `slammast.zip` from a real one in the same folder (one ROM folder cannot hold both under the same name).
@@ -490,11 +490,11 @@ node rom/tools/room-test.mjs
 - two players on screen at once;
 - a camera that only moves forward.
 
-Verified in the core and in a go-link room, then installed in the user's own library.
+Verified in the core and in a go-link Console room, then installed in the user's own library.
 
 **What was read:**
 - The tilemap code again ([`get_tile1_info`](https://github.com/libretro/mame2003-plus-libretro/blob/0d9a325c96aa96460be7b2fe4310a7096981ff75/src/vidhrdw/cps1_vidhrdw.c#L1074-L1100), the tilemap sizes at L1159-1161, `palette_basecolor` at L1220-1225).
-- go-link's `LibraryService` (`SetDir`, `Scan`, `Import`) to find how a new zip reaches a running device.
+- go-link Console's `LibraryService` (`SetDir`, `Scan`, `Import`) to find how a new zip reaches a running device.
 
 **Commands:**
 ```sh
@@ -606,20 +606,20 @@ One player through the whole route:
 
 *Frames 820, 935, 1060: up building B's ladder; the knife when the android is right in front; the child rescued on the roof.*
 
-### In a go-link room
+### In a go-link Console room
 
 ![The room's video at 2x](images/step4-room-video.png)
 
 *Four frames of the room's WebRTC video (768×448, the device's 2× of the 384×224 frames above), played from the browser's keyboard: the run, the machine gun breaking a crate (+100), a jump, the crates further on. In about 15 s the browser decoded 952 frames and dropped 34.*
 
-### In your own go-link
+### In your own go-link Console
 
 How the build reaches the user's library:
 1. **The folder:** the running device reads `roms_dir` from `~/Library/Application Support/go-link-console/device.json`, here `/Volumes/HD12TB/ROMS/roms/MAME-2003-Plus` (when empty, `~/go-link-console/roms`).
 2. **No overwrite:** first check that the folder has no `slammast.zip`. If it had one, nothing would be copied: a real set must never be overwritten.
 3. **The copy:** `cp -n rom/build/slammast.zip <roms_dir>/slammast.zip`. Same SHA-256 on both sides; no other file in the folder is touched.
 4. **The library refresh without a restart:** the device rescans its folder when it changes (`LibraryService.SetDir` → `Scan`), so the least invasive way is **My device › ROMs**, field *ROM folder on the device's computer*: the same path, then **Use this folder** (control `set_roms_dir`). Otherwise quit and reopen the app. Dropping the zip on My device › ROMs is the device's own import (`Import`, never overwrites, rescans) and works too, when the file is not already there.
-5. **Play:** **My device › New game › "Saturday Night Slam Masters (World 930713)"** (our game shows under the layout's original title until go-link has a list of its own sets) › Start the game. Controls on the keyboard:
+5. **Play:** **My device › New game › "Saturday Night Slam Masters (World 930713)"** (our game shows under the layout's original title until go-link Console has a list of its own sets) › Start the game. Controls on the keyboard:
    - 5 = coin, Enter = start;
    - arrows; a double tap runs; up/down on ladders;
    - Z = jump (down + Z drops through), X = fire (knife up close), C = special.
@@ -665,13 +665,13 @@ mkdir -p /tmp/romdir && cp rom/build/slammast.zip /tmp/romdir/
 **Files created:** `rom/tools/ownsets.mjs` (reads the zip, hashes each inner file, writes the list); `backend-device/pkg/ownsets` (the embedded list, the match, the set's picture); the ROM test in `backend-device/internal/services/romtest_service.go` and `cmd/device/romtest.go`.
 
 **Result:**
-- `roms check`: `slammast  ok  Willy Gorklingo: The Lag Protocol (prototype) [go-link set, verified]`. The same zip with one byte changed is "Saturday Night Slam Masters" again.
+- `roms check`: `slammast  ok  Willy Gorklingo: The Lag Protocol (prototype) [go-link Console set, verified]`. The same zip with one byte changed is "Saturday Night Slam Masters" again.
 - Two builds in a row: the zip's SHA-256 changed (entry timestamps), the 28 inner files did not. That is why the list is per inner file.
 - `romtest`: the picture at frame 9, 220 different pictures in the last 300 frames, Coin changes the picture at frame 301 while the run without input stays the same, 5.4x real time. The sound runs but is silent (the Z80 program is still a stub).
 - Damaged copies: an erased `mbe_23e.rom` crashed the core with SIGSEGV in the worker process (or left the screen black, depending on the run); without `mbe_23e.rom`, the `set` step fails ("files missing for this core"); half of it fails `core.files` ("wrong size"); a cut zip fails `zip`.
 
 **Learned:**
-- The core logs `WRONG CHECKSUMS` for each of our 28 files, so "no warnings" cannot be a rule for go-link sets: only missing files and wrong sizes fail.
+- The core logs `WRONG CHECKSUMS` for each of our 28 files, so "no warnings" cannot be a rule for go-link Console sets: only missing files and wrong sizes fail.
 - The core is deterministic from power on: two runs without input give the same pictures frame by frame, which makes "the input changed something" a clean comparison.
 - A crash of the old core stays in its worker process; the device only reads the worker's report.
 
@@ -680,11 +680,11 @@ mkdir -p /tmp/romdir && cp rom/build/slammast.zip /tmp/romdir/
 ## Verdict
 
 **Feasible with the stock core, and no core patch is needed.**
-- **Core and device:** mame2003-plus runs a CPS-1 game that is entirely ours, laid out as `slammast`'s files: word-swapped program files, the documented graphics format, and a Z80 program encrypted with the public Kabuki algorithm. go-link's device accepts the set and plays it in a room unchanged, with **4 players × 3 buttons**.
+- **Core and device:** mame2003-plus runs a CPS-1 game that is entirely ours, laid out as `slammast`'s files: word-swapped program files, the documented graphics format, and a Z80 program encrypted with the public Kabuki algorithm. go-link Console's device accepts the set and plays it in a room unchanged, with **4 players × 3 buttons**.
 - **The cost of option A** (the replacement set): the game takes the name `slammast` inside the core.
   - Device side, fixed by our own allow-list by hash: our title and art in the library, and no clash with a real `slammast.zip`.
   - Core side, with no fix: its own messages and saved files (cfg, nvram, save states) use `slammast`.
 - **A core patch (option B, a `willy` driver entry in a fork)** is only needed to have our own set name inside the core, at the price of shipping and maintaining a core build.
 - **What the `slammast` board means for the game:** QSound for sound (sampled, stereo, a sound driver of our own to write and encrypt), no DIP switches (settings in our own EEPROM menu), and 6 MB of tile space.
-- **A Metal Slug-style level fits** ([step 4](#step-4--a-metal-slug-style-level)): 44 px characters, two routes with crates, ladders and one-way platforms, two players, a forward camera on both axes, and a layered background; playable in a go-link room.
+- **A Metal Slug-style level fits** ([step 4](#step-4--a-metal-slug-style-level)): 44 px characters, two routes with crates, ladders and one-way platforms, two players, a forward camera on both axes, and a layered background; playable in a go-link Console room.
 - **Sprite quality is not a hardware limit:** with dominant-color downscaling and per-tile palettes (13 of 32 palettes for the prototype's cast), the characters stay close to the sheets ([step 2b](#step-2b--sprite-quality)).

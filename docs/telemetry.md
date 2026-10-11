@@ -29,7 +29,7 @@ The test pattern room is recorded too (room `test`, one run per device run).
 | `enc_avg_ms`, `enc_max_ms`, `enc_late` | Encoding time per frame, and frames that took longer than a frame |
 | `fps_sent`, `kbps` | What the encoder sent |
 | `viewers` | Participants connected |
-| `cpu_pct`, `proc_cpu_pct`, `proc_mem_mb` | The computer's CPU, go-link's (with its games) and its memory |
+| `cpu_pct`, `proc_cpu_pct`, `proc_mem_mb` | The computer's CPU, go-link Console's (with its games) and its memory |
 | `enc_load_pct` | The share of the last second spent encoding, every tier together (`encode_load.go`); 75 % or more for five seconds is an overload |
 | `net_up_kbps`, `net_down_kbps` | Everything the host's computer sends and receives: every guest's picture shares the upload |
 | `hud` | 1 while the latency test draws the controllers |

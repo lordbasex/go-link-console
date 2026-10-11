@@ -31,16 +31,16 @@ It was built in [experiment 1, case C](../experiments/README.md) (records in [`d
                              ▼                                           ▼
                  mbe_*.rom, mb_gfx*.rom, mb_*.bin, mb_qa.rom, mb_q1-8.bin ──► slammast.zip (fixed dates)
                                                                               │
-                                                       power-on test (level 3), Download, Play on my go-link (level 4)
+                                                       power-on test (level 3), Download, Play on my go-link Console (level 4)
 ```
 
 1. **The engine** (`engine.bin`, fetched once, its SHA-256 checked against `engine.json`): the 68000 program, the engine's own sprite tiles (Willy, three recruit shirts, the woman and the child, the Lag android, the bullet and the rocket) and the plain Z80 sound program.
 2. **The pictures**: each tileset's PNG and the saved picture of each hero a player uses, from the browser's asset store, decoded in JavaScript (`io/png.ts`).
 3. **Pack** (`packGame`): the data block, the font and its double size, the sprites, the players' own heroes ([looks](#the-players-looks)), the play layer's 16 px tiles and the far layer's 32 px tiles in the board's graphics format (`@go-link/cps1` `GfxRegion`), the program space split into the program files (`splitProgram`), the Z80 program encrypted for the QSound board (`encodeOpcodes`, the `slammast` keys), silent samples.
 4. **Zip** (`zipSet`): every file with a fixed date, sorted: the same game always gives the same `.zip` byte for byte (the recorded session made three identical zips).
-5. **Power-on test** (validation level 3) runs on it at once in its Worker, with its picture. Then **Download ROM**, **Symbol map** (`symbols.json`, the engine's symbols: the harness reads the game's state through it) and **Play on my go-link** (the same zip in its own room on the linked device's real core).
+5. **Power-on test** (validation level 3) runs on it at once in its Worker, with its picture. Then **Download ROM**, **Symbol map** (`symbols.json`, the engine's symbols: the harness reads the game's state through it) and **Play on my go-link Console** (the same zip in its own room on the linked device's real core).
 
-Nothing is uploaded except by **Play on my go-link**, and only to the user's own device.
+Nothing is uploaded except by **Play on my go-link Console**, and only to the user's own device.
 
 ## The data block (`wm_data`)
 
@@ -195,11 +195,11 @@ Create ROM lists these as notes under its result; none of them stops it.
 - The **mid layer** and extra tile layers are left out (the board has one far layer); each layer loads the palettes its tiles use, up to 32 ([layer palettes](#layer-palettes)).
 - **Sound** (T-26): see [Sound](#sound-qsound): QSound effects and music; play mode plays the same sounds in the browser (below).
 - The ROM is always laid out as `slammast` (a `captcomm` game is noted).
-- **Play on my go-link** opens the game's own room on the linked device with the real core (device 0.1.9: the game is `@maker`, kept apart from the ROM folder); the power-on test on the device (validation level 4) stays in the Power-on test card.
+- **Play on my go-link Console** opens the game's own room on the linked device with the real core (device 0.1.9: the game is `@maker`, kept apart from the ROM folder); the power-on test on the device (validation level 4) stays in the Power-on test card.
 
 ## Sound (QSound)
 
-Task T-26 of [experiment 1's verdict](../experiments/verdict.md). The slammast board's Z80 runs go-link's QSound driver ([`rom/engine/sound.z80`](../../rom/engine/sound.z80), built by `engine.mjs` with its `code_end` and `DATA` labels in `engine.json`), and Create ROM writes the sound itself (`rom/sound.ts` `packSound`):
+Task T-26 of [experiment 1's verdict](../experiments/verdict.md). The slammast board's Z80 runs go-link Console's QSound driver ([`rom/engine/sound.z80`](../../rom/engine/sound.z80), built by `engine.mjs` with its `code_end` and `DATA` labels in `engine.json`), and Create ROM writes the sound itself (`rom/sound.ts` `packSound`):
 
 - **The chip** (the core's `src/sound/qsound.c`): 16 channels of 8-bit signed samples at 24096 Hz (pitch 0x1000), each with its own balance from left to right. Effects play on channels 8-15 in turn, music on 0-7.
 - **The 68000 talks to it** through shared RAM 1 (`0xf18000`, the Z80's `0xc000`): an 8-entry queue of (id, balance) and its write index. Ids 1-15 are effects (shot, knife, jump, hit, enemy down, hurt, crate, pickup, rescue, coin, start, rocket, explosion, kick, land), each panned to where it happens on screen; `0x40 + n` plays the music of screen n (title, play, clear, continue, game over), `0x7f` stops it.

@@ -224,8 +224,8 @@ Without a device in `adb devices` the project is skipped; `npm test` runs only t
 
 1. restarts the emulator with its own command line plus `-camera-back virtualscene` when it does not already use it (`adb emu kill`, then the `emulator` launcher from the discovery file), and at the end starts it again exactly as it was;
 2. links the owner, opens the test pattern room, points the app at the test signalhub and makes an invitation;
-3. draws two QR codes with the website's encoder (`qrcode-generator`, level M, as `QrCode.tsx`): the website's own link on the test stack (not a go-link invitation for the app) and the same invitation as `https://play.go-link.org/g/<invite>`;
-4. opens **Scan QR code** from home, taps **Allow** on the explanation and **While using the app** on the system's camera dialog; the scanner sees the first code and refuses it ("That QR code is not a go-link invitation.");
+3. draws two QR codes with the website's encoder (`qrcode-generator`, level M, as `QrCode.tsx`): the website's own link on the test stack (not a go-link Console invitation for the app) and the same invitation as `https://play.go-link.org/g/<invite>`;
+4. opens **Scan QR code** from home, taps **Allow** on the explanation and **While using the app** on the system's camera dialog; the scanner sees the first code and refuses it ("That QR code is not a go-link Console invitation.");
 5. puts the real invitation on the wall: the scanner reads it, the PIN screen opens with that invitation, and the PIN and the terms join a seat.
 
 Its screenshots and screen recording go to `e2e/test-results/android-camera/` (and `E2E_EVIDENCE_DIR`).

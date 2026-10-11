@@ -154,7 +154,7 @@ test("the owner opens the test pattern room and the app uses the test signalhub"
 test("the scanner reads the invitation's QR code with the camera, then the PIN joins", async () => {
   const inv = await invite(page);
   // The website's own link (the test stack's address) is not a go-link
-  // invitation for the app; the same token on go-link.org is.
+  // invitation for the app; the same token on play.go-link.org is.
   const foreign = join(OUT, "qr-site-link.png");
   const real = join(OUT, "qr-invitation.png");
   await qrPng(inv.url, foreign);

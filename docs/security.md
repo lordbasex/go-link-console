@@ -36,15 +36,15 @@ Details in [signalhub's README](https://github.com/lordbasex/signalhub). In shor
 
 The website is two sites ([web.md](web.md#two-sites)): the landing, guide and tools on console.go-link.org, and the rooms and My device on play.go-link.org. The device link and the room passes live only in play's storage; the landing keeps no link and never connects to the signaling server, so a flaw in the landing, the guide or a tool cannot reach a device.
 
-Browsers that used go-link before the split still keep those on go-link.org. Moving them (`apps/web/src/handoff.ts`):
+Browsers that used go-link Console before the split still keep those on go-link.org. Moving them (`apps/web/src/handoff.ts`):
 
-- Play opens `go-link.org/handoff` only on a click, in a tab with a random name. The handoff page posts its data with play's origin as `targetOrigin`, so if any other page opened it, the browser delivers nothing; it acts on play's `done` only from play's origin and from the tab that opened it.
-- Play accepts the data only from go-link.org's origin and from the tab it opened, takes only `go-link.*` keys (at most 64, each value at most 256 KB), never the landing's own (Willy Maker's games, skins), and never replaces a value it already has.
+- Play opens the landing's `/handoff` only on a click, in a tab with a random name. The handoff page posts its data with play's origin as `targetOrigin`, so if any other page opened it, the browser delivers nothing; it acts on play's `done` only from play's origin and from the tab that opened it.
+- Play accepts the data only from the landing's origin and from the tab it opened, takes only `go-link.*` keys (at most 64, each value at most 256 KB), never the landing's own (Willy Maker's games, skins), and never replaces a value it already has.
 - Once play has them, the landing deletes the device link and the passes. Nothing goes in the address: `?import=1` only says that there is something to bring.
 
 ## Willy Maker's site and the device bridge
 
-Willy Maker is its own site (maker.go-link.org). The link to the owner's go-link stays on the rooms' site (play.go-link.org), whose storage another origin cannot read, so Willy Maker reaches the device through a tab of that site it opens, `/maker-bridge`, with `postMessage` (`packages/shared/src/maker-bridge.ts`, [the architecture](willy-maker/architecture.md#the-device-bridge)):
+Willy Maker is its own site (maker.go-link.org). The link to the owner's go-link Console stays on the rooms' site (play.go-link.org), whose storage another origin cannot read, so Willy Maker reaches the device through a tab of that site it opens, `/maker-bridge`, with `postMessage` (`packages/shared/src/maker-bridge.ts`, [the architecture](willy-maker/architecture.md#the-device-bridge)):
 
 - **Who may talk:** the bridge accepts a message only from Willy Maker's origin (`MAKER_URL`, pinned by `make web-build`, never a development address from a `.env.local`) and only from the tab that opened it; every answer is posted only to that origin, so a third party that opens `/maker-bridge` gets nothing (not even the device's name). Willy Maker's side accepts only the origin of the tab it opened (play.go-link.org, or console.go-link.org to bring the games made there before it moved) and only that tab, whose window name is random.
 - **What passes:** a ROM test (`rom_test`) and a private room for the Willy Maker game (`create_room` for `@maker`), their zips (purpose `rom_test` or `maker`, at most 16 MB), and back only `upload_result`, `rom_test_result`, `room_created` and `room_error`. Nothing else of the device: unlink, settings, factory reset, status, other rooms.

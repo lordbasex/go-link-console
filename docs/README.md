@@ -1,4 +1,4 @@
-# go-link documentation
+# go-link Console documentation
 
 | Document | What it covers |
 |---|---|
@@ -16,7 +16,7 @@
 | [Security](security.md) | Signaling, device and website security, HTTP headers |
 | [Building](building.md) | Requirements, Makefile, macOS app, releases, tests, CI |
 | [Deploying](deploy.md) | Signaling server, website hosting, device distribution |
-| [Arcade ROM project](rom/README.md) | go-link's own arcade game for mame2003-plus: a CPS-1 prototype that runs on the stock core and in rooms, recognized by the device as a go-link set, its [lab journal](rom/journal.md) and the [game bible](rom/story.md) with the story and its ten levels |
+| [Arcade ROM project](rom/README.md) | go-link Console's own arcade game for mame2003-plus: a CPS-1 prototype that runs on the stock core and in rooms, recognized by the device as a go-link Console set, its [lab journal](rom/journal.md) and the [game bible](rom/story.md) with the story and its ten levels |
 | [Willy Maker](willy-maker/README.md) | The visual game maker, on its own site ([maker.go-link.org](https://maker.go-link.org), `frontend/willy-maker`): build CPS-1 games, play-test them in the browser, export a project or an AI pack, and validate a ROM in four levels, up to a power-on test on the linked device; creating the ROM in the browser comes later ([architecture](willy-maker/architecture.md), [file format](willy-maker/file-format.md), [validation](willy-maker/validation.md)) |
 | [Status and roadmap](status.md) | What is done and what comes next |
 | [Legal](legal.md) | Terms of use, privacy policy, licenses and trademarks |

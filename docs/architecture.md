@@ -1,6 +1,6 @@
 # Architecture
 
-go-link is **host streaming**, not netplay. One person, the **host**, runs the go-link app (the **device**) on their own computer with **their own ROMs**. Everyone else plays from a web browser: they get the game's video and sound over WebRTC and send their controls back. Nobody but the host needs the ROM.
+go-link Console is **host streaming**, not netplay. One person, the **host**, runs the go-link Console app (the **device**) on their own computer with **their own ROMs**. Everyone else plays from a web browser: they get the game's video and sound over WebRTC and send their controls back. Nobody but the host needs the ROM.
 
 ## Principles
 

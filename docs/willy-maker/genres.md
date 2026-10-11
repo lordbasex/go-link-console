@@ -10,7 +10,7 @@ The board is the same for all of them: Capcom CPS-1 laid out as the `slammast` s
 - **Layers**: scroll1 (8 px tiles, text and HUD), scroll2 (16 px, the play layer, with **row scroll**: each line can scroll on its own) and scroll3 (32 px, the far layer). No rotation or scaling in hardware.
 - **Sprites**: 256 table entries of 16 × 16 tiles (big objects are blocks of tiles), 32 palettes of 15 colors plus transparency.
 - **ROM**: 6 MB of graphics and 2 MB of program; a 68000 at about 10 MHz.
-- **Controls**: 4 players, each with an 8-way stick, 3 buttons, Start and Coin (the "4 × 3" layout; `captcomm` has 2 buttons and makes the third with both). go-link maps RetroPad B, A, Y to buttons 1, 2, 3.
+- **Controls**: 4 players, each with an 8-way stick, 3 buttons, Start and Coin (the "4 × 3" layout; `captcomm` has 2 buttons and makes the third with both). go-link Console maps RetroPad B, A, Y to buttons 1, 2, 3.
 
 ## 1. Platform shooter (available)
 
@@ -50,7 +50,7 @@ The board is the same for all of them: Capcom CPS-1 laid out as the `slammast` s
 - **The player:** aims a crosshair on screen and shoots targets that pop up while the camera moves along a route or holds on each scene; reloads, rescues hostages by not shooting them.
 - **Engine:** reuses levels as backgrounds, the camera (now on a script: move, stop, move), camera locks (a scene ends when its targets are down) and enemies (as targets with pop-up timings). New: a crosshair per player moved by the stick, hits at the crosshair instead of shots that fly, reload, hostages.
 - **Editor parts:** reused: levels, camera locks, enemies (target, with when they appear and for how long), civilians (hostages). New: camera route, target timing.
-- **CPS-1 limits:** the board has no light gun input; the crosshair moves with the stick (a browser pointer can drive the stick's direction in go-link); four crosshairs are four sprites.
+- **CPS-1 limits:** the board has no light gun input; the crosshair moves with the stick (a browser pointer can drive the stick's direction in go-link Console); four crosshairs are four sprites.
 - **Controls (4 × 3):** stick moves the crosshair, B1 shoot, B2 reload, B3 special (a bomb).
 - **Size:** M.
 

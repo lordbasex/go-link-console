@@ -1,6 +1,6 @@
 <div align="center">
 
-# go-link
+# go-link Console
 
 **Play classic arcade games online with your friends, straight from the browser.**
 
@@ -18,20 +18,20 @@ Your computer becomes the arcade: it runs the games and streams them live. Frien
 
 </div>
 
-## Why go-link
+## Why go-link Console
 
 > *"Come on, the next token's on me."*
 
-go-link started with a simple wish: to get together with friends and play like we did in the arcades of the 80s and 90s. Sitting side by side at the machine, running tournaments, and joking with each other the whole game. Life spread us out, so go-link brings the arcade to us: one friend hosts, sends a link, and everyone is back at the same machine, talking and laughing while they play.
+go-link Console started with a simple wish: to get together with friends and play like we did in the arcades of the 80s and 90s. Sitting side by side at the machine, running tournaments, and joking with each other the whole game. Life spread us out, so go-link Console brings the arcade to us: one friend hosts, sends a link, and everyone is back at the same machine, talking and laughing while they play.
 
 What makes it different:
 
-- **Only the host needs the games.** With classic netplay every player needs the same ROM and emulator setup; with go-link friends only open a link.
+- **Only the host needs the games.** With classic netplay every player needs the same ROM and emulator setup; with go-link Console friends only open a link.
 - **Nothing to install for players.** A browser is enough, on a computer, a tablet or a phone (or the go-link Console Player app).
 - **It feels like the arcade:** four seats, a queue for the next game, spectators, voice and chat between players.
 - **No accounts and no middleman.** The games run on the host's own computer and never touch a server; you can even run your own signaling server.
 
-A **host** runs the go-link app (the **device**) on their own computer, with **their own ROMs**. Friends join from a web browser **without needing the ROM**: they get the game's video and sound over WebRTC and send their controls back, peer to peer.
+A **host** runs the go-link Console app (the **device**) on their own computer, with **their own ROMs**. Friends join from a web browser **without needing the ROM**: they get the game's video and sound over WebRTC and send their controls back, peer to peer.
 
 - Up to **4 players** per room, with voice between them. Everyone else waits **in the queue**, like at an arcade, and can watch and chat meanwhile.
 - Based on MAME: the engine is [mame2003-plus](https://github.com/libretro/mame2003-plus-libretro) (MAME 0.78 sets) through libretro.
@@ -45,7 +45,7 @@ A **host** runs the go-link app (the **device**) on their own computer, with **t
 | **Windows 10/11** | Download the [`.zip`](https://github.com/lordbasex/go-link-console/releases/latest), unzip, run `go-link-console.exe` |
 | **Linux** | Download the [`.tar.gz`](https://github.com/lordbasex/go-link-console/releases/latest), unpack, run `./go-link-console` |
 | **Raspberry Pi / server** | The `-headless` build: a web panel on port 7373 and a full CLI |
-| **Docker** | `docker run -d --name go-link --network host -v go-link:/data -v ~/roms:/data/go-link-console/roms ghcr.io/lordbasex/go-link-console:latest` (also `lordbasex/go-link-console` on Docker Hub) |
+| **Docker** | `docker run -d --name go-link-console --network host -v go-link-console:/data -v ~/roms:/data/go-link-console/roms ghcr.io/lordbasex/go-link-console:latest` (also `lordbasex/go-link-console` on Docker Hub) |
 
 Then open [play.go-link.org/device](https://play.go-link.org/device), type the 9-digit code the app shows, add your ROMs and start a game. The [user guide](https://console.go-link.org/docs) walks you through every step.
 
@@ -76,8 +76,8 @@ Then open [play.go-link.org/device](https://play.go-link.org/device), type the 9
                           (pairing, invitations, STUN/TURN)
 ```
 
-1. The host installs go-link, opens it and types the 9-digit code shown in its window at [play.go-link.org/device](https://play.go-link.org/device).
-2. The host downloads the emulator core (one click) and points go-link at their ROM folder.
+1. The host installs go-link Console, opens it and types the 9-digit code shown in its window at [play.go-link.org/device](https://play.go-link.org/device).
+2. The host downloads the emulator core (one click) and points go-link Console at their ROM folder.
 3. The host starts a game and invites friends with a link, a QR or a code, plus a PIN for each person.
 4. Friends open the invitation, type the PIN and play.
 
@@ -87,7 +87,7 @@ Get the app from the [releases](https://github.com/lordbasex/go-link-console/rel
 
 | System | File | Notes |
 |---|---|---|
-| **macOS 12+** (Intel and Apple silicon) | `go-link-console-vX.Y.Z-macos-universal.dmg` | Drag go-link to Applications. Since 0.3.0 the app is signed and notarized by Apple, so it opens like any other app (an older version: System Settings › Privacy & Security › Open Anyway). Or with Homebrew from this repository's tap (see [Install in a minute](#install-in-a-minute)) |
+| **macOS 12+** (Intel and Apple silicon) | `go-link-console-vX.Y.Z-macos-universal.dmg` | Drag go-link Console to Applications. Since 0.3.0 the app is signed and notarized by Apple, so it opens like any other app (an older version: System Settings › Privacy & Security › Open Anyway). Or with Homebrew from this repository's tap (see [Install in a minute](#install-in-a-minute)) |
 | **Windows 10/11** (x64 and ARM) | `go-link-console-vX.Y.Z-windows-amd64.zip` / `-arm64.zip` | Unzip and run `go-link-console.exe` |
 | **Linux desktop** (x64 and ARM64) | `go-link-console-vX.Y.Z-linux-amd64.tar.gz` / `-arm64.tar.gz` | Window and tray icon |
 | **Raspberry Pi and servers** | `go-link-console-vX.Y.Z-linux-arm64-headless.tar.gz` / `-amd64-headless.tar.gz` | No window: a web panel on port 7373 and a full CLI |
@@ -143,7 +143,7 @@ Details in [docs/deploy.md](docs/deploy.md).
 
 ## Help the project
 
-go-link is built in the open, and every bit of help counts:
+go-link Console is built in the open, and every bit of help counts:
 
 - ⭐ **Star the repository** (top right of this page). It is free, it takes one click, and it is the easiest way to help other retro gamers find the project.
 - 🕹️ **Install it and play** with your friends, then tell us what worked and what did not.
@@ -154,7 +154,7 @@ go-link is built in the open, and every bit of help counts:
 
 ## Documentation
 
-How to use go-link (install, link, ROMs, inviting, controls, the app, network, troubleshooting): [console.go-link.org/docs](https://console.go-link.org/docs), in English, Spanish and Portuguese.
+How to use go-link Console (install, link, ROMs, inviting, controls, the app, network, troubleshooting): [console.go-link.org/docs](https://console.go-link.org/docs), in English, Spanish and Portuguese.
 
 For developers, start at [docs/README.md](docs/README.md): architecture, flows, the device protocol, the device app, the emulator, the website, the Player apps (Android and iOS), networking, security, building, deploying, the roadmap and the legal texts. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 

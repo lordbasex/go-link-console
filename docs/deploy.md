@@ -1,6 +1,6 @@
 # Deploying
 
-go-link has three pieces to put in front of people:
+go-link Console has three pieces to put in front of people:
 
 | Piece | Where it runs | How |
 |---|---|---|
@@ -13,9 +13,9 @@ go-link has three pieces to put in front of people:
 
 signalhub is a separate, generic project. Its README has the step-by-step deployment, the ports to open (TCP 80/443, TCP and UDP 3478, the UDP relay range) and every variable. Its server builds the image from source with `docker compose`; no image is published to a registry.
 
-For go-link, set in its `deploy/.env`:
+For go-link Console, set in its `deploy/.env`:
 
-| Variable | Value for go-link |
+| Variable | Value for go-link Console |
 |---|---|
 | `ALLOWED_ORIGINS` | The rooms' site origin, for example `https://play.go-link.org` (plus `http://localhost:5180` for development). The landing (`https://console.go-link.org`) never talks to signaling |
 | `ALLOWED_APPS` | Must include `go-link-console` |
@@ -35,7 +35,7 @@ SITE_URL=https://example.org PLAY_URL=https://play.example.org make web-build   
 
 Each site trusts the other's address for the handoff, and the landing sends the rooms' paths there, so both are built together with `SITE_URL` and `PLAY_URL`. Upload the rooms' site first. The rooms' site keeps `.well-known/` (the apps' invitation links are its `/g/<invite>`; iOS needs `apple-app-site-association` served as `application/json`) and sends `noindex`.
 
-Since 2026-10-11, go-link.org (and www) is an index of go-link's WebRTC projects, deployed apart from this repository; it sends every other address to the landing at console.go-link.org.
+Since 2026-10-11, go-link.org (and www) is an index of go-link Console's WebRTC projects, deployed apart from this repository; it sends every other address to the landing at console.go-link.org.
 
 Whatever serves them must:
 
@@ -57,7 +57,7 @@ The file can define `web-deploy`, a `hosting-help` target (shown by `make help`)
 
 ### Willy Maker's site
 
-Willy Maker is its own static site (`frontend/willy-maker`), served on its own host name (go-link's is `maker.go-link.org`):
+Willy Maker is its own static site (`frontend/willy-maker`), served on its own host name (go-link Console's is `maker.go-link.org`):
 
 ```bash
 make maker-build                                    # frontend/willy-maker/dist
@@ -65,7 +65,7 @@ SITE_URL=https://go-link.example.org make maker-build   # with your own website
 make maker-deploy                                   # build and upload (deploy/local/hosting.mk)
 ```
 
-- It reaches the owner's go-link through the rooms' site `/maker-bridge` tab, so each must know the other: Willy Maker is built with the rooms' address (`PLAY_URL`, default `https://play.go-link.org`) and the landing's (`SITE_URL`, default `https://console.go-link.org`, for the games made there before it moved), and the website with Willy Maker's (`VITE_MAKER_URL`, default `https://maker.go-link.org`).
+- It reaches the owner's go-link Console through the rooms' site `/maker-bridge` tab, so each must know the other: Willy Maker is built with the rooms' address (`PLAY_URL`, default `https://play.go-link.org`) and the landing's (`SITE_URL`, default `https://console.go-link.org`, for the games made there before it moved), and the website with Willy Maker's (`VITE_MAKER_URL`, default `https://maker.go-link.org`).
 - Serve it like the website: `index.html` for unknown paths (a game's address is `/<id>`), `index.html` with `no-cache` and `assets/` cached for a year, HTTPS only, and the same security headers (`frame-ancestors 'none'` and the rest, [security.md](security.md)).
 - `hosting.mk` can define `maker-deploy` the same way as `web-deploy`; without it, `make maker-deploy` only builds the site.
 
