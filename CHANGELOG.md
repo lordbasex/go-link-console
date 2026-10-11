@@ -10,6 +10,11 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 - **The landing plays ANTÍDOTO:** the hero's screen is a silent loop of two players in ANTÍDOTO, and **Watch the trailer** opens its trailer with sound (two players beat a boss in each zone). The landing's retro music is gone; only the trailer has sound.
 - **The landing's app screenshots of a room are an iPhone playing ANTÍDOTO** (with the on-screen pad, and the room chat), in English, Spanish and Portuguese. The iPhone app's live test takes them (`live-2e-pad`), joins its hero with 2P first and writes the chat line in each language.
 
+### Added (device)
+
+- **go-link HD rooms in H.264 from the graphics card on Linux and in Docker:** `--hd-room-codec auto` tries NVENC (NVIDIA), then VAAPI (Intel, AMD, through `/dev/dri`), through ffmpeg, with a short clip as the device starts, and uses the first that works; else VP8. `--hd-h264 nvenc|vaapi` forces one (refused at start when it does not work). `make device-docker-gpu` builds the `go-link-console:gpu` image with ffmpeg and the VA-API drivers; `docker-compose.yml` shows how to give it the card.
+- **go-link HD rooms in H.264 from the graphics card on Windows:** `--hd-room-codec auto` uses the encoder Windows lists through Media Foundation (Intel Quick Sync, NVIDIA NVENC, AMD AMF), called directly through cgo (`pkg/encoder/mf_windows.go`: nothing to install, CBR, low latency, a keyframe when a viewer joins); without one the room keeps VP8. `--hd-h264 mediafoundation` forces it (Windows' software encoder when there is no card's), and `device hdbench --encoder mediafoundation` measures it.
+
 ### Changed
 
 - **github.com/lordbasex/go-link is now the go-link.org index** (the project ecosystem), so GitHub no longer redirects the old name here. Its release `v0.4.0` has no files and points to this repository's 0.4.0, so a device running 0.3.x still sees the update and where to download it.

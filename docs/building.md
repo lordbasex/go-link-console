@@ -52,6 +52,7 @@ npm run wasm:check -w @go-link/cps1-sim     # rebuilds in a temporary folder and
 | `make device-dmg` | The universal macOS app in a drag-to-Applications `.dmg` |
 | `make panel` | Builds the website into `backend-device/web/panel/dist`, the panel that headless devices serve (device builds do it when it is missing) |
 | `make device-docker` | The `go-link-console` image (headless, panel on :7373) in the local Docker |
+| `make device-docker-gpu` | The same image with ffmpeg and the VA-API drivers (`go-link-console:gpu`): HD rooms in H.264 from an Intel, AMD or NVIDIA card |
 | `make device-docker-oci` | The same image for amd64 and arm64, as an OCI archive in `dist/docker/` |
 | `make e2e` | End-to-end tests in a real browser |
 | `VERSION=x.y.z make release` | A full release (below) |

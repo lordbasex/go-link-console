@@ -37,9 +37,16 @@ RUN mkdir -p /out/lib && if [ -f /golinkhd/Makefile ]; then make -s -B -C /golin
 FROM debian:bookworm-slim
 # CA certificates: wss:// to the signaling server and the core download.
 # libstdc++: the libretro core (a C++ library loaded at run time).
-RUN apt-get update && apt-get install -y --no-install-recommends \
-      ca-certificates libstdc++6 && rm -rf /var/lib/apt/lists/* && \
-    useradd --create-home --home-dir /data --uid 1000 golink && \
+# GPU=1 (the "gpu" image, about 650 MB more): ffmpeg and the VA-API drivers
+# (Intel, AMD), for go-link HD rooms in H.264 from the graphics card when the
+# container is given it (--device /dev/dri; an NVIDIA card with --gpus all and
+# its container toolkit). Without them, or without a card, rooms keep VP8.
+ARG GPU=0
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libstdc++6 && \
+    if [ "$GPU" = 1 ]; then apt-get install -y --no-install-recommends \
+      ffmpeg mesa-va-drivers intel-media-va-driver i965-va-driver; fi && \
+    rm -rf /var/lib/apt/lists/* && \
+    useradd --create-home --home-dir /data --uid 1000 --groups video golink && \
     mkdir -p /data/go-link-console/cores /data/go-link-console/roms /data/go-link-console/thumbnails/MAME \
       /data/go-link-console/saves /data/go-link-console/logs && chown -R golink:golink /data/go-link-console
 # The folders exist in the image, owned by golink: a new volume gets them

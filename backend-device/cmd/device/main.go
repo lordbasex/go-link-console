@@ -72,14 +72,14 @@ func run() error {
 		testHD     = flag.String("test-room-hd", "", "go-link HD's experiment (T-31): the test room streams an HD scene (720p, 1080p, 2160p, or auto: the best this computer streams at 60 fps, checked) made of --hd-far and --hd-play")
 		hdCore     = flag.String("hd-core", "", "go-link HD's engine library (default: the one shipped with the device, else libgolinkhd in the cores folder): game rooms of .glhd packages run it; with --test-room-hd 720p, 1080p or 2160p the test room plays its built-in demo (its 640x360 screen enlarged x2, x3 or x6)")
 		hdRoomSize = flag.String("hd-room-size", "", "go-link HD game rooms' picture for this run: 720p (x2) or 1080p (x3) (default: go-link HD's Screen setting, else 720p)")
-		hdRoomCdc  = flag.String("hd-room-codec", "", "go-link HD game rooms' codec for this run: vp8, h264 (--hd-h264's encoder) or auto (the Mac's hardware H.264 through VideoToolbox, vp8 elsewhere) (default: go-link HD's Screen setting, else auto)")
+		hdRoomCdc  = flag.String("hd-room-codec", "", "go-link HD game rooms' codec for this run: vp8, h264 (--hd-h264's encoder) or auto (hardware H.264: the Mac's through VideoToolbox, the graphics card's through Media Foundation on Windows or NVENC/VAAPI with ffmpeg on Linux; vp8 without one) (default: go-link HD's Screen setting, else auto)")
 		hdRoomKbps = flag.Int("hd-room-kbps", 0, "go-link HD game rooms' bitrate at high quality (default by size: 4000 at 720p, 8000 at 1080p)")
 		hdFar      = flag.String("hd-far", "", "the HD scene's far picture (with --test-room-hd)")
 		hdPlay     = flag.String("hd-play", "", "the HD scene's play picture, #FF00FF transparent (with --test-room-hd)")
 		hdKbps     = flag.Int("hd-kbps", 0, "the HD scene's VP8 bitrate (default by size: 4000, 8000, 25000)")
 		hdThreads  = flag.Int("hd-threads", 8, "libvpx threads for the HD scene")
 		hdCodec    = flag.String("hd-codec", "vp8", "the HD scene's codec: vp8, or h264 made by ffmpeg (needs ffmpeg installed)")
-		hdH264     = flag.String("hd-h264", "x264", "with --hd-codec h264: x264 (software) or videotoolbox (the Mac's hardware)")
+		hdH264     = flag.String("hd-h264", "x264", "the H.264 encoder (--hd-codec h264, --hd-room-codec h264): x264 (software, through ffmpeg), videotoolbox (the Mac's hardware) mediafoundation (Windows: the graphics card's encoder, else Windows' software one), nvenc or vaapi (Linux: NVIDIA's, or Intel's and AMD's through /dev/dri, with ffmpeg)")
 		game       = flag.String("game", "", "ROM set to play in the room, e.g. robby (from the ROM folder); empty streams the test pattern")
 		udpPort    = flag.Int("udp-port", 0, "carry every WebRTC connection on this UDP port, to forward it on a router (default: udp_port in device.json, else random ports)")
 		announce   = flag.String("announce", "", "comma-separated addresses where browsers reach --udp-port through a forwarding router (default: announce_ips in device.json)")
@@ -176,6 +176,8 @@ func run() error {
 	if *hdRoomSize != "" && !slices.Contains(models.HDRoomSizes, *hdRoomSize) {
 		return fmt.Errorf("--hd-room-size: %q is not 720p or 1080p", *hdRoomSize)
 	}
+	// the hardware encoder is looked for once (on Linux it tries a short clip)
+	hardware := sync.OnceValue(func() string { return encoder.HardwareH264(runtime.GOOS) })
 	hdRoom := func() (scale int, h264 string, kbps int, err error) {
 		hd := settings.HD()
 		size, codec := hd.RoomSize, hd.Codec
@@ -189,12 +191,18 @@ func run() error {
 		if size == models.HD1080p {
 			scale = 3
 		}
-		h264, kbps, err = hdRoomVideo(codec, *hdH264, *hdRoomKbps, scale, runtime.GOOS, encoder.FFmpegPath)
+		h264, kbps, err = hdRoomVideo(codec, *hdH264, *hdRoomKbps, scale, runtime.GOOS, encoder.FFmpegPath, hardware)
 		return scale, h264, kbps, err
 	}
 	if _, roomH264, roomKbps, err := hdRoom(); err != nil {
 		return err
 	} else {
+		if *hdRoomCdc == "h264" && (roomH264 == "nvenc" || roomH264 == "vaapi") {
+			// a graphics card asked for by name: tried now, not when the first room opens
+			if err := encoder.TryH264(roomH264); err != nil {
+				return fmt.Errorf("--hd-h264 %s does not work on this computer (%v): --hd-room-codec auto keeps VP8 without it", roomH264, err)
+			}
+		}
 		logger.Info("go-link HD rooms", "codec", map[bool]string{true: "h264 " + roomH264, false: "vp8"}[roomH264 != ""], "kbps", roomKbps)
 	}
 	if *testHD == "auto" {

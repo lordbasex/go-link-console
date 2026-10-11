@@ -9,7 +9,7 @@
 #   make maker-deploy build and upload Willy Maker's site (deploy/local/hosting.mk)
 #   make help         everything else
 
-.PHONY: all e2e release legal golinkhd-src panel device-dmg device-darwin-universal FORCE device-docker device-docker-oci help info web-build web-deploy maker-build maker-deploy hosting-help \
+.PHONY: all e2e release legal golinkhd-src panel device-docker-gpu device-dmg device-darwin-universal FORCE device-docker device-docker-oci help info web-build web-deploy maker-build maker-deploy hosting-help \
 	device device-windows device-windows-amd64 device-windows-arm64 clean android-debug android-apk
 
 # The darwin and linux device targets are pattern rules (device-darwin-%,
@@ -279,6 +279,13 @@ device-docker: $(PANEL_DIST)/index.html legal golinkhd-src
 		--build-context legal=$(LEGAL_DIR) --build-context golinkhd=$(GOLINK_HD_SRC) -t go-link-console:$(VERSION) -t go-link-console:latest --load .
 	@echo "$(GREEN)✓ go-link-console:$(VERSION) (docker compose -f $(DEVICE_DIR)/docker-compose.yml up -d)$(NC)"
 
+# The same image with ffmpeg and the VA-API drivers, for HD rooms in H.264
+# from the graphics card (docs/device.md): go-link-console:gpu.
+device-docker-gpu: $(PANEL_DIST)/index.html legal golinkhd-src
+	cd $(DEVICE_DIR) && docker buildx build -f build/docker.Dockerfile --build-arg VERSION=$(VERSION) --build-arg GPU=1 \
+		--build-context legal=$(LEGAL_DIR) --build-context golinkhd=$(GOLINK_HD_SRC) -t go-link-console:$(VERSION)-gpu -t go-link-console:gpu --load .
+	@echo "$(GREEN)✓ go-link-console:gpu$(NC)"
+
 device-docker-oci: $(PANEL_DIST)/index.html legal golinkhd-src
 	mkdir -p $(DOCKER_OUT)
 	cd $(DEVICE_DIR) && docker buildx build -f build/docker.Dockerfile --build-arg VERSION=$(VERSION) \
@@ -344,6 +351,7 @@ help:
 	@echo "  VERSION=0.1.0 make release   every platform packed in dist/release/ + GitHub release (gh)"
 	@echo "  make panel                   rebuild the web panel that headless devices serve"
 	@echo "  make device-docker           the device as a Docker image (headless, panel on :7373)"
+	@echo "  make device-docker-gpu       the image with ffmpeg and VA-API drivers (H.264 from the GPU)"
 	@echo "  make device-docker-oci       the image for amd64 + arm64, as an OCI archive"
 	@echo ""
 	@echo "$(YELLOW)Android app (go-link Console Player, needs JDK 17 + Android SDK):$(NC)"

@@ -24,6 +24,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	_ "image/jpeg"
@@ -69,7 +70,7 @@ func cmdHDBench(args []string) error {
 	far := fs.String("far", "", "far layer picture (PNG or JPEG), scrolling at half speed")
 	play := fs.String("play", "", "play layer picture, scrolling at full speed (#FF00FF is transparent)")
 	sizes := fs.String("res", "720p,1080p,2160p", "sizes: 720p, 1080p, 2160p")
-	enc := fs.String("encoder", "vp8", "vp8 (libvpx, the stream's), videotoolbox (the Mac's hardware, through ffmpeg) or x264 (through ffmpeg)")
+	enc := fs.String("encoder", "vp8", "vp8 (libvpx, the stream's), videotoolbox (the Mac's hardware, through ffmpeg), x264 (through ffmpeg) or mediafoundation (Windows' encoders, called directly)")
 	seconds := fs.Int("seconds", 10, "seconds of game to encode at each size")
 	fps := fs.Int("fps", 60, "frames per second")
 	threads := fs.Int("threads", 0, "vp8: libvpx threads (0 = the stream's 2; try the cores)")
@@ -80,7 +81,7 @@ func cmdHDBench(args []string) error {
 		return err
 	}
 	if *far == "" {
-		return errors.New("usage: device hdbench --far PICTURE [--play PICTURE] [--res 720p,1080p,2160p] [--encoder vp8|videotoolbox|x264] [--seconds N] [--threads N] [--json]")
+		return errors.New("usage: device hdbench --far PICTURE [--play PICTURE] [--res 720p,1080p,2160p] [--encoder vp8|videotoolbox|x264|mediafoundation] [--seconds N] [--threads N] [--json]")
 	}
 	farImg, err := loadPicture(*far)
 	if err != nil {
@@ -207,6 +208,31 @@ func hdRun(size hdSize, enc string, far, play image.Image, frames, fps, threads,
 			return cmd.Wait()
 		}
 		r.Note = "through ffmpeg: the time per frame is how long it takes to accept one"
+	case "mediafoundation":
+		// Windows' encoders called directly, as rooms use them: the graphics card's, else Windows' software one
+		var mu sync.Mutex
+		h, err := encoder.NewH264(encoder.Config{Width: size.W, Height: size.H, FPS: fps, BitrateKbps: size.Kbps}, enc, func(au []byte) {
+			mu.Lock()
+			bytes += int64(len(au))
+			mu.Unlock()
+		})
+		if err != nil {
+			return r, err
+		}
+		r.Encoder = h.Encoder()
+		encodeFrame = func(force bool) error {
+			start := time.Now()
+			err := h.WriteKey(i420, force)
+			encodeTimes = append(encodeTimes, time.Since(start))
+			return err
+		}
+		finish = func() error {
+			h.Close()
+			mu.Lock()
+			defer mu.Unlock()
+			return nil
+		}
+		r.Note = "a hardware encoder works in the background: the time per frame is how long it takes to accept one"
 	default:
 		return r, fmt.Errorf("hdbench: unknown encoder %q", enc)
 	}
@@ -377,6 +403,9 @@ func cmdHDProbe(args []string) error {
 		return e.Encode(map[string]any{"type": "hd_probe", "cpus": runtime.NumCPU(), "goos": runtime.GOOS, "goarch": runtime.GOARCH, "h264": h264, "tries": tries, "choice": choice})
 	}
 	fmt.Printf("computer: %s/%s, %d CPUs; ffmpeg: %s (x264 %v, VideoToolbox %v)\n", runtime.GOOS, runtime.GOARCH, runtime.NumCPU(), orNone(h264.FFmpeg), h264.X264, h264.VideoToolbox)
+	if runtime.GOOS == "windows" {
+		fmt.Printf("Media Foundation hardware H.264: %s\n", orNone(encoder.MFHardware()))
+	}
 	for _, t := range tries {
 		fmt.Printf("  %-5s %-4s %-12s max %6.1f fps, p95 %5.1f ms  %s\n", t.Size, t.Codec, t.H264, t.MaxFPS, t.P95Ms, map[bool]string{true: "fits", false: "no: " + t.Why}[t.Fits])
 	}

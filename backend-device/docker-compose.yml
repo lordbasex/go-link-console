@@ -25,5 +25,20 @@ services:
       # Your thumbnails, libretro layout: Named_Boxarts, Named_Titles,
       # Named_Snaps (":ro" if you only add them by hand).
       - ./thumbnails:/data/go-link-console/thumbnails/MAME
+    # go-link HD rooms in H.264 from the graphics card (else VP8). Intel or
+    # AMD: give it the card, and the group that owns it on this computer
+    # (the number from `stat -c %g /dev/dri/renderD128`):
+    # devices:
+    #   - /dev/dri:/dev/dri
+    # group_add:
+    #   - "109"
+    # NVIDIA (with the NVIDIA Container Toolkit):
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu, video]
 volumes:
   go-link-data:
