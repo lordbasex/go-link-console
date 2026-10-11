@@ -32,7 +32,7 @@
     <string name="join_title">Entrar na partida</string>
     <string name="join_invitation">Convite</string>
     <string name="join_code_label">Código da sala ou link do convite</string>
-    <string name="join_code_hint">O código de 9 dígitos, ou o link go-link.org/g/…</string>
+    <string name="join_code_hint">O código de 9 dígitos, ou o link play.go-link.org/g/…</string>
     <string name="join_pin_label">PIN</string>
     <string name="join_pin_hint">O PIN de 6 dígitos que o anfitrião te deu. Vale para uma pessoa.</string>
     <string name="join_terms">Aceito os termos de uso e a política de privacidade.</string>

@@ -3,7 +3,7 @@ package org.golink.player.core
 
 /**
  * What an invitation points at: the 22-character invite of a
- * https://go-link.org/g/<invite> link (and its QR code), or the room's
+ * https://play.go-link.org/g/<invite> link (and its QR code), or the room's
  * 9-digit code. The PIN is never part of either: the person types it.
  */
 sealed interface InviteTarget {
@@ -20,7 +20,7 @@ sealed interface InviteTarget {
 
 object Invites {
     /** The only site whose invitation links the app follows. */
-    const val HOST = "go-link.org"
+    const val HOST = "play.go-link.org"
 
     private val INVITE = Regex("^[A-Za-z0-9_-]{22}$")
     private val LINK = Regex("^https://go-link\\.org/g/([A-Za-z0-9_-]{22})/?$")
@@ -31,7 +31,7 @@ object Invites {
 
     /**
      * Reads a scanned QR code. Only two things are accepted: exactly an
-     * https://go-link.org/g/<invite> link, or a 9-digit code. Anything
+     * https://play.go-link.org/g/<invite> link, or a 9-digit code. Anything
      * else (another site, a signaling server, a PIN, parameters) is
      * rejected, so a hostile QR can never point the app elsewhere.
      */
@@ -56,7 +56,7 @@ object Invites {
     }
 
     /**
-     * Reads an Android App Link: scheme https, host go-link.org, path
+     * Reads an Android App Link: scheme https, host play.go-link.org, path
      * /g/<invite>. Query and fragment are ignored, never used.
      */
     fun parseAppLink(scheme: String?, host: String?, path: String?): InviteTarget? {

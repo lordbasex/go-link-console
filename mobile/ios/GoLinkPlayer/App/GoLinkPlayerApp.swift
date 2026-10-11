@@ -12,7 +12,7 @@ struct GoLinkPlayerApp: App {
                 .environmentObject(model)
                 .preferredColorScheme(.dark)
                 .tint(Tokens.accent)
-                // Universal Links: https://go-link.org/g/<invite>.
+                // Universal Links: https://play.go-link.org/g/<invite>.
                 .onOpenURL { model.open(url: $0) }
                 .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
                     if let url = activity.webpageURL { model.open(url: url) }

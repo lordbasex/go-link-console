@@ -145,7 +145,7 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * An App Link (https://go-link.org/g/<invite>) goes straight to the PIN
+     * An App Link (https://play.go-link.org/g/<invite>) goes straight to the PIN
      * form for that invitation. Only the invitation is read from the link:
      * never a PIN or a signaling server.
      */

@@ -7,7 +7,8 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 ### Changed
 
 - **The repository is now [lordbasex/go-link-console](https://github.com/lordbasex/go-link-console)** (the Go modules too: `github.com/lordbasex/go-link-console/...`). GitHub redirects the old name, so devices that check for updates and the Homebrew tap keep working.
-- **The landing, the guide and the tools moved to console.go-link.org.** go-link.org is now the index of go-link's WebRTC projects: it sends every old address there, and invitations stay `go-link.org/g/<invite>` (`INVITE_URL`, `make web-build`), the address the Player apps open. The apps link to console.go-link.org for the terms, the privacy policy and the skin editor.
+- **The landing, the guide and the tools moved to console.go-link.org.** go-link.org is now the index of go-link's WebRTC projects and sends every old address there.
+- **Invitations are `play.go-link.org/g/<invite>`**, the rooms' own address: the Player apps (App Links, Universal Links) and their QR reader take only that host, and play serves `.well-known/`. Invitations shared before as `go-link.org/g/…` no longer open; make a new one. The apps link to console.go-link.org for the terms, the privacy policy and the skin editor.
 
 ## [0.3.3] - 2026-10-11
 

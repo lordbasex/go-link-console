@@ -280,7 +280,7 @@ export const docsEs: Docs = {
           items: [
             "Toca **Escanear código QR** y apunta la cámara al código QR de la invitación, o toca **Escribir el código de la sala** y escribe el código de 9 dígitos, o copia el link de la invitación y toca **Pegar el link de la invitación**.",
             "Escribe el **PIN de 6 dígitos** que te dio el anfitrión, acepta los términos y toca **Entrar**.",
-            "Con la app instalada, un link de invitación (`go-link.org/g/…`) abre la app directo en la pantalla del PIN.",
+            "Con la app instalada, un link de invitación (`play.go-link.org/g/…`) abre la app directo en la pantalla del PIN.",
           ],
         },
         { t: "note", tone: "info", text: "El PIN nunca va en el link ni en el código QR, y cada vez que entras de nuevo se pide. Si tu conexión se corta durante la partida, la app vuelve a entrar sola sin pedirlo otra vez." },

@@ -342,7 +342,7 @@ test("the go-link Player app on Android", async () => {
       start(lang);
       const inv = await invite();
       await closeDialog();
-      A.shell(`am start -a android.intent.action.VIEW -d https://go-link.org/g/${inv.invite} ${A.PACKAGE}`);
+      A.shell(`am start -a android.intent.action.VIEW -d https://play.go-link.org/g/${inv.invite} ${A.PACKAGE}`);
       await A.fill({ id: "join-pin" }, inv.pin);
       A.hideKeyboard();
       const terms = await A.waitFor({ id: "terms-check" });

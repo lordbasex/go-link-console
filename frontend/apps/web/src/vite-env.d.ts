@@ -10,5 +10,4 @@ interface ImportMetaEnv {
   readonly VITE_ROLE?: string;
   readonly VITE_SITE_URL?: string;
   readonly VITE_PLAY_URL?: string;
-  readonly VITE_INVITE_URL?: string;
 }

@@ -33,9 +33,9 @@ SIGNAL_URL=wss://signal.example.com/ws make web-build   # for your own signaling
 SITE_URL=https://example.org PLAY_URL=https://play.example.org make web-build   # your own host names
 ```
 
-Each site trusts the other's address for the handoff, and the landing sends the rooms' paths there, so both are built together with `SITE_URL` and `PLAY_URL` (and `INVITE_URL`, the address invitations are shared with, default `https://go-link.org`). Upload the rooms' site first. The rooms' site sends `noindex`.
+Each site trusts the other's address for the handoff, and the landing sends the rooms' paths there, so both are built together with `SITE_URL` and `PLAY_URL`. Upload the rooms' site first. The rooms' site keeps `.well-known/` (the apps' invitation links are its `/g/<invite>`; iOS needs `apple-app-site-association` served as `application/json`) and sends `noindex`.
 
-Since 2026-10-11, go-link.org (and www) is an index of go-link's WebRTC projects, deployed apart from this repository. It serves `.well-known/` (the apps' invitation links stay on `go-link.org/g/<invite>`), sends `/g/*` to play and every other path to the landing at console.go-link.org. Your own host only needs the index when your Player apps open your invitation address.
+Since 2026-10-11, go-link.org (and www) is an index of go-link's WebRTC projects, deployed apart from this repository; it sends every other address to the landing at console.go-link.org.
 
 Whatever serves them must:
 

@@ -33,7 +33,7 @@ final class AppModel: ObservableObject {
         signal = prefs.signal
         #if DEBUG
         // Debug builds take an invitation from the launch arguments
-        // (-invite https://go-link.org/g/<invite>), since Universal Links
+        // (-invite https://play.go-link.org/g/<invite>), since Universal Links
         // need the published association file and a signed app. The same
         // strict parser is used, so only the invitation is read.
         let args = ProcessInfo.processInfo.arguments
@@ -49,7 +49,7 @@ final class AppModel: ObservableObject {
     }
 
     /**
-     * A Universal Link (https://go-link.org/g/<invite>) goes straight to the
+     * A Universal Link (https://play.go-link.org/g/<invite>) goes straight to the
      * PIN form for that invitation. Only the invitation is read from the
      * link: never a PIN or a signaling server.
      */

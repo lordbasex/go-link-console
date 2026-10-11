@@ -42,13 +42,13 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- Invitation links open here: https://go-link.org/g/<invite>. -->
+            <!-- Invitation links open here: https://play.go-link.org/g/<invite>. -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
-                <data android:host="go-link.org" />
+                <data android:host="play.go-link.org" />
                 <data android:pathPrefix="/g/" />
             </intent-filter>
         </activity>

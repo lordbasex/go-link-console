@@ -32,7 +32,7 @@
     <string name="join_title">Join the game</string>
     <string name="join_invitation">Invitation</string>
     <string name="join_code_label">Room code or invitation link</string>
-    <string name="join_code_hint">The 9-digit code, or the go-link.org/g/… link</string>
+    <string name="join_code_hint">The 9-digit code, or the play.go-link.org/g/… link</string>
     <string name="join_pin_label">PIN</string>
     <string name="join_pin_hint">The 6-digit PIN the host gave you. It works for one person.</string>
     <string name="join_terms">I accept the terms of use and the privacy policy.</string>

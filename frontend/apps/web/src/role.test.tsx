@@ -30,8 +30,8 @@ describe("the two sites", () => {
     expect(pageUrl("/device", "all", "https://here")).toBe("https://here/device");
   });
 
-  it("shares invitations on the landing's address, which the apps open", () => {
-    expect(invitationUrl("abc", false, "play", "https://p")).toBe(`${SITE_URL}/g/abc`);
+  it("shares invitations on the rooms' address, which the apps open", () => {
+    expect(invitationUrl("abc", false, "play", "https://p")).toBe(`${PLAY_URL}/g/abc`);
     // the device's local panel and development keep their own address
     expect(invitationUrl("abc", true, "play", "http://192.0.2.7:7373")).toBe("http://192.0.2.7:7373/g/abc");
     expect(invitationUrl("abc", false, "all", "http://localhost:5180")).toBe("http://localhost:5180/g/abc");

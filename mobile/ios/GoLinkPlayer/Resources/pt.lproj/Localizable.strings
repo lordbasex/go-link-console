@@ -30,7 +30,7 @@
 "join_title" = "Entrar na partida";
 "join_invitation" = "Convite";
 "join_code_label" = "Código da sala ou link do convite";
-"join_code_hint" = "O código de 9 dígitos, ou o link go-link.org/g/…";
+"join_code_hint" = "O código de 9 dígitos, ou o link play.go-link.org/g/…";
 "join_pin_label" = "PIN";
 "join_pin_hint" = "O PIN de 6 dígitos que o anfitrião te deu. Vale para uma pessoa.";
 "join_terms" = "Aceito os termos de uso e a política de privacidade.";

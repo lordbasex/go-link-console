@@ -280,7 +280,7 @@ export const docsEn: Docs = {
           items: [
             "Tap **Scan QR code** and point the camera at the invitation's QR code, or tap **Type the room code** and type the 9-digit code, or copy the invitation link and tap **Paste the invitation link**.",
             "Type the **6-digit PIN** the host gave you, accept the terms and tap **Join**.",
-            "With the app installed, an invitation link (`go-link.org/g/…`) opens the app straight on the PIN screen.",
+            "With the app installed, an invitation link (`play.go-link.org/g/…`) opens the app straight on the PIN screen.",
           ],
         },
         { t: "note", tone: "info", text: "The PIN is never in the link or the QR code, and every new join asks for it. If your connection drops during the game, the app gets back in by itself without asking again." },

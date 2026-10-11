@@ -30,7 +30,7 @@ From the repository root: `make android-debug`.
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 adb shell am start -n org.golink.player/.MainActivity
 # open an invitation link straight on the PIN screen:
-adb shell am start -a android.intent.action.VIEW -d "https://go-link.org/g/<invite>" org.golink.player
+adb shell am start -a android.intent.action.VIEW -d "https://play.go-link.org/g/<invite>" org.golink.player
 # debug builds only: play the startup intro 5 times slower (after force-stop, it runs on a cold start)
 adb shell am start -n org.golink.player/.MainActivity --es introSlow 5
 # debug builds only: the name step alone, or the room's overlays (stats box, see-through pad,
@@ -122,7 +122,7 @@ The APK holds libwebrtc for `arm64-v8a`, `armeabi-v7a` and `x86_64` (about 49 MB
 
 ## App Links fingerprint
 
-Invitation links (`https://go-link.org/g/…`) open the app without asking only when the website publishes the release key's fingerprint:
+Invitation links (`https://play.go-link.org/g/…`) open the app without asking only when the website publishes the release key's fingerprint:
 
 1. Read the SHA-256 of the release certificate:
 
@@ -131,7 +131,7 @@ Invitation links (`https://go-link.org/g/…`) open the app without asking only 
    ```
 
 2. Put it (the `AA:BB:…` form) in `frontend/apps/web/public/.well-known/assetlinks.json`, in `sha256_cert_fingerprints` (it already holds the current release key's). The debug key has its own fingerprint (`keytool -list -v -keystore ~/.android/debug.keystore -storepass android`); add it next to the release one only for testing.
-3. Deploy the website. The file must be served at `https://go-link.org/.well-known/assetlinks.json` as `application/json`, with no redirect.
+3. Deploy the website. The file must be served at `https://play.go-link.org/.well-known/assetlinks.json` as `application/json`, with no redirect.
 4. Check it on a phone with the app installed: `adb shell pm verify-app-links --re-verify org.golink.player`, then `adb shell pm get-app-links org.golink.player` (it should say `verified`).
 
 ## Rules for this code

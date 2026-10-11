@@ -20,7 +20,7 @@
 
 ## Joining
 
-1. **Scan the QR code** (the invitation link `https://go-link.org/g/<invite>`), **type the 9-digit code** (or paste the link), or open an invitation link with the app installed (Android App Links).
+1. **Scan the QR code** (the invitation link `https://play.go-link.org/g/<invite>`), **type the 9-digit code** (or paste the link), or open an invitation link with the app installed (Android App Links).
 2. The PIN screen: the **6-digit PIN** the host made for this person, and the terms checkbox (`Terms.VERSION` equals `TERMS_VERSION` in `frontend/apps/web/src/legal.ts`, a test checks it).
 3. `join` with `invite` or `code` → `joined`; the device sends `pin_required` and the app sends the typed PIN; `pin_result` admits it (or says why not: wrong, used, blocked, locked). Then the device offers and the app answers.
 4. **Your name** (the first admission of each visit, not after a reconnect): a "What's your name?" screen over the room, prefilled with the saved name, and **Enter the room**. See [Your name](#your-name).
@@ -29,8 +29,8 @@ Rules:
 
 - **The PIN is never in a QR code or a link.** The QR code stays the website's invitation link.
 - **Every new join asks for the PIN**, even when a return token for that room is stored. The `pin_result` token (kept per `room_id` in SharedPreferences `go-link.room-passes`, the last 20, like the website's localStorage) is only used to get back in by itself after the connection drops (network change, app in the background) during the same visit. A refused token is forgotten and the person is asked again.
-- **A QR code is parsed strictly**: only exactly `https://go-link.org/g/<22 base64url characters>` (an optional trailing `/`) or a 9-digit code. Other hosts, `http://`, ports, user info, query strings and fragments are rejected. A QR code or a link never changes the signaling server or carries a PIN.
-- The App Link intent filter only takes `https://go-link.org/g/…`, and only the path is read.
+- **A QR code is parsed strictly**: only exactly `https://play.go-link.org/g/<22 base64url characters>` (an optional trailing `/`) or a 9-digit code. Other hosts, `http://`, ports, user info, query strings and fragments are rejected. A QR code or a link never changes the signaling server or carries a PIN.
+- The App Link intent filter only takes `https://play.go-link.org/g/…`, and only the path is read.
 
 ## Signaling server
 
@@ -172,7 +172,7 @@ Limits: a Bluetooth microphone cannot be used while the sound plays on the louds
 
 ## App Links
 
-The app declares `https://go-link.org/g/*` with `autoVerify`. Android trusts it only when `https://go-link.org/.well-known/assetlinks.json` lists the app's signing certificate. The file is in `frontend/apps/web/public/.well-known/assetlinks.json` with the release key's fingerprint; if the key ever changes, update it before the next web deploy (steps in the [app README](../mobile/android/README.md#app-links-fingerprint)). The host must serve it as `application/json`, without redirects. Until it is verified, Android asks which app should open the link.
+The app declares `https://play.go-link.org/g/*` with `autoVerify`. Android trusts it only when `https://play.go-link.org/.well-known/assetlinks.json` lists the app's signing certificate. The file is in `frontend/apps/web/public/.well-known/assetlinks.json` with the release key's fingerprint; if the key ever changes, update it before the next web deploy (steps in the [app README](../mobile/android/README.md#app-links-fingerprint)). The host must serve it as `application/json`, without redirects. Until it is verified, Android asks which app should open the link.
 
 On Android, the website's `/g/:invite` page shows a small card under the PIN form (`components/AndroidAppCard.tsx`) linking to the latest release, with the browser as the other way to play.
 
@@ -189,7 +189,7 @@ On Android, the website's `/g/:invite` page shows a small card under the PIN for
 `e2e/tests/android.spec.ts` (Playwright project `android`) starts the usual e2e stack (its own signalhub on 8191, a headless device with `--debug` and its own HOME, the website on 5191). A Chromium page with a fake microphone is the owner: it links the device, opens the test pattern room (taking P1) and makes the invitations. The debug APK, driven with `adb` and UiAutomator (Compose test tags exposed as resource ids: `join-pin`, `terms-check`, `room-seat`, `dock-mic`, `pad-dpad`, `chat-input`…), then:
 
 1. points the app at `ws://10.0.2.2:8191/ws` in Settings (debug builds only);
-2. joins by App Link (`am start -d https://go-link.org/g/<invite>`), types the PIN, ticks the terms, confirms a name on the name step (`alias-field`, `alias-enter`; after every new admission in the test), gets a seat, and the picture area of a screenshot is lit and varied (not black);
+2. joins by App Link (`am start -d https://play.go-link.org/g/<invite>`), types the PIN, ticks the terms, confirms a name on the name step (`alias-field`, `alias-enter`; after every new admission in the test), gets a seat, and the picture area of a screenshot is lit and varied (not black);
 3. presses the D-pad, button 1 and Coin: the device's debug log shows each `input` packet;
 4. game sound: inbound RTP packets and audio energy grow and the audio level is above 0 (decoded, not only received);
 5. the Sound sheet (players tab › **Sound**) lists Automatic for the microphone and the output and the Speaker row, **Test sound** plays, and Back closes it;
@@ -224,7 +224,7 @@ Without a device in `adb devices` the project is skipped; `npm test` runs only t
 
 1. restarts the emulator with its own command line plus `-camera-back virtualscene` when it does not already use it (`adb emu kill`, then the `emulator` launcher from the discovery file), and at the end starts it again exactly as it was;
 2. links the owner, opens the test pattern room, points the app at the test signalhub and makes an invitation;
-3. draws two QR codes with the website's encoder (`qrcode-generator`, level M, as `QrCode.tsx`): the website's own link on the test stack (not a go-link invitation for the app) and the same invitation as `https://go-link.org/g/<invite>`;
+3. draws two QR codes with the website's encoder (`qrcode-generator`, level M, as `QrCode.tsx`): the website's own link on the test stack (not a go-link invitation for the app) and the same invitation as `https://play.go-link.org/g/<invite>`;
 4. opens **Scan QR code** from home, taps **Allow** on the explanation and **While using the app** on the system's camera dialog; the scanner sees the first code and refuses it ("That QR code is not a go-link invitation.");
 5. puts the real invitation on the wall: the scanner reads it, the PIN screen opens with that invitation, and the PIN and the terms join a seat.
 
@@ -249,7 +249,7 @@ Differences from Android:
 - **Output.** iOS apps can offer the system's route picker (`AVRoutePickerView`), so **Game settings** shows it for speaker, headphones, AirPods or AirPlay; the microphone is chosen from the session's inputs (Automatic, the iPhone's or a headset's) with `AudioSelection` from GoLinkCore. The panel also has the game and voices volumes (0 to 100 %) and a test chime.
 - **Drawer.** The room's drawer has the three tabs of the approved design, **Chat** (typing indicator, unread badge), **Players** (seats, move, swap, silence, watch or queue) and **You** (seat, Game settings, How to play, Leave); it slides in from the right sideways and from the bottom upright.
 - **Controllers.** MFi, Xbox, PlayStation and Switch Pro through GameController's extended gamepad, by position like the standard layout (A bottom, B right, X left, Y top; Options = Select = Coin, Menu = Start); each controller takes the next local player and the on-screen pad steps aside.
-- **Universal Links** instead of App Links: `applinks:go-link.org`, only `/g/*`, only the invitation is read. The website serves `frontend/apps/web/public/.well-known/apple-app-site-association` as `application/json`; its `appIDs` has the placeholder `TEAMID00000.org.golink.player`, to be replaced with the signing team before a deploy.
+- **Universal Links** instead of App Links: `applinks:play.go-link.org`, only `/g/*`, only the invitation is read. The website serves `frontend/apps/web/public/.well-known/apple-app-site-association` as `application/json`; its `appIDs` has the placeholder `TEAMID00000.org.golink.player`, to be replaced with the signing team before a deploy.
 - **Debug builds** accept `ws://` to `localhost` and `127.0.0.1` only (the Simulator reaches the Mac through them), and the launch arguments `-invite <link>`, `-signal <url>`, `-silentOutput` and `-resetState`. `-aliasLab` opens the name step alone, `-pictureLab` streams the website's synthetic test card (384 × 224 at 60 fps, shown at 4:3) into the real renderer with the dock's gear and the Game settings panel (`-labStyle`, `-labBands`, `-labCompare`, `-labSettings`, `-labUp2`, `-labRaw`; `picture-lab-fps` shows the new frames drawn per second and the screen rate), and `-padLab` takes `-labStats` (the stats box with sample values) and `-labGhost` (the see-through pad with a sample controller), for screenshots. Their probe logs the room and libwebrtc's counters to the unified log (subsystem `org.golink.player`, category `e2e`), like Android's `GoLinkE2E`.
 
 Tests: `make test-core` (unit tests mirroring the Android ones, plus the terms version check against `legal.ts`) and the XCUITest target (`testScreens` for screenshots; `testLiveJoin` joins a real test pattern room given `TEST_RUNNER_GL_INVITE` and `TEST_RUNNER_GL_PIN`: PIN, terms, video and game sound, pad presses on the `input` channel, chat round trip, the drawer tabs, the sound sheet, the microphone prompt and landscape; it passes the name step), `testAliasValidation` (an emoji disables Enter with the red hint, a valid name enables it), `testControllerTestScreen` (Home › Test controller opens and closes, and measures the screen rate), `testStatsAndGhostPadLab`, `testPicture2xMatchesNative` (the offscreen 2x check, then the lab streaming 2x frames), `testPictureRoomDefault` (a room default applies until the viewer picks, and Use the room's default brings it back) and `testGameSettingsAndPictureStyles` (picture lab: the gear opens Game settings, every style and side can be chosen, Compare shows the divider, portrait and landscape; with `TEST_RUNNER_GL_SHOTS` it saves every style × side). CI (`ios` job on `macos-latest`) runs the GoLinkCore tests and an unsigned Simulator build.

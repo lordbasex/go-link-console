@@ -43,8 +43,6 @@ SIGNAL_URL    ?= wss://signal.go-link.org/ws
 MAKER_URL     ?= https://maker.go-link.org
 SITE_URL      ?= https://console.go-link.org
 PLAY_URL      ?= https://play.go-link.org
-# Invitations stay go-link.org/g/<invite> (the Player apps open it; go-link.org sends browsers to play).
-INVITE_URL    ?= https://go-link.org
 
 # Paths
 WEB_DIR      = frontend
@@ -93,7 +91,7 @@ web-build:
 	@# The in-browser MP4 helper (Go compiled to WebAssembly) goes in public/mp4.
 	$(MAKE) -C frontend/wasm/mp4 build
 	@cd $(WEB_DIR) && $(NODE_ENV_SETUP) && npm ci --no-audit --no-fund && \
-		VITE_SIGNAL_URL=$(SIGNAL_URL) VITE_MAKER_URL=$(MAKER_URL) VITE_SITE_URL=$(SITE_URL) VITE_PLAY_URL=$(PLAY_URL) VITE_INVITE_URL=$(INVITE_URL) \
+		VITE_SIGNAL_URL=$(SIGNAL_URL) VITE_MAKER_URL=$(MAKER_URL) VITE_SITE_URL=$(SITE_URL) VITE_PLAY_URL=$(PLAY_URL) \
 		VITE_DEMO_DATA=false VITE_APP_VERSION=$(VERSION) \
 		VITE_BUILD_DATE=$$(date -u +%Y-%m-%d) npm run build
 	@find $(SITE_DIST) $(PLAY_DIST) -name "*.map" -delete

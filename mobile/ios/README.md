@@ -40,7 +40,7 @@ TEST_RUNNER_GL_LANG=es TEST_RUNNER_GL_SHOTS=/tmp/shots \
   -only-testing:GoLinkPlayerUITests/PlayerUITests/testScreens
 
 # A live join (a test pattern room invitation and its PIN from the website):
-TEST_RUNNER_GL_INVITE=https://go-link.org/g/<invite> TEST_RUNNER_GL_PIN=<pin> \
+TEST_RUNNER_GL_INVITE=https://play.go-link.org/g/<invite> TEST_RUNNER_GL_PIN=<pin> \
   xcodebuild test ... -only-testing:GoLinkPlayerUITests/PlayerUITests/testLiveJoin
 ```
 
@@ -50,7 +50,7 @@ TEST_RUNNER_GL_INVITE=https://go-link.org/g/<invite> TEST_RUNNER_GL_PIN=<pin> \
 
 Debug builds (never release builds) accept:
 
-- `-invite https://go-link.org/g/<invite>` as a launch argument: opens the PIN screen for that invitation, through the same strict parser as Universal Links (only the invitation is read). Universal Links need the published association file and a signed app, so this is how the Simulator opens an invitation: `xcrun simctl launch booted org.golink.player -invite https://go-link.org/g/<invite>`.
+- `-invite https://play.go-link.org/g/<invite>` as a launch argument: opens the PIN screen for that invitation, through the same strict parser as Universal Links (only the invitation is read). Universal Links need the published association file and a signed app, so this is how the Simulator opens an invitation: `xcrun simctl launch booted org.golink.player -invite https://play.go-link.org/g/<invite>`.
 - `-signal ws://127.0.0.1:8090/ws`: a signaling server; debug builds also accept `ws://` to `localhost` and `127.0.0.1` in Settings, for a local signalhub.
 - `-silentOutput`: computes the level of the sound it would play (for the probe) but plays silence, for automated runs on a desk.
 - `-padLab`: opens a pad lab instead of the app: the room's console layouts with the on-screen pad and no room, listing every held-buttons value sent (`testPadAcrossRotations` rotates it and presses the pad).
@@ -144,9 +144,9 @@ A tester installs **TestFlight** from the App Store, opens the link (or the emai
 
 ## Universal Links
 
-The app claims `https://go-link.org/g/*` (`applinks:go-link.org` in `GoLinkPlayer/GoLinkPlayer.entitlements`, generated from `project.yml`). Only the invitation is read from the link, never a PIN or a signaling server.
+The app claims `https://play.go-link.org/g/*` (`applinks:play.go-link.org` in `GoLinkPlayer/GoLinkPlayer.entitlements`, generated from `project.yml`). Only the invitation is read from the link, never a PIN or a signaling server.
 
-The website publishes `frontend/apps/web/public/.well-known/apple-app-site-association` (JSON, no extension). Its `appIDs` holds a placeholder, `TEAMID00000.org.golink.player`: replace `TEAMID00000` with the Team ID that signs the app before deploying the website. The CDN must serve the file at `https://go-link.org/.well-known/apple-app-site-association` with `Content-Type: application/json`, without redirects. Apple's CDN caches it; while developing, `applinks:go-link.org?mode=developer` in the entitlements (with the device's Developer Mode on) makes the phone fetch it directly.
+The website publishes `frontend/apps/web/public/.well-known/apple-app-site-association` (JSON, no extension). Its `appIDs` holds a placeholder, `TEAMID00000.org.golink.player`: replace `TEAMID00000` with the Team ID that signs the app before deploying the website. The CDN must serve the file at `https://play.go-link.org/.well-known/apple-app-site-association` with `Content-Type: application/json`, without redirects. Apple's CDN caches it; while developing, `applinks:play.go-link.org?mode=developer` in the entitlements (with the device's Developer Mode on) makes the phone fetch it directly.
 
 ## What it does
 

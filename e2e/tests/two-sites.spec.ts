@@ -18,7 +18,7 @@ test("each site sends the other's pages there", async ({ page }) => {
   await page.goto(`${PLAY_URL}/docs/install`);
   await expect(page).toHaveURL(`${SITE_URL}/docs/install`);
 
-  // an invitation shared as go-link.org/g/<invite> opens on the rooms' site
+  // an invitation shared as play.go-link.org/g/<invite> opens on the rooms' site
   await page.goto(`${SITE_URL}/g/AAAAAAAAAAAAAAAAAAAAAA`);
   await expect(page).toHaveURL(`${PLAY_URL}/g/AAAAAAAAAAAAAAAAAAAAAA`);
 

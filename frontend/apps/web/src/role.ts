@@ -37,9 +37,6 @@ export const SITE_URL = trim(import.meta.env.VITE_SITE_URL || (DEV ? "http://loc
 /** The rooms' address (VITE_PLAY_URL). */
 export const PLAY_URL = trim(import.meta.env.VITE_PLAY_URL || (DEV ? "http://localhost:5183" : "https://play.go-link.org"));
 
-/** The address invitations are shared with (VITE_INVITE_URL): go-link.org, whose /g/ the Player apps open (the landing's address in development). */
-export const INVITE_URL = trim(import.meta.env.VITE_INVITE_URL || (DEV ? SITE_URL : "https://go-link.org"));
-
 /** Which build serves a path: "both" for pages each one has. */
 export function ownerOf(pathname: string): "site" | "play" | "both" {
   // Routes match any letter case.
@@ -88,10 +85,10 @@ export function pageUrl(path: string, role: Role = ROLE, origin: string = window
 }
 
 /**
- * The address to share for an invitation: go-link.org/g/<invite> (INVITE_URL) from the
- * rooms' site, the one the Player apps open (go-link.org sends browsers on
- * to play). The device's local panel and development keep their own.
+ * The address to share for an invitation: play.go-link.org/g/<invite> (the
+ * rooms' address, PLAY_URL), the one the Player apps open. The device's local
+ * panel and development keep their own.
  */
 export function invitationUrl(invite: string, panel: boolean, role: Role = ROLE, origin: string = window.location.origin): string {
-  return `${role === "play" && !panel ? INVITE_URL : origin}/g/${invite}`;
+  return `${role === "play" && !panel ? PLAY_URL : origin}/g/${invite}`;
 }

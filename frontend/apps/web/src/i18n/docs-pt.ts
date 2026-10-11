@@ -280,7 +280,7 @@ export const docsPt: Docs = {
           items: [
             "Toque em **Escanear código QR** e aponte a câmera para o código QR do convite, ou toque em **Digitar o código da sala** e digite o código de 9 dígitos, ou copie o link do convite e toque em **Colar o link do convite**.",
             "Digite o **PIN de 6 dígitos** que o anfitrião te deu, aceite os termos e toque em **Entrar**.",
-            "Com o app instalado, um link de convite (`go-link.org/g/…`) abre o app direto na tela do PIN.",
+            "Com o app instalado, um link de convite (`play.go-link.org/g/…`) abre o app direto na tela do PIN.",
           ],
         },
         { t: "note", tone: "info", text: "O PIN nunca vai no link nem no código QR, e cada nova entrada o pede. Se a sua conexão cair durante a partida, o app entra de novo sozinho sem pedir outra vez." },
