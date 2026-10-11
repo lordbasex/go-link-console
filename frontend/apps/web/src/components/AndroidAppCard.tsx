@@ -3,7 +3,7 @@ import { t } from "../i18n";
 import { androidDownload } from "../downloads";
 
 /** Where the Android app is published when this release has no APK: the latest GitHub release. */
-export const ANDROID_APP_URL = "https://github.com/lordbasex/go-link/releases/latest";
+export const ANDROID_APP_URL = "https://github.com/lordbasex/go-link-console/releases/latest";
 
 /** The APK of this release (a direct download), or the latest release page. */
 export function androidAppUrl(): string {

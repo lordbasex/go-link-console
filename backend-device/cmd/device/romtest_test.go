@@ -13,9 +13,9 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/pkg/cores"
-	"github.com/lordbasex/go-link/backend-device/pkg/romcheck"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/cores"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/romcheck"
 )
 
 func TestLoaderLine(t *testing.T) {

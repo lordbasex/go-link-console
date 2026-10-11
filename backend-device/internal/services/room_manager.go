@@ -16,8 +16,8 @@ import (
 
 	"golang.org/x/text/unicode/norm"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/pkg/input"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/input"
 )
 
 // ControlSender delivers JSON messages on a peer's "control" channel.

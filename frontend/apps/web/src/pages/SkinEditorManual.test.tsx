@@ -13,6 +13,6 @@ describe("skin editor manual", () => {
     const nav = screen.getByRole("navigation", { name: "Documentation menu" });
     expect(within(nav).getByRole("link", { name: "Skin editor" })).toHaveAttribute("href", "/docs/skin-editor");
     expect(within(screen.getByRole("navigation", { name: "On this page" })).getByRole("link", { name: "Keyboard shortcuts" })).toHaveAttribute("href", "#keys");
-    expect(screen.getByRole("link", { name: "developer reference" })).toHaveAttribute("href", "https://github.com/lordbasex/go-link/blob/main/docs/skins/README.md");
+    expect(screen.getByRole("link", { name: "developer reference" })).toHaveAttribute("href", "https://github.com/lordbasex/go-link-console/blob/main/docs/skins/README.md");
   });
 });

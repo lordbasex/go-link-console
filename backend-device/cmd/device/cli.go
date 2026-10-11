@@ -18,11 +18,11 @@ import (
 	"syscall"
 	"text/tabwriter"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/pkg/instancelock"
-	"github.com/lordbasex/go-link/backend-device/pkg/ownsets"
-	"github.com/lordbasex/go-link/backend-device/pkg/romcheck"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/instancelock"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/ownsets"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/romcheck"
 )
 
 // usage prints the help of the device and its subcommands.

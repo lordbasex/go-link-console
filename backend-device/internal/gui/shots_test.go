@@ -19,10 +19,10 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/test"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/internal/shots"
-	"github.com/lordbasex/go-link/backend-device/pkg/sysinfo"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/internal/shots"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/sysinfo"
 )
 
 // TestShots renders the real window with made-up data (an invented game

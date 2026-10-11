@@ -10,8 +10,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/cores"
-	"github.com/lordbasex/go-link/backend-device/pkg/libretro"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/cores"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/libretro"
 )
 
 // TestSaveStateWithRealCore needs the mame2003-plus core and the free ROM

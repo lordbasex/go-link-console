@@ -26,7 +26,7 @@ The records behind it: step 1 [decisions.md](decisions.md), [journal.md](journal
 - Free ports: the guide uses **5401** for Willy Maker and **5408-5409** for the room test. Pick others if they are taken.
 
 ```sh
-git clone https://github.com/lordbasex/go-link.git go-link && cd go-link   # or: git worktree add --detach ../case-b 23806b8
+git clone https://github.com/lordbasex/go-link-console.git go-link && cd go-link   # or: git worktree add --detach ../case-b 23806b8
 git checkout --detach 23806b8
 git log --oneline -1
 ```

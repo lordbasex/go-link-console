@@ -41,12 +41,14 @@ SIGNAL_URL    ?= wss://signal.go-link.org/ws
 # (the website trusts MAKER_URL's origin for its /maker-bridge tab, the landing
 # and the rooms' site trust each other's for the handoff).
 MAKER_URL     ?= https://maker.go-link.org
-SITE_URL      ?= https://go-link.org
+SITE_URL      ?= https://console.go-link.org
 PLAY_URL      ?= https://play.go-link.org
+# Invitations stay go-link.org/g/<invite> (the Player apps open it; go-link.org sends browsers to play).
+INVITE_URL    ?= https://go-link.org
 
 # Paths
 WEB_DIR      = frontend
-# The website is built twice: the landing, guide and tools (go-link.org) and
+# The website is built twice: the landing, guide and tools (console.go-link.org) and
 # the rooms and My device (play.go-link.org, also the device's local panel).
 SITE_DIST    = $(WEB_DIR)/apps/web/dist-site
 PLAY_DIST    = $(WEB_DIR)/apps/web/dist-play
@@ -91,7 +93,7 @@ web-build:
 	@# The in-browser MP4 helper (Go compiled to WebAssembly) goes in public/mp4.
 	$(MAKE) -C frontend/wasm/mp4 build
 	@cd $(WEB_DIR) && $(NODE_ENV_SETUP) && npm ci --no-audit --no-fund && \
-		VITE_SIGNAL_URL=$(SIGNAL_URL) VITE_MAKER_URL=$(MAKER_URL) VITE_SITE_URL=$(SITE_URL) VITE_PLAY_URL=$(PLAY_URL) \
+		VITE_SIGNAL_URL=$(SIGNAL_URL) VITE_MAKER_URL=$(MAKER_URL) VITE_SITE_URL=$(SITE_URL) VITE_PLAY_URL=$(PLAY_URL) VITE_INVITE_URL=$(INVITE_URL) \
 		VITE_DEMO_DATA=false VITE_APP_VERSION=$(VERSION) \
 		VITE_BUILD_DATE=$$(date -u +%Y-%m-%d) npm run build
 	@find $(SITE_DIST) $(PLAY_DIST) -name "*.map" -delete

@@ -10,7 +10,7 @@
 "home_paste" = "Paste the invitation link";
 "home_paste_invalid" = "The clipboard has no go-link invitation.";
 "home_pin_note" = "Every invitation has its own 6-digit PIN, good for one person. The PIN is never in the link or the QR code.";
-"home_host_hint" = "Want to host games? Install go-link on your computer: go-link.org";
+"home_host_hint" = "Want to host games? Install go-link on your computer: console.go-link.org";
 "home_custom_server" = "Custom signaling server: %1$@";
 "scan_title" = "Scan the invitation";
 "scan_hint" = "Point the camera at the QR code the host shows you.";
@@ -283,7 +283,7 @@
 /* Install a skin by pasting its JSON (Settings and Game settings › Skin) */
 "skin_install" = "Install skin";
 "skin_install_title" = "Install skin";
-"skin_install_explain" = "Paste a skin's JSON (made in the skin editor at go-link.org/tools/skin-editor, or shared by someone). The app checks it and shows it before installing.";
+"skin_install_explain" = "Paste a skin's JSON (made in the skin editor at console.go-link.org/tools/skin-editor, or shared by someone). The app checks it and shows it before installing.";
 "skin_install_text" = "The skin's JSON";
 "skin_install_paste" = "Paste";
 "skin_install_check" = "Check";

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/romcheck"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/romcheck"
 )
 
 func TestSeedMakesTheInventedLibrary(t *testing.T) {

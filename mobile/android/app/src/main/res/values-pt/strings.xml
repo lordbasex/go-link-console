@@ -12,7 +12,7 @@
     <string name="home_paste">Colar o link do convite</string>
     <string name="home_paste_invalid">A área de transferência não tem um convite do go-link.</string>
     <string name="home_pin_note">Cada convite tem seu próprio PIN de 6 dígitos, válido para uma pessoa. O PIN nunca vai no link nem no código QR.</string>
-    <string name="home_host_hint">Quer organizar partidas? Instale o go-link no seu computador: go-link.org</string>
+    <string name="home_host_hint">Quer organizar partidas? Instale o go-link no seu computador: console.go-link.org</string>
     <string name="home_custom_server">Servidor de sinalização próprio: %1$s</string>
     <string name="scan_title">Escanear o convite</string>
     <string name="scan_hint">Aponte a câmera para o código QR que o anfitrião te mostra.</string>
@@ -245,7 +245,7 @@
     <string name="skin_note">Uma carcaça de console ao redor da imagem. Só neste telefone.</string>
     <string name="skin_folder_hint">Mais skins: copie os arquivos de skin para a pasta Android/data/org.golink.player/files/Skins do telefone (de um computador por USB).</string>
     <string name="skin_install">Instalar skin</string>
-    <string name="skin_install_intro">Cole o JSON de uma skin (feita no editor de skins em go-link.org/tools/skin-editor, ou à mão) para adicioná-la como skin própria. Ela é conferida e mostrada antes de instalar.</string>
+    <string name="skin_install_intro">Cole o JSON de uma skin (feita no editor de skins em console.go-link.org/tools/skin-editor, ou à mão) para adicioná-la como skin própria. Ela é conferida e mostrada antes de instalar.</string>
     <string name="skin_install_field">JSON da skin</string>
     <string name="skin_install_paste">Colar</string>
     <string name="skin_install_check">Conferir</string>

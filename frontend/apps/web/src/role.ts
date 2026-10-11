@@ -2,7 +2,7 @@
 
 // The website is built twice from this one app:
 //
-//   site   go-link.org: the landing, the guide, the tools and the legal pages.
+//   site   console.go-link.org: the landing, the guide, the tools and the legal pages.
 //          It never connects to signaling and keeps no link to a device.
 //   play   play.go-link.org: rooms, invitations and My device (the link to
 //          the device lives in this origin's storage). The device's local
@@ -32,10 +32,13 @@ const DEV = import.meta.env.DEV;
 const trim = (url: string) => url.replace(/\/+$/, "");
 
 /** The landing's address (VITE_SITE_URL). */
-export const SITE_URL = trim(import.meta.env.VITE_SITE_URL || (DEV ? "http://localhost:5182" : "https://go-link.org"));
+export const SITE_URL = trim(import.meta.env.VITE_SITE_URL || (DEV ? "http://localhost:5182" : "https://console.go-link.org"));
 
 /** The rooms' address (VITE_PLAY_URL). */
 export const PLAY_URL = trim(import.meta.env.VITE_PLAY_URL || (DEV ? "http://localhost:5183" : "https://play.go-link.org"));
+
+/** The address invitations are shared with (VITE_INVITE_URL): go-link.org, whose /g/ the Player apps open (the landing's address in development). */
+export const INVITE_URL = trim(import.meta.env.VITE_INVITE_URL || (DEV ? SITE_URL : "https://go-link.org"));
 
 /** Which build serves a path: "both" for pages each one has. */
 export function ownerOf(pathname: string): "site" | "play" | "both" {
@@ -66,7 +69,7 @@ export function servesPath(pathname: string, role: Role = ROLE): boolean {
 
 /**
  * The address of a page: the path itself when this build has it, else the
- * full address on the other site ("/docs" on play → https://go-link.org/docs).
+ * full address on the other site ("/docs" on play → https://console.go-link.org/docs).
  */
 export function pageHref(path: string, role: Role = ROLE): string {
   if (servesPath(path.split(/[?#]/)[0] ?? "/", role)) return path;
@@ -85,10 +88,10 @@ export function pageUrl(path: string, role: Role = ROLE, origin: string = window
 }
 
 /**
- * The address to share for an invitation: go-link.org/g/<invite> from the
- * rooms' site, the one the Player apps open (the landing sends browsers on
+ * The address to share for an invitation: go-link.org/g/<invite> (INVITE_URL) from the
+ * rooms' site, the one the Player apps open (go-link.org sends browsers on
  * to play). The device's local panel and development keep their own.
  */
 export function invitationUrl(invite: string, panel: boolean, role: Role = ROLE, origin: string = window.location.origin): string {
-  return `${role === "play" && !panel ? SITE_URL : origin}/g/${invite}`;
+  return `${role === "play" && !panel ? INVITE_URL : origin}/g/${invite}`;
 }

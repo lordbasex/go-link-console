@@ -1,4 +1,4 @@
-module github.com/lordbasex/go-link/backend-device
+module github.com/lordbasex/go-link-console/backend-device
 
 go 1.26.9
 

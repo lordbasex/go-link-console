@@ -17,8 +17,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/emuproc"
-	"github.com/lordbasex/go-link/backend-device/pkg/libretro"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/emuproc"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/libretro"
 )
 
 // WorkerConfig describes the game a WorkerSource runs.

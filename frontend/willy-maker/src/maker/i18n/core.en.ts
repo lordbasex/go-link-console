@@ -456,7 +456,7 @@ export const coreEn = {
   },
   site: {
     by: "by go-link",
-    home: "go-link.org",
+    home: "console.go-link.org",
     language: "Language",
     lightTheme: "Light theme",
     darkTheme: "Dark theme",

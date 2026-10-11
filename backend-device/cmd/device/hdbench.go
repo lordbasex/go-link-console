@@ -29,8 +29,8 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/encoder"
-	"github.com/lordbasex/go-link/backend-device/pkg/hdscene"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/encoder"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/hdscene"
 )
 
 type hdSize struct {

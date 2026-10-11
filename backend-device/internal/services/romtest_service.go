@@ -22,9 +22,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/emuproc"
-	"github.com/lordbasex/go-link/backend-device/pkg/ownsets"
-	"github.com/lordbasex/go-link/backend-device/pkg/romcheck"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/emuproc"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/ownsets"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/romcheck"
 )
 
 // The ROM test (validation level 4, docs/willy-maker/validation.md): the

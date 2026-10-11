@@ -7,7 +7,7 @@ import (
 	"image"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/hdscene"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/hdscene"
 )
 
 // HDSceneSource streams go-link HD's test scene (experiment T-31,

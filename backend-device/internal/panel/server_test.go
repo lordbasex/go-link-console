@@ -16,8 +16,8 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/pkg/signalclient"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/signalclient"
 )
 
 const token = "0b5c7c1e-9d7a-4b8e-8a31-2f6f3c9d1e24" // gitleaks:allow (test value)

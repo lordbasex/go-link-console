@@ -2,7 +2,7 @@
 import { expect, test } from "@playwright/test";
 import { PLAY_URL, SITE_URL } from "../ports";
 
-// The website's two builds on their own origins: the landing (go-link.org)
+// The website's two builds on their own origins: the landing (console.go-link.org)
 // and the rooms (play.go-link.org). Each sends the other's pages to the
 // other site, and the rooms can take the device link a browser kept on the
 // landing before the split.

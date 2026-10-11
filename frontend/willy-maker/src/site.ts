@@ -1,13 +1,13 @@
 // Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com>
 
 // The site around Willy Maker: where the main site is, the language and the
-// theme (the same keys as go-link.org, kept per site by the browser).
+// theme (the same keys as console.go-link.org, kept per site by the browser).
 
 import { useSyncExternalStore } from "react";
 import type { Lang } from "./maker";
 
 /** go-link's landing (VITE_SITE_URL): the games made there before Willy Maker had its own site. */
-export const SITE_URL = (import.meta.env.VITE_SITE_URL || (import.meta.env.DEV ? "http://localhost:5180" : "https://go-link.org")).replace(/\/+$/, "");
+export const SITE_URL = (import.meta.env.VITE_SITE_URL || (import.meta.env.DEV ? "http://localhost:5180" : "https://console.go-link.org")).replace(/\/+$/, "");
 
 /** go-link's rooms (VITE_PLAY_URL), which keep the link to the owner's go-link. */
 export const PLAY_URL = (import.meta.env.VITE_PLAY_URL || (import.meta.env.DEV ? SITE_URL : "https://play.go-link.org")).replace(/\/+$/, "");

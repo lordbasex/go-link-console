@@ -5,7 +5,7 @@ package testpattern
 import (
 	"math"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/encoder"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/encoder"
 )
 
 // Tone generates the 1 kHz reference tone that accompanied test cards on

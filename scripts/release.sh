@@ -15,7 +15,7 @@
 #   VERSION=0.1.0 CODESIGN_IDENTITY="Developer ID Application: Name (TEAMID)" \
 #     NOTARY_PROFILE=go-link-notary ./scripts/release.sh
 #
-# Other knobs: REPO=owner/name (default lordbasex/go-link), SKIP_BUILD=1
+# Other knobs: REPO=owner/name (default lordbasex/go-link-console), SKIP_BUILD=1
 # (pack what is already in dist/device), DOCKER=0 (skip the Docker image, built by default as
 # an OCI archive), ANDROID=0 (skip the signed Android APK, built by default:
 # it needs ANDROID_SIGNING, see mobile/android/README.md), GITHUB_RELEASE=0
@@ -28,7 +28,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VERSION="${VERSION:?Set VERSION, e.g. VERSION=0.1.0}"
 VERSION="${VERSION#v}"
 TAG="v$VERSION"
-REPO="${REPO:-lordbasex/go-link}"
+REPO="${REPO:-lordbasex/go-link-console}"
 CODESIGN_IDENTITY="${CODESIGN_IDENTITY:--}"
 DEVICE="$ROOT/dist/device"
 OUT="$ROOT/dist/release/$TAG"

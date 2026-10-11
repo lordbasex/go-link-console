@@ -12,7 +12,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/telemetry"
+	"github.com/lordbasex/go-link-console/backend-device/internal/telemetry"
 )
 
 // telemetryRequest is what the host's linked browser asks about a room's

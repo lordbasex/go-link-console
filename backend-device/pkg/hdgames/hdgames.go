@@ -20,7 +20,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/glhd"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/glhd"
 )
 
 // File is one screen size of a game.

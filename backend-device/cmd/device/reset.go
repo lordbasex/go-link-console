@@ -13,10 +13,10 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/internal/telemetry"
-	"github.com/lordbasex/go-link/backend-device/pkg/instancelock"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/internal/telemetry"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/instancelock"
 )
 
 // resetParts are what a factory reset of the running device touches.

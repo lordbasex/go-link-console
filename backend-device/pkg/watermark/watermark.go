@@ -14,7 +14,7 @@ import (
 	"math/rand/v2"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/trayicon"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/trayicon"
 )
 
 // icon is the mark at one size, ready to blend into I420.

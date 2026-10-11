@@ -49,8 +49,8 @@ const MASK: [string, string][] = [
   [userInfo().username, "player"],
   // The test stack's addresses read as the public ones.
   [`ws://127.0.0.1:${PORTS.signal}/ws`, "wss://signal.go-link.org/ws"],
-  [`http://localhost:${PORTS.web}`, "https://go-link.org"],
-  [`localhost:${PORTS.web}`, "go-link.org"],
+  [`http://localhost:${PORTS.web}`, "https://console.go-link.org"],
+  [`localhost:${PORTS.web}`, "console.go-link.org"],
   [`127.0.0.1:${PORTS.signal}`, "signal.go-link.org"],
   // The site's search hint names real games: never in a picture.
   ["Metal Slug, Turtles…", "Sky Pirates, Glacier…"],

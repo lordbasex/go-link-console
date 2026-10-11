@@ -22,14 +22,14 @@ import (
 	"github.com/pion/webrtc/v4"
 	"github.com/pion/webrtc/v4/pkg/media"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/internal/telemetry"
-	"github.com/lordbasex/go-link/backend-device/pkg/encoder"
-	"github.com/lordbasex/go-link/backend-device/pkg/input"
-	"github.com/lordbasex/go-link/backend-device/pkg/inputhud"
-	"github.com/lordbasex/go-link/backend-device/pkg/signalclient"
-	"github.com/lordbasex/go-link/backend-device/pkg/testpattern"
-	"github.com/lordbasex/go-link/backend-device/pkg/watermark"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/telemetry"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/encoder"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/input"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/inputhud"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/signalclient"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/testpattern"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/watermark"
 )
 
 // RTCSignal is the application payload carried inside signalhub "signal"

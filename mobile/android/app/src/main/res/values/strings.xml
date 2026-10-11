@@ -12,7 +12,7 @@
     <string name="home_paste">Paste the invitation link</string>
     <string name="home_paste_invalid">The clipboard has no go-link invitation.</string>
     <string name="home_pin_note">Every invitation has its own 6-digit PIN, good for one person. The PIN is never in the link or the QR code.</string>
-    <string name="home_host_hint">Want to host games? Install go-link on your computer: go-link.org</string>
+    <string name="home_host_hint">Want to host games? Install go-link on your computer: console.go-link.org</string>
     <string name="home_custom_server">Custom signaling server: %1$s</string>
     <string name="scan_title">Scan the invitation</string>
     <string name="scan_hint">Point the camera at the QR code the host shows you.</string>
@@ -243,7 +243,7 @@
     <string name="skin_note">A console shell around the picture. Only on this phone.</string>
     <string name="skin_folder_hint">More skins: copy skin files to the phone\'s Android/data/org.golink.player/files/Skins folder (from a computer over USB).</string>
     <string name="skin_install">Install skin</string>
-    <string name="skin_install_intro">Paste a skin\'s JSON (made in the skin editor at go-link.org/tools/skin-editor, or by hand) to add it as a custom skin. It is checked and shown before it is installed.</string>
+    <string name="skin_install_intro">Paste a skin\'s JSON (made in the skin editor at console.go-link.org/tools/skin-editor, or by hand) to add it as a custom skin. It is checked and shown before it is installed.</string>
     <string name="skin_install_field">Skin JSON</string>
     <string name="skin_install_paste">Paste</string>
     <string name="skin_install_check">Check</string>

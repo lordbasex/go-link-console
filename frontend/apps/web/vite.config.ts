@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { defineConfig, searchForWorkspaceRoot, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 
-// Which site this build is (src/role.ts): "site" (go-link.org: the landing,
+// Which site this build is (src/role.ts): "site" (console.go-link.org: the landing,
 // guide and tools), "play" (play.go-link.org and the device's local panel:
 // rooms and My device), or both on one origin (development and tests).
 const ROLE = process.env.VITE_ROLE === "site" || process.env.VITE_ROLE === "play" ? process.env.VITE_ROLE : "all";
@@ -52,7 +52,7 @@ function contentSecurityPolicy(): Plugin {
     apply: "build",
     transformIndexHtml(html) {
       // The build's version, to check which one a server is serving
-      // (curl -s https://go-link.org/ | grep go-link-version).
+      // (curl -s https://console.go-link.org/ | grep go-link-version).
       const version = (process.env.VITE_APP_VERSION || "dev").replace(/[^\w.+-]/g, "");
       // The rooms' site is an app, not pages to find in a search engine.
       const robots = ROLE === "play" ? `\n    <meta name="robots" content="noindex" />` : "";

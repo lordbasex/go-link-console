@@ -56,8 +56,8 @@ export const docsEn: Docs = {
       title: "Install",
       lead: "Download go-link for your system from the releases page. The app is small: the emulator is downloaded later, from inside the app.",
       blocks: [
-        {"t": "note", "tone": "info", "text": "Downloads: [github.com/lordbasex/go-link/releases](https://github.com/lordbasex/go-link/releases). Pick your system below."},
-        {"t": "tabs", "label": "Your system", "tabs": [{"id": "macos", "label": "macOS", "os": "macos", "blocks": [{"t": "steps", "items": ["Download `go-link-vX.Y.Z-macos-universal.dmg` (Intel and Apple silicon, macOS 12 or later).", "Open it and drag **go-link** to **Applications**.", "Open go-link from Applications or Launchpad. Its icon appears in the menu bar."]}, {"t": "note", "tone": "warn", "text": "While the app is not notarized by Apple, macOS blocks it the first time. Try to open it, then go to **System Settings › Privacy & Security** and click **Open Anyway**. On macOS 14 and earlier, right click the app and choose **Open**."}, {"t": "p", "text": "Or with Homebrew:"}, {"t": "code", "code": "brew tap lordbasex/go-link https://github.com/lordbasex/go-link\nbrew trust --cask lordbasex/go-link/go-link\nbrew install --cask go-link"}]}, {"id": "windows", "label": "Windows", "os": "windows", "blocks": [{"t": "steps", "items": ["Download `go-link-vX.Y.Z-windows-amd64.zip` (or `-arm64.zip` for ARM computers).", "Unzip it and run `go-link-device.exe`. It opens a window and an icon in the notification area.", "If SmartScreen warns you, click **More info › Run anyway**."]}, {"t": "note", "tone": "info", "text": "Windows 10 or 11. Nothing else to install."}]}, {"id": "linux", "label": "Linux", "os": "linux", "blocks": [{"t": "p", "text": "For a desktop computer (x64 or ARM64). It needs OpenGL and Wayland or X11, which any desktop has."}, {"t": "p", "text": "Download the file for your processor, unpack it and run it:"}, {"t": "code", "code": "tar xzf go-link-vX.Y.Z-linux-amd64.tar.gz     # or -linux-arm64\n./go-link-device"}]}, {"id": "raspberry-pi", "label": "Raspberry Pi", "blocks": [{"t": "p", "text": "Use the **headless** build: no window, a [web panel](/docs/panel) on port 7373 and a full [command line](/docs/cli). A Raspberry Pi needs a 64-bit system (Raspberry Pi OS 64-bit)."}, {"t": "steps", "items": ["Download and unpack `go-link-vX.Y.Z-linux-arm64-headless.tar.gz` (on an x64 server, `-linux-amd64-headless`).", "Download the emulator and choose your ROM folder.", "Start go-link and open the panel from another computer: `http://<address>:7373`."]}, {"t": "code", "code": "tar xzf go-link-vX.Y.Z-linux-arm64-headless.tar.gz\n# emulator and ROM folder\n./go-link-device core download\n./go-link-device roms dir /media/usb/roms\n# run it (keep it running with a service, tmux or screen)\n./go-link-device\n# the key to open the web panel\n./go-link-device panel token"}]}, {"id": "docker", "label": "Docker", "blocks": [{"t": "p", "text": "The image is go-link without a window, with its web panel on port 7373. Everything it keeps lives in the /data volume."}, {"t": "code", "code": "docker run -d --name go-link --network host \\\n  -v go-link:/data \\\n  -v ~/roms:/data/go-link/roms \\\n  ghcr.io/lordbasex/go-link-device:latest"}, {"t": "p", "text": "Ports, volumes and Docker Desktop: see [Docker](/docs/docker)."}]}]},
+        {"t": "note", "tone": "info", "text": "Downloads: [github.com/lordbasex/go-link-console/releases](https://github.com/lordbasex/go-link-console/releases). Pick your system below."},
+        {"t": "tabs", "label": "Your system", "tabs": [{"id": "macos", "label": "macOS", "os": "macos", "blocks": [{"t": "steps", "items": ["Download `go-link-vX.Y.Z-macos-universal.dmg` (Intel and Apple silicon, macOS 12 or later).", "Open it and drag **go-link** to **Applications**.", "Open go-link from Applications or Launchpad. Its icon appears in the menu bar."]}, {"t": "note", "tone": "warn", "text": "While the app is not notarized by Apple, macOS blocks it the first time. Try to open it, then go to **System Settings › Privacy & Security** and click **Open Anyway**. On macOS 14 and earlier, right click the app and choose **Open**."}, {"t": "p", "text": "Or with Homebrew:"}, {"t": "code", "code": "brew tap lordbasex/go-link-console https://github.com/lordbasex/go-link-console\nbrew trust --cask lordbasex/go-link-console/go-link\nbrew install --cask go-link"}]}, {"id": "windows", "label": "Windows", "os": "windows", "blocks": [{"t": "steps", "items": ["Download `go-link-vX.Y.Z-windows-amd64.zip` (or `-arm64.zip` for ARM computers).", "Unzip it and run `go-link-device.exe`. It opens a window and an icon in the notification area.", "If SmartScreen warns you, click **More info › Run anyway**."]}, {"t": "note", "tone": "info", "text": "Windows 10 or 11. Nothing else to install."}]}, {"id": "linux", "label": "Linux", "os": "linux", "blocks": [{"t": "p", "text": "For a desktop computer (x64 or ARM64). It needs OpenGL and Wayland or X11, which any desktop has."}, {"t": "p", "text": "Download the file for your processor, unpack it and run it:"}, {"t": "code", "code": "tar xzf go-link-vX.Y.Z-linux-amd64.tar.gz     # or -linux-arm64\n./go-link-device"}]}, {"id": "raspberry-pi", "label": "Raspberry Pi", "blocks": [{"t": "p", "text": "Use the **headless** build: no window, a [web panel](/docs/panel) on port 7373 and a full [command line](/docs/cli). A Raspberry Pi needs a 64-bit system (Raspberry Pi OS 64-bit)."}, {"t": "steps", "items": ["Download and unpack `go-link-vX.Y.Z-linux-arm64-headless.tar.gz` (on an x64 server, `-linux-amd64-headless`).", "Download the emulator and choose your ROM folder.", "Start go-link and open the panel from another computer: `http://<address>:7373`."]}, {"t": "code", "code": "tar xzf go-link-vX.Y.Z-linux-arm64-headless.tar.gz\n# emulator and ROM folder\n./go-link-device core download\n./go-link-device roms dir /media/usb/roms\n# run it (keep it running with a service, tmux or screen)\n./go-link-device\n# the key to open the web panel\n./go-link-device panel token"}]}, {"id": "docker", "label": "Docker", "blocks": [{"t": "p", "text": "The image is go-link without a window, with its web panel on port 7373. Everything it keeps lives in the /data volume."}, {"t": "code", "code": "docker run -d --name go-link --network host \\\n  -v go-link:/data \\\n  -v ~/roms:/data/go-link/roms \\\n  ghcr.io/lordbasex/go-link-device:latest"}, {"t": "p", "text": "Ports, volumes and Docker Desktop: see [Docker](/docs/docker)."}]}]},
         {"t": "h2", "id": "check", "text": "Check the download"},
         {"t": "p", "text": "Every file of a release is listed in `SHA256SUMS`. To check yours:"},
         {"t": "code", "code": "shasum -a 256 -c SHA256SUMS --ignore-missing"},
@@ -269,7 +269,7 @@ export const docsEn: Docs = {
         {
           t: "steps",
           items: [
-            "On your Android phone or tablet (Android 8 or newer), open the [latest release](https://github.com/lordbasex/go-link/releases/latest) and download `go-link-vX.Y.Z-android.apk`.",
+            "On your Android phone or tablet (Android 8 or newer), open the [latest release](https://github.com/lordbasex/go-link-console/releases/latest) and download `go-link-vX.Y.Z-android.apk`.",
             "Open the file and allow installing apps from your browser when Android asks (it is not in Play Store yet).",
             "Open **go-link Player**. Nothing else is installed: the games run on the host's computer.",
           ],
@@ -518,7 +518,7 @@ export const docsEn: Docs = {
       slug: "docker",
       group: "The go-link app",
       title: "Docker",
-      lead: "go-link in Docker runs without a window: you link it from the website with its code and manage it from go-link.org, or from its web panel on port 7373. Everything it keeps lives in the /data volume.",
+      lead: "go-link in Docker runs without a window: you link it from the website with its code and manage it from play.go-link.org, or from its web panel on port 7373. Everything it keeps lives in the /data volume.",
       blocks: [
         {"t": "h2", "id": "quick", "text": "Quick start"},
         {"t": "p", "text": "**1.** Start it (Linux, host network):"},
@@ -576,7 +576,7 @@ export const docsEn: Docs = {
         { t: "p", text: "The server is [signalhub](https://github.com/lordbasex/signalhub), open source, for any Linux server with Docker. Its README lists the ports to open and the settings." },
         {
           t: "steps",
-          items: ["Deploy signalhub, allowing `https://go-link.org` in `ALLOWED_ORIGINS` and the app `go-link` in `ALLOWED_APPS`.", "Start your app with `--server-signaling wss://your-server/ws`, or set `signal_url` in its settings file.", "On the website, click the **Signaling server** button in the header, type the same address and save. Every player must do the same."],
+          items: ["Deploy signalhub, allowing `https://play.go-link.org` in `ALLOWED_ORIGINS` and the app `go-link` in `ALLOWED_APPS`.", "Start your app with `--server-signaling wss://your-server/ws`, or set `signal_url` in its settings file.", "On the website, click the **Signaling server** button in the header, type the same address and save. Every player must do the same."],
         },
         { t: "note", tone: "warn", text: "The website never takes the server from a link, only from that button, so nobody can send your friends to another server with a crafted link." },
       ],
@@ -706,7 +706,7 @@ export const docsEn: Docs = {
             "Keep the controls big and away from the screen: fingers are wider than a mouse pointer.",
             "Contrast matters: labels and marks must read on the plastic in daylight.",
             "Start from a built-in skin: its layout already passes every check, so change the colors first and move parts later.",
-            "For the format and the schema (to write skins by hand or with an AI), see the [developer reference](https://github.com/lordbasex/go-link/blob/main/docs/skins/README.md).",
+            "For the format and the schema (to write skins by hand or with an AI), see the [developer reference](https://github.com/lordbasex/go-link-console/blob/main/docs/skins/README.md).",
           ],
         },
       ],
@@ -875,7 +875,7 @@ export const docsEn: Docs = {
         { t: "h2", id: "macos", text: "macOS says the app cannot be opened" },
         { t: "p", text: "Since 0.3.0 go-link is signed and notarized by Apple and opens like any other app: download the latest version. With an older one, go to **System Settings › Privacy & Security** and click **Open Anyway** (see [Install](/docs/install))." },
         { t: "h2", id: "help", text: "Still stuck?" },
-        { t: "p", text: "Open an issue on [GitHub](https://github.com/lordbasex/go-link/issues) with your system and go-link version (the app's Overview, or `go-link-device --help`)." },
+        { t: "p", text: "Open an issue on [GitHub](https://github.com/lordbasex/go-link-console/issues) with your system and go-link version (the app's Overview, or `go-link-device --help`)." },
       ],
     },
   ],

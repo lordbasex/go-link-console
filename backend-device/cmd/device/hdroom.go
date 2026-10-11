@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/encoder"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/encoder"
 )
 
 // hdRoomVideo picks go-link HD game rooms' video: the H.264 encoder ("" for

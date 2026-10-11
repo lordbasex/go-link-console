@@ -167,7 +167,7 @@ Check each file with any JSON Schema validator before copying it to the Skins fo
 
 ## The editor
 
-The editor is a page of the website: **[go-link.org/tools/skin-editor](https://go-link.org/tools/skin-editor)**, in English, Spanish and Portuguese, with nothing to install. It draws the skin exactly as the apps do (the same placement math and checks in TypeScript, `frontend/apps/web/src/skins/`, tested against the same cases as the apps) and reads the built-in skins straight from `builtin/`. It needs a computer-sized screen.
+The editor is a page of the website: **[console.go-link.org/tools/skin-editor](https://console.go-link.org/tools/skin-editor)**, in English, Spanish and Portuguese, with nothing to install. It draws the skin exactly as the apps do (the same placement math and checks in TypeScript, `frontend/apps/web/src/skins/`, tested against the same cases as the apps) and reads the built-in skins straight from `builtin/`. It needs a computer-sized screen.
 
 Your work stays in your browser (localStorage only, nothing is sent anywhere): **My skins** keeps several skins, each saved as it changes. **New** and **Open…** start a record, the first change to a built-in skin makes your own copy of it (built-in skins stay read-only), and the list opens, duplicates and deletes them (rename a skin through its names). To keep a skin or share it, export its JSON.
 

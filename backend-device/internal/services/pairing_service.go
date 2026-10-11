@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/pkg/signalclient"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/signalclient"
 )
 
 // Sender is the part of signalclient.Client the pairing logic needs.

@@ -60,7 +60,7 @@ ffmpeg -version | head -1             # ffmpeg version 8.1.2 ...
 ### 1b. The clone
 
 ```sh
-git clone https://github.com/lordbasex/go-link.git go-link-case-a
+git clone https://github.com/lordbasex/go-link-console.git go-link-case-a
 cd go-link-case-a
 git checkout 23806b8
 git log --oneline -1                  # 23806b8 rom/tools/lab: the route bot, the Laya player, ...

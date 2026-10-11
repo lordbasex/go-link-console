@@ -3,10 +3,10 @@
 package services
 
 import (
-	"github.com/lordbasex/go-link/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
 	"testing"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/libretro"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/libretro"
 )
 
 func TestMAMEsOwnButtonsNeverReachTheCore(t *testing.T) {

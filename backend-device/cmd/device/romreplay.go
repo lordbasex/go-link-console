@@ -20,9 +20,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/pkg/framelab"
-	"github.com/lordbasex/go-link/backend-device/pkg/libretro"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/framelab"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/libretro"
 )
 
 // replayScript is an input script of experiment 1's harness

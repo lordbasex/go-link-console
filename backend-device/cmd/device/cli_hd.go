@@ -12,8 +12,8 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
 )
 
 // cmdHDDir shows or changes go-link HD's games folder.

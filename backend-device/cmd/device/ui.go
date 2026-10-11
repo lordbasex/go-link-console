@@ -6,7 +6,7 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/lordbasex/go-link/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
 )
 
 // uiOptions is what the user interface needs from the device.

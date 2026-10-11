@@ -441,7 +441,7 @@ describe("legal", () => {
     expect(within(footer).getByRole("link", { name: "Privacy policy" })).toHaveAttribute("href", "/privacy");
     expect(within(footer).getByRole("link", { name: "Third-party licenses" })).toHaveAttribute(
       "href",
-      "https://github.com/lordbasex/go-link/blob/main/THIRD_PARTY_NOTICES.md",
+      "https://github.com/lordbasex/go-link-console/blob/main/THIRD_PARTY_NOTICES.md",
     );
     await userEvent.click(within(footer).getByRole("link", { name: "Privacy policy" }));
     expect(await screen.findByRole("heading", { level: 1, name: "Privacy policy" })).toBeInTheDocument();

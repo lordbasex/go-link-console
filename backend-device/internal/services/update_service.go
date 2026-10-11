@@ -12,11 +12,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
 )
 
 // DefaultReleasesURL lists go-link's releases, newest first.
-const DefaultReleasesURL = "https://api.github.com/repos/lordbasex/go-link/releases?per_page=10"
+const DefaultReleasesURL = "https://api.github.com/repos/lordbasex/go-link-console/releases?per_page=10"
 
 // UpdateConfig configures UpdateService.
 type UpdateConfig struct {

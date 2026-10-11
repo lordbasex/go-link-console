@@ -25,10 +25,10 @@ import (
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/test"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/internal/services"
-	"github.com/lordbasex/go-link/backend-device/pkg/romcheck"
-	"github.com/lordbasex/go-link/backend-device/pkg/thumbnails"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/internal/services"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/romcheck"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/thumbnails"
 )
 
 func writeZip(t *testing.T, path, name, body string) {

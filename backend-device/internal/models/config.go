@@ -15,7 +15,7 @@ const App = "go-link"
 const DefaultSignalURL = "wss://signal.go-link.org/ws"
 
 // DefaultWebURL is the website where hosts type the pairing code: the rooms'
-// site (the landing, go-link.org, sends its /device there too).
+// site (the landing, console.go-link.org, sends its /device there too).
 const DefaultWebURL = "https://play.go-link.org"
 
 // Config is persisted in device.json with 0600 permissions.

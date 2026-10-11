@@ -12,7 +12,7 @@
     <string name="home_paste">Pegar el link de la invitación</string>
     <string name="home_paste_invalid">El portapapeles no tiene una invitación de go-link.</string>
     <string name="home_pin_note">Cada invitación tiene su propio PIN de 6 dígitos, válido para una persona. El PIN nunca va en el link ni en el código QR.</string>
-    <string name="home_host_hint">¿Quieres organizar partidas? Instala go-link en tu computadora: go-link.org</string>
+    <string name="home_host_hint">¿Quieres organizar partidas? Instala go-link en tu computadora: console.go-link.org</string>
     <string name="home_custom_server">Servidor de señalización propio: %1$s</string>
     <string name="scan_title">Escanear la invitación</string>
     <string name="scan_hint">Apunta la cámara al código QR que te muestra el anfitrión.</string>
@@ -245,7 +245,7 @@
     <string name="skin_note">Una carcasa de consola alrededor de la imagen. Solo en este teléfono.</string>
     <string name="skin_folder_hint">Más pieles: copia los archivos de piel a la carpeta Android/data/org.golink.player/files/Skins del teléfono (desde una computadora por USB).</string>
     <string name="skin_install">Instalar piel</string>
-    <string name="skin_install_intro">Pega el JSON de una piel (hecha en el editor de pieles de go-link.org/tools/skin-editor, o a mano) para sumarla como piel propia. Se revisa y se muestra antes de instalarla.</string>
+    <string name="skin_install_intro">Pega el JSON de una piel (hecha en el editor de pieles de console.go-link.org/tools/skin-editor, o a mano) para sumarla como piel propia. Se revisa y se muestra antes de instalarla.</string>
     <string name="skin_install_field">JSON de la piel</string>
     <string name="skin_install_paste">Pegar</string>
     <string name="skin_install_check">Revisar</string>

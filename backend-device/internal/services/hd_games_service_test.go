@@ -19,8 +19,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/pkg/hdgames"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/hdgames"
 )
 
 func TestTheHDFolderListsItsGamesFirst(t *testing.T) {

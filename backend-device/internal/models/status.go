@@ -5,8 +5,8 @@ package models
 import (
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/romcheck"
-	"github.com/lordbasex/go-link/backend-device/pkg/sysinfo"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/romcheck"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/sysinfo"
 )
 
 // Signal connection states.

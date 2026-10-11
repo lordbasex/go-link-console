@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/lordbasex/go-link/backend-device/pkg/glhd"
-	"github.com/lordbasex/go-link/backend-device/pkg/input"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/glhd"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/input"
 )
 
 // TestGoLinkHDCorePlaysItsDemo runs go-link HD's real engine library (built

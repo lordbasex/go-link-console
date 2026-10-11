@@ -70,12 +70,12 @@ export function End({ len, title, free }: { len: number; title: string; free: st
       </div>
       <KineticTitle text={title} start={12} size={58} align="center" />
       <div style={{ display: "flex", gap: 16, marginTop: 10 }}>
-        <Chip start={26}>go-link.org</Chip>
+        <Chip start={26}>console.go-link.org</Chip>
         <Chip start={30} color={C.ok}>{free}</Chip>
         <Chip start={34} color={C.voice}>{PLATFORMS}</Chip>
       </div>
       <Sub start={40} style={{ fontFamily: F.mono, fontSize: 26, color: C.faint }}>
-        github.com/lordbasex/go-link
+        github.com/lordbasex/go-link-console
       </Sub>
     </AbsoluteFill>
   );
@@ -142,7 +142,7 @@ export function Trailer({ voice = "en", subs = voice }: { voice?: Lang; subs?: L
       </Sequence>
       <Sequence from={s("home").from} durationInFrames={s("home").len}>
         <Split len={s("home").len} title={t.home.title} sub={t.home.sub} side="left">
-          <Screen take={take("landing")} from={T.landing.hero} url="go-link.org" duration={s("home").len} />
+          <Screen take={take("landing")} from={T.landing.hero} url="console.go-link.org" duration={s("home").len} />
         </Split>
       </Sequence>
       <Sequence from={s("friends").from} durationInFrames={s("friends").len}>

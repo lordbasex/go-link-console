@@ -9,8 +9,8 @@ import (
 	"slices"
 	"sync"
 
-	"github.com/lordbasex/go-link/backend-device/internal/models"
-	"github.com/lordbasex/go-link/backend-device/pkg/thumbnails"
+	"github.com/lordbasex/go-link-console/backend-device/internal/models"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/thumbnails"
 )
 
 // ErrBadSetting is a settings value the device cannot use.

@@ -79,7 +79,7 @@ export default defineConfig({
       env: { VITE_SITE_URL: `http://localhost:${PORTS.web}` },
     },
     {
-      // The website as the landing's own site (go-link.org), and as the rooms' (play.go-link.org).
+      // The website as the landing's own site (console.go-link.org), and as the rooms' (play.go-link.org).
       command: `npm --prefix ../frontend run dev -w @go-link/web -- --port ${PORTS.site} --strictPort`,
       url: SITE_URL,
       reuseExistingServer: false,

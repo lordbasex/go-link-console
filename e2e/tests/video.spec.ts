@@ -80,8 +80,8 @@ const MASK: [string, string][] = [
   [short, "arcade-pc"],
   [userInfo().username, "player"],
   [`ws://127.0.0.1:${PORTS.signal}/ws`, "wss://signal.go-link.org/ws"],
-  [`http://localhost:${PORTS.web}`, "https://go-link.org"],
-  [`localhost:${PORTS.web}`, "go-link.org"],
+  [`http://localhost:${PORTS.web}`, "https://console.go-link.org"],
+  [`localhost:${PORTS.web}`, "console.go-link.org"],
   [`127.0.0.1:${PORTS.signal}`, "signal.go-link.org"],
   ["Metal Slug, Turtles…", "Sky Pirates, Glacier…"],
 ].sort((a, b) => b[0].length - a[0].length) as [string, string][];
