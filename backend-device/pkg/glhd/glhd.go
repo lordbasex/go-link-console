@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -62,6 +63,11 @@ type Manifest struct {
 			Button string `json:"button"`
 		} `json:"super"`
 	} `json:"weapon"`
+	// Screens are the package's own pictures: its title screen is the
+	// game's picture in the library and the rooms.
+	Screens struct {
+		Title string `json:"title"`
+	} `json:"screens"`
 }
 
 // Labels names the buttons of the built-in games (the platformer): buttons
@@ -103,6 +109,43 @@ func (m Manifest) Labels() []string {
 		l[3] = l[2]
 	}
 	return l
+}
+
+// ErrNoPicture is a package without a title screen.
+var ErrNoPicture = errors.New("the game package has no title screen")
+
+// Picture returns a package's title screen (a PNG or JPEG of at most
+// maxBytes), the picture the library and the rooms show for the game.
+func Picture(path string, maxBytes int64) ([]byte, error) {
+	m, err := Read(path)
+	if err != nil {
+		return nil, err
+	}
+	name := m.Screens.Title
+	ext := strings.ToLower(filepath.Ext(name))
+	if name == "" || (ext != ".png" && ext != ".jpg" && ext != ".jpeg") {
+		return nil, ErrNoPicture
+	}
+	z, err := zip.OpenReader(path)
+	if err != nil {
+		return nil, err
+	}
+	defer z.Close()
+	for _, f := range z.File {
+		if f.Name != name {
+			continue
+		}
+		if f.UncompressedSize64 > uint64(maxBytes) {
+			return nil, fmt.Errorf("%s is bigger than %d bytes", name, maxBytes)
+		}
+		rc, err := f.Open()
+		if err != nil {
+			return nil, err
+		}
+		defer rc.Close()
+		return io.ReadAll(io.LimitReader(rc, maxBytes))
+	}
+	return nil, ErrNoPicture
 }
 
 // Read opens a package and returns its manifest, or why the core cannot

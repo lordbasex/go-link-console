@@ -88,3 +88,25 @@ func TestLabels(t *testing.T) {
 		}
 	}
 }
+
+func TestPicture(t *testing.T) {
+	with := writePackage(t, map[string]string{
+		"manifest.json": `{"format": 3, "title": "Body", "level": "l", "screens": {"title": "start.png"}}`,
+		"l":             "",
+		"start.png":     "picture",
+	})
+	if b, err := Picture(with, 1<<20); err != nil || string(b) != "picture" {
+		t.Fatalf("got %q, %v", b, err)
+	}
+	if _, err := Picture(with, 3); err == nil {
+		t.Error("a picture bigger than the limit was read")
+	}
+	without := writePackage(t, map[string]string{"manifest.json": `{"format": 3, "title": "Body", "level": "l"}`, "l": ""})
+	missing := writePackage(t, map[string]string{"manifest.json": `{"format": 3, "title": "Body", "level": "l", "screens": {"title": "start.png"}}`, "l": ""})
+	notImage := writePackage(t, map[string]string{"manifest.json": `{"format": 3, "title": "Body", "level": "l", "screens": {"title": "l"}}`, "l": ""})
+	for name, p := range map[string]string{"without": without, "missing": missing, "not an image": notImage} {
+		if _, err := Picture(p, 1<<20); err != ErrNoPicture {
+			t.Errorf("%s: got %v, want ErrNoPicture", name, err)
+		}
+	}
+}

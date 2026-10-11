@@ -4,6 +4,9 @@ package services
 
 import (
 	"archive/zip"
+	"bytes"
+	"image"
+	"image/png"
 	"io"
 	"log/slog"
 	"os"
@@ -15,6 +18,7 @@ import (
 	"github.com/lordbasex/go-link-console/backend-device/internal/models"
 	"github.com/lordbasex/go-link-console/backend-device/pkg/glhd"
 	"github.com/lordbasex/go-link-console/backend-device/pkg/romcheck"
+	"github.com/lordbasex/go-link-console/backend-device/pkg/thumbnails"
 )
 
 func writeGLHD(t *testing.T, path, manifest string) {
@@ -157,5 +161,46 @@ func TestLibraryListsGoLinkHDBuiltInGames(t *testing.T) {
 	}
 	if lib.IsHD("glhd_platformer") {
 		t.Fatal("the folder's zip lost to the built-in game")
+	}
+}
+
+func TestGoLinkHDPackageTitleScreenIsItsPicture(t *testing.T) {
+	dir := t.TempDir()
+	var pic bytes.Buffer
+	img := image.NewRGBA(image.Rect(0, 0, 160, 90))
+	for i := range img.Pix {
+		img.Pix[i] = 200
+	}
+	if err := png.Encode(&pic, img); err != nil {
+		t.Fatal(err)
+	}
+	f, _ := os.Create(filepath.Join(dir, "body.glhd"))
+	z := zip.NewWriter(f)
+	for name, body := range map[string]string{
+		"manifest.json": `{"format": 3, "title": "Body", "level": "level.json", "screens": {"title": "start.png"}}`,
+		"level.json":    "{}",
+		"start.png":     pic.String(),
+	} {
+		w, _ := z.Create(name)
+		w.Write([]byte(body))
+	}
+	z.Close()
+	f.Close()
+	writeGLHD(t, filepath.Join(dir, "plain.glhd"), `{"format": 3, "title": "Plain", "level": "level.json"}`)
+	st := NewStatusService(deviceID, "test", "ws://x", "")
+	lib := NewLibraryService(dir, st, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	lib.SetThumbnailsDir(t.TempDir())
+	lib.Scan()
+	for _, r := range st.Snapshot().Library.Roms {
+		want := r.Name == "body"
+		if r.Thumbs.Boxart != want || r.Thumbs.Title != want || r.Thumbs.Snap != want {
+			t.Errorf("%s thumbs %+v", r.Name, r.Thumbs)
+		}
+	}
+	if b, err := lib.Thumbnail("body", thumbnails.Boxart, 64, 86, 0); err != nil || len(b) == 0 {
+		t.Fatalf("the title screen is not the picture: %v", err)
+	}
+	if _, err := lib.Thumbnail("plain", thumbnails.Boxart, 64, 86, 0); err == nil {
+		t.Fatal("a package without a title screen has a picture")
 	}
 }

@@ -725,6 +725,7 @@ func (l *LibraryService) Scan() {
 		}
 		entries = append(entries, entry{l.Dir(), f})
 	}
+	packageArt := map[string]bool{} // HD packages with their own title screen
 	for _, e := range entries {
 		f := e.f
 		name, ok := strings.CutSuffix(f.Name(), ".zip")
@@ -753,6 +754,7 @@ func (l *LibraryService) Scan() {
 				rom.Check = &romcheck.Result{Status: romcheck.StatusOK}
 				rom.Title, rom.Description = m.Title, "go-link HD"
 				rom.Controls = &models.RomControls{Players: m.Players, Buttons: len(m.Labels()), Labels: m.Labels()}
+				packageArt[name] = m.Screens.Title != ""
 			}
 		}
 		roms = append(roms, rom)
@@ -807,6 +809,10 @@ func (l *LibraryService) Scan() {
 		}
 		has := thumbnails.Has(thumbsDir, roms[i].Name, roms[i].Title)
 		roms[i].Thumbs = models.Thumbs{Boxart: has[thumbnails.Boxart], Title: has[thumbnails.Title], Snap: has[thumbnails.Snap]}
+		// an HD package's title screen stands in for the kinds the host has no picture of
+		if packageArt[roms[i].Name] {
+			roms[i].Thumbs = models.Thumbs{Boxart: true, Title: true, Snap: true}
+		}
 	}
 	slices.SortFunc(roms, func(a, b models.RomInfo) int { return strings.Compare(a.Name, b.Name) })
 	if roms == nil {
@@ -889,6 +895,14 @@ func (l *LibraryService) Thumbnail(name string, kind thumbnails.Kind, maxW, maxH
 	}
 	p, ok := l.ThumbnailPath(name, kind)
 	if !ok {
+		// an HD package shows its own title screen
+		if kind.Valid() && l.IsHD(name) {
+			if pkg := l.hdPackage(name); pkg != "" {
+				if art, err := glhd.Picture(pkg, thumbnails.MaxFileSize); err == nil {
+					return l.thumbCache.SmallBytes("glhd|"+pkg, art, maxW, maxH, maxBytes)
+				}
+			}
+		}
 		return nil, os.ErrNotExist
 	}
 	return l.thumbCache.Small(p, maxW, maxH, maxBytes)

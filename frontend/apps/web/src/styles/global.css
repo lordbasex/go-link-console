@@ -1442,63 +1442,7 @@ button.capsule-avatar:hover, button.capsule-avatar[aria-expanded="true"] { trans
 
 /* The arcade screen with the fight. */
 .lp-scene { margin: 0; display: flex; flex-direction: column; gap: 14px; }
-.lp-screen { position: relative; border-radius: 20px; overflow: hidden; background: #05060a; border: 10px solid #1b2030; box-shadow: 0 30px 80px var(--shadow-strong), inset 0 0 0 1px #2a3040; aspect-ratio: 480 / 280; }
-.lp-svg { display: block; width: 100%; height: 100%; }
-.lp-scanlines { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgb(0 0 0 / 0.18) 0 1px, transparent 1px 3px); mix-blend-mode: multiply; }
-.lp-hud { font: 700 12px var(--font-title); fill: #ffffff; letter-spacing: 0.1em; }
-.lp-clock { font: 700 20px var(--font-mono); fill: #ffffff; }
-.lp-hp { transform-box: fill-box; }
-.lp-hp1 { transform-origin: 100% 50%; animation: lp-hp1 6s steps(1, end) infinite; }
-.lp-hp2 { transform-origin: 0% 50%; animation: lp-hp2 6s steps(1, end) infinite; }
-.lp-f1 { animation: lp-f1 6s ease-in-out infinite; }
-.lp-f2 { animation: lp-f2 6s ease-in-out infinite; }
-.lp-f1 .lp-arm { animation: lp-punch 6s ease-out infinite; }
-.lp-f2 .lp-arm { animation: lp-guard 6s ease-in-out infinite; }
-.lp-f2 .lp-leg { transform-box: fill-box; transform-origin: 50% 0%; animation: lp-kick 6s ease-out infinite; }
-.lp-spark { opacity: 0; }
-.lp-spark-on2 { animation: lp-spark2 6s linear infinite; }
-.lp-spark-on1 { animation: lp-spark1 6s linear infinite; }
-@keyframes lp-f1 {
-  0%, 12% { transform: translate(0, 0); }
-  6% { transform: translate(0, -2px); }
-  18%, 22% { transform: translate(24px, 0); }
-  30%, 56% { transform: translate(0, 0); }
-  61% { transform: translate(-14px, 0); }
-  70%, 74% { transform: translate(0, 0); }
-  80%, 84% { transform: translate(24px, 0); }
-  92%, 100% { transform: translate(0, 0); }
-}
-@keyframes lp-punch {
-  0%, 17% { transform: translate(0, 0); }
-  20%, 23% { transform: translate(16px, 0); }
-  28%, 79% { transform: translate(0, 0); }
-  82%, 85% { transform: translate(16px, -6px); }
-  90%, 100% { transform: translate(0, 0); }
-}
-@keyframes lp-f2 {
-  0%, 18% { transform: translate(0, 0); }
-  10% { transform: translate(0, -2px); }
-  23% { transform: translate(-16px, 0); }
-  32%, 50% { transform: translate(0, 0); }
-  57%, 62% { transform: translate(20px, 0); }
-  70%, 80% { transform: translate(0, 0); }
-  85% { transform: translate(-16px, -4px); }
-  94%, 100% { transform: translate(0, 0); }
-}
-@keyframes lp-kick {
-  0%, 54% { transform: rotate(0deg); }
-  58%, 62% { transform: rotate(-82deg); }
-  68%, 100% { transform: rotate(0deg); }
-}
-@keyframes lp-guard {
-  0%, 40% { transform: translate(0, 0); }
-  45% { transform: translate(-4px, -8px); }
-  52%, 100% { transform: translate(0, 0); }
-}
-@keyframes lp-hp1 { 0% { transform: scaleX(1); } 60% { transform: scaleX(0.72); } }
-@keyframes lp-hp2 { 0% { transform: scaleX(1); } 22% { transform: scaleX(0.74); } 83% { transform: scaleX(0.46); } }
-@keyframes lp-spark2 { 0%, 20% { opacity: 0; } 21%, 25% { opacity: 1; } 26%, 81% { opacity: 0; } 82%, 86% { opacity: 1; } 87%, 100% { opacity: 0; } }
-@keyframes lp-spark1 { 0%, 58% { opacity: 0; } 59%, 63% { opacity: 1; } 64%, 100% { opacity: 0; } }
+.lp-screen { position: relative; border-radius: 20px; overflow: hidden; background: #05060a; border: 10px solid #1b2030; box-shadow: 0 30px 80px var(--shadow-strong), inset 0 0 0 1px #2a3040; aspect-ratio: 16 / 9; }
 
 /* The two players under the screen, joined by a live link. */
 .lp-players { display: flex; align-items: center; gap: 12px; color: var(--color-text-2); }
@@ -1563,11 +1507,9 @@ button.capsule-avatar:hover, button.capsule-avatar[aria-expanded="true"] { trans
   .lp-lead { font-size: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .lp-f1, .lp-f2, .lp-arm, .lp-leg, .lp-hp1, .lp-hp2, .lp-spark, .lp-link-line, .lp-voice i { animation: none !important; }
+  .lp-link-line, .lp-voice i { animation: none !important; }
 }
 /* The music button, inside the arcade screen (always on dark). */
-.lp-sound { position: absolute; right: 12px; bottom: 12px; z-index: 2; background: rgb(12 14 20 / 0.72); border-color: #3a4256; color: #c4cad6; }
-.lp-sound.is-on { border-color: #f2a33a; color: #f2a33a; }
 .panel-command { margin: 0; padding: 10px 14px; border-radius: var(--radius-control); background: var(--color-surface-sunken); border: 1px solid var(--color-border); color: var(--color-text); font-size: 13px; overflow-x: auto; }
 /* History: the result badge with the time the game ended under it. */
 .history-result { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
@@ -3046,3 +2988,20 @@ body .video-stage.has-touchpad.is-console .picture-layer { inset: auto; left: va
 .net-level { font: 600 11px var(--font-mono, ui-monospace, monospace); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted); }
 .net-level.is-warn { color: var(--color-accent-text); }
 .net-level.is-error { color: var(--color-danger-text); }
+
+/* A game's picture (GameArt): a wide one is shown whole over a blurred copy of itself. */
+.game-art { position: relative; display: block; width: 100%; height: 100%; overflow: hidden; }
+.game-art > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.game-art.is-wide > .game-art-back { position: absolute; inset: 0; transform: scale(1.25); filter: blur(12px) brightness(0.6) saturate(1.2); }
+.game-art.is-wide > .game-art-main { position: relative; object-fit: contain; }
+
+/* The landing's ANTÍDOTO loop and its trailer (GameScene). */
+.lp-video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.lp-trailer-open { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 2; display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 18px 0 4px; border-radius: 999px; border: 1px solid rgb(255 255 255 / 0.25); background: rgb(12 14 20 / 0.72); color: #ffffff; font: 600 14px var(--font-text); cursor: pointer; backdrop-filter: blur(6px); transition: background 0.15s, transform 0.15s; }
+.lp-trailer-open:hover { background: rgb(12 14 20 / 0.88); transform: translateX(-50%) scale(1.04); }
+.lp-trailer-open:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.lp-trailer-play { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: var(--color-accent); color: var(--color-bg); }
+.lp-trailer { width: min(960px, calc(100vw - 32px)); max-width: none; display: flex; flex-direction: column; gap: 12px; }
+.lp-trailer-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.lp-trailer-video { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 12px; background: #000000; }
+@media (prefers-reduced-motion: reduce) { .lp-trailer-open { transition: none; } }
