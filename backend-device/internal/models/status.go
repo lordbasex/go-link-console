@@ -61,7 +61,11 @@ type StarterGame struct {
 	Title     string `json:"title"`
 	Installed bool   `json:"installed"`
 	// Size is the screen size of the installed package (720p or 1080p).
-	Size        string `json:"size,omitempty"`
+	Size string `json:"size,omitempty"`
+	// Version is the installed package's version, and Update the newer one
+	// that can be downloaded (empty when it is up to date).
+	Version     string `json:"version,omitempty"`
+	Update      string `json:"update,omitempty"`
 	Downloading string `json:"downloading,omitempty"` // the size being downloaded
 	Done        int64  `json:"done,omitempty"`
 	Total       int64  `json:"total,omitempty"`

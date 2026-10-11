@@ -214,6 +214,8 @@ func (h *hdPage) render(st models.Status) {
 			row.state.SetText(Lf("Downloading %s · %d %% (%s of %s)", g.Downloading, g.Done*100/g.Total, formatBytes(uint64(g.Done)), formatBytes(uint64(g.Total))))
 		case g.Downloading != "":
 			row.state.SetText(Lf("Downloading %s…", g.Downloading))
+		case g.Installed && g.Update != "":
+			row.state.SetText(Lf("Installed · version %s available", g.Update))
 		case g.Installed && g.Size != "":
 			row.state.SetText(Lf("Installed · %s", g.Size))
 		case g.Installed:
@@ -228,7 +230,7 @@ func (h *hdPage) render(st models.Status) {
 			row.err.Show()
 		}
 		for size, b := range row.sizes {
-			if g.Downloading != "" || h.u.opts.HDGames == nil || (g.Installed && g.Size == size) {
+			if g.Downloading != "" || h.u.opts.HDGames == nil || (g.Installed && g.Size == size && g.Update == "") {
 				b.Disable()
 			} else {
 				b.Enable()

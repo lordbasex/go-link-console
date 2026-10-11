@@ -57,10 +57,15 @@ func TestTheHDFolderListsItsGamesFirst(t *testing.T) {
 
 // starterGame serves a tiny package as a starter game.
 func starterGame(t *testing.T) (hdgames.Game, *atomic.Int32) {
+	return starterGameVersion(t, "")
+}
+
+// starterGameVersion serves a tiny package of a version as a starter game.
+func starterGameVersion(t *testing.T, version string) (hdgames.Game, *atomic.Int32) {
 	t.Helper()
 	var b bytes.Buffer
 	z := zip.NewWriter(&b)
-	for name, body := range map[string]string{"manifest.json": `{"format": 3, "title": "Demo", "resolution": "720p", "levels": [{"level": "l.json"}]}`, "l.json": "{}"} {
+	for name, body := range map[string]string{"manifest.json": `{"format": 3, "title": "Demo", "version": "` + version + `", "resolution": "720p", "levels": [{"level": "l.json"}]}`, "l.json": "{}"} {
 		w, _ := z.Create(name)
 		w.Write([]byte(body))
 	}
@@ -74,7 +79,30 @@ func starterGame(t *testing.T) (hdgames.Game, *atomic.Int32) {
 	t.Cleanup(srv.Close)
 	sum := sha256.Sum256(data)
 	f := hdgames.File{URL: srv.URL, Size: int64(len(data)), SHA256: hex.EncodeToString(sum[:])}
-	return hdgames.Game{Name: "demo", Title: "Demo", Files: map[string]hdgames.File{"720p": f, "1080p": f}}, &hits
+	return hdgames.Game{Name: "demo", Title: "Demo", Version: version, Files: map[string]hdgames.File{"720p": f, "1080p": f}}, &hits
+}
+
+func TestAnOlderStarterGameCanBeUpdated(t *testing.T) {
+	g, hits := starterGameVersion(t, "0.1.1")
+	roms, hd := t.TempDir(), t.TempDir()
+	writeGLHD(t, filepath.Join(roms, "demo.glhd"), `{"format": 3, "title": "Demo", "version": "0.1.0", "resolution": "720p", "levels": [{"level": "level.json"}]}`)
+	st := NewStatusService(deviceID, "test", "ws://x", "")
+	lib := NewLibraryService(roms, st, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	lib.SetCore(t.TempDir(), "")
+	lib.UseHDDir(hd)
+	settings := NewSettingsService(lib, models.ThumbnailSettings{}, t.TempDir(), nil)
+	h := NewHDGamesService(HDGamesConfig{Library: lib, Status: st, Settings: settings, Games: []hdgames.Game{g}})
+	h.Publish()
+	if sg := st.Snapshot().HD.Starter[0]; !sg.Installed || sg.Version != "0.1.0" || sg.Update != "0.1.1" {
+		t.Fatalf("an older package: %+v", sg)
+	}
+	if err := h.DownloadWait(context.Background(), "demo", "720p"); err != nil || hits.Load() != 1 {
+		t.Fatalf("update: %v, hits %d", err, hits.Load())
+	}
+	// The new one goes to the HD folder, which wins over the ROM folder's old one.
+	if sg := st.Snapshot().HD.Starter[0]; sg.Version != "0.1.1" || sg.Update != "" || lib.HDPackage("demo") != filepath.Join(hd, "demo.glhd") {
+		t.Fatalf("after the update: %+v, package %q", sg, lib.HDPackage("demo"))
+	}
 }
 
 func TestStarterGamesAreOfferedOnce(t *testing.T) {

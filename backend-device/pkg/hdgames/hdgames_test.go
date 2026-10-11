@@ -13,6 +13,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -65,12 +66,26 @@ func TestDownloadChecksTheFile(t *testing.T) {
 func TestStarterGamesArePinned(t *testing.T) {
 	for _, g := range Starter {
 		for size, f := range g.Files {
-			if f.Size <= 0 || len(f.SHA256) != 64 || f.URL == "" {
+			if f.Size <= 0 || len(f.SHA256) != 64 || f.URL == "" || !strings.Contains(f.URL, "-v"+g.Version+"/") {
 				t.Errorf("%s %s: %+v", g.Name, size, f)
 			}
 		}
 		if _, ok := Find(g.Name); !ok {
 			t.Errorf("Find(%q)", g.Name)
+		}
+	}
+}
+
+func TestOlderVersions(t *testing.T) {
+	for _, c := range []struct {
+		installed, version string
+		older              bool
+	}{
+		{"0.1.0", "0.1.1", true}, {"0.1.1", "0.1.1", false}, {"0.2.0", "0.1.1", false},
+		{"0.9", "0.10", true}, {"1", "1.0.0", false}, {"", "0.1.1", true}, {"dev", "0.1.1", true}, {"0.1.0", "", false},
+	} {
+		if got := Older(c.installed, c.version); got != c.older {
+			t.Errorf("Older(%q, %q) = %v", c.installed, c.version, got)
 		}
 	}
 }

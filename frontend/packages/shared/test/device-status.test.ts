@@ -151,12 +151,12 @@ describe("go-link HD in device_status", () => {
       type: "device_status",
       device_id: "d",
       library: { dir: "/r", hd_dir: "/h", hd_games: 1, hd_bytes: 117389971, core: {} },
-      hd: { room_size: "1080p", codec: "vp8", starter: [{ name: "antidoto", title: "ANTÍDOTO", installed: true, size: "720p", downloading: "1080p", done: 10, total: 100 }, { title: "no name" }] },
+      hd: { room_size: "1080p", codec: "vp8", starter: [{ name: "antidoto", title: "ANTÍDOTO", installed: true, size: "720p", version: "0.1.0", update: "0.1.1", downloading: "1080p", done: 10, total: 100 }, { title: "no name" }] },
     });
     expect(st?.hd).toEqual({
       roomSize: "1080p",
       codec: "vp8",
-      starter: [{ name: "antidoto", title: "ANTÍDOTO", installed: true, size: "720p", downloading: "1080p", done: 10, total: 100, error: undefined }],
+      starter: [{ name: "antidoto", title: "ANTÍDOTO", installed: true, size: "720p", version: "0.1.0", update: "0.1.1", downloading: "1080p", done: 10, total: 100, error: undefined }],
     });
     expect([st?.library?.hdDir, st?.library?.hdGames, st?.library?.hdBytes]).toEqual(["/h", 1, 117389971]);
     // An older device: no hd, unknown values fall back to the defaults.

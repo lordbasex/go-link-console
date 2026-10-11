@@ -186,6 +186,7 @@ var catalogES = map[string]string{
 	"go-link's own engine · HD games made for go-link":                      "El motor propio de go-link · juegos HD hechos para go-link",
 	"How the picture is compressed.":                                        "Cómo se comprime la imagen.",
 	"Installed · %s":                                                        "Instalado · %s",
+	"Installed · version %s available":                                      "Instalado · versión %s disponible",
 	"Installed":                                                             "Instalado",
 	"Not installed":                                                         "No instalado",
 	"Room size":                                                             "Tamaño de la sala",
