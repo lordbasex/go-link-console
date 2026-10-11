@@ -23,7 +23,7 @@ object Invites {
     const val HOST = "play.go-link.org"
 
     private val INVITE = Regex("^[A-Za-z0-9_-]{22}$")
-    private val LINK = Regex("^https://go-link\\.org/g/([A-Za-z0-9_-]{22})/?$")
+    private val LINK = Regex("^https://play\\.go-link\\.org/g/([A-Za-z0-9_-]{22})/?$")
     private val CODE = Regex("^\\d{9}$")
 
     /** Largest text worth looking at: a QR code can carry kilobytes. */

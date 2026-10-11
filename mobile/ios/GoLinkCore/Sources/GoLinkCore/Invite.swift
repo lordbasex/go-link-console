@@ -31,7 +31,7 @@ public enum Invites {
     static let maxInput = 200
 
     private static let invite = try! NSRegularExpression(pattern: "^[A-Za-z0-9_-]{22}$")
-    private static let link = try! NSRegularExpression(pattern: "^https://go-link\\.org/g/([A-Za-z0-9_-]{22})/?$")
+    private static let link = try! NSRegularExpression(pattern: "^https://play\\.go-link\\.org/g/([A-Za-z0-9_-]{22})/?$")
     private static let path = try! NSRegularExpression(pattern: "^/g/([A-Za-z0-9_-]{22})/?$")
     private static let code = try! NSRegularExpression(pattern: "^[0-9]{9}$")
     private static let separators = try! NSRegularExpression(pattern: "[\\s.-]")
