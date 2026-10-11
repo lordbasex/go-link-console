@@ -4,6 +4,8 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-11
+
 ### Changed
 
 - **The repository is now [lordbasex/go-link-console](https://github.com/lordbasex/go-link-console)** (the Go modules too: `github.com/lordbasex/go-link-console/...`). GitHub redirects the old name, so devices that check for updates and the Homebrew tap keep working.
