@@ -4,11 +4,15 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 
 ## [Unreleased]
 
-### Changed
-- go-link HD's starter game is ANTÍDOTO 0.1.1: its enemies and bosses move smoothly (their bodies no longer jump sideways between frames).
+## [0.3.3] - 2026-10-11
 
-### Added
-- A starter game installed in an older version shows the newer one: the window's Core › go-link HD › Games says "Installed · version X available" and downloads it again, and `device hd games` says so too (`device_status.hd.starter[].version`/`update`).
+### Changed (device)
+
+- **ANTÍDOTO 0.1.1** is go-link HD's free starter game: its enemies and bosses move smoothly (their bodies no longer jump sideways between frames).
+
+### Added (device)
+
+- **Starter games update:** a starter game installed in an older version shows the newer one: the window's Core › go-link HD › Games says "Installed · version X available" and downloads it again, and `device hd games` says so too (`device_status.hd.starter[].version`/`update`).
 
 ## [0.3.2] - 2026-10-10
 
