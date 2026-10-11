@@ -31,6 +31,8 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 adb shell am start -n org.golink.player/.MainActivity
 # open an invitation link straight on the PIN screen:
 adb shell am start -a android.intent.action.VIEW -d "https://go-link.org/g/<invite>" org.golink.player
+# a group invitation (asks a name instead of a PIN; quote the # for the shell):
+adb shell am start -a android.intent.action.VIEW -d "'https://go-link.org/g/<invite>#k=<key>'" org.golink.player
 # debug builds only: play the startup intro 5 times slower (after force-stop, it runs on a cold start)
 adb shell am start -n org.golink.player/.MainActivity --es introSlow 5
 # debug builds only: the name step alone, or the room's overlays (stats box, see-through pad,
@@ -60,6 +62,13 @@ An emulator: `emulator -avd <name> -no-window -gpu swiftshader_indirect` (add `-
 - Home and Settings show **go-link Player v*X.Y.Z* (build *N*)** from `BuildConfig` (" · debug" in debug builds).
 
 Details: [docs/mobile.md](../../docs/mobile.md#your-name).
+
+## Group invitations, raised hands and voice
+
+- **Group and spectators' invitations:** a link (App Link, QR code or pasted) `https://go-link.org/g/<invite>#k=<key>` carries the group key in its fragment (`Invites.groupKeyOf`: exactly 43 base64url characters, anything else is ignored; query strings are still refused). The join screen then asks a name (the saved one, the device's name rules) and the terms the first time instead of a PIN; `RoomClient` sends `{kind:"pin", key, name}`, shows **Waiting for the host** (`room-knock-waiting`, with Leave) while `pin_result` says `waiting`, and either gets in (return token saved as with a PIN; no name step afterwards) or ends with the website's reason (`declined`, `full`, `expired`, `busy`, `wrong`, `blocked`, `locked`; phase `REFUSED`). The key lives only in memory (`InviteTarget.Link.toString` leaves it out).
+- **Taken out by the host:** `pin_result` `removed` (now or on a reconnection with the token) is final (phase `REMOVED`, `room-removed`): "The host took you out of this room"; the app stops trying and keeps the token (it never counts as a wrong PIN).
+- **Raised hands:** a spectator gets a hand button in the dock (`dock-hand`, in place of the pause button) sending `{"type":"hand","on":…}`; it is dimmed and explains itself while `host_online` is false. Someone the host moved to watching (`you.held`) sees "You are watching: raise your hand to ask the host to play" in Players, with the hand instead of Join the queue. The device's refusals (`error` codes `hand_too_soon` with the seconds from `you.hand_again`, `hand_no_host`, `queue_ask_host`) and the chat event `hand_later` show as short notices; the chat translates `let_queue`, `play_now`, `first_in_queue`, `removed`, `sent_to_queue` and `sent_to_watch`.
+- **Voice:** the players and the queue talk (the microphone is sent only while this phone is seated or in the queue); spectators listen while the host lets them (`spectators_hear`). The four voice tracks are slots: `room_state.voice_slots` says who each carries, and **Silence** in Players silences a person by name (seats and queue), wherever their voice moves (`VoiceSlots.silencedSlots`). Each time the phone becomes able to talk with its microphone off, a card under the picture asks **Do you want to join the voice?** (`voice-ask`: Turn on my microphone, which asks for the permission when needed, or Not now).
 
 ## Game settings and the picture
 

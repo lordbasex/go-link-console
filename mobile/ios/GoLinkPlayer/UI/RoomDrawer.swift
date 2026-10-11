@@ -196,7 +196,12 @@ struct ChatLineView: View {
     }
 }
 
-/** Seats with swap / move / silence, the queue, and watching. */
+/**
+ * Seats with swap / move / silence, the queue, and watching. Who speaks
+ * lights up (a seat, or a name in the queue); silencing goes by person.
+ * A spectator the host moved to watching raises a hand instead of joining
+ * the queue.
+ */
 struct PlayersPanel: View {
     @ObservedObject var session: RoomSession
 
@@ -212,6 +217,17 @@ struct PlayersPanel: View {
                         Text(L("queue_summary", room.queue.count, room.spectators.count)).font(.footnote).foregroundStyle(Tokens.muted)
                         Spacer()
                         switch room.me {
+                        case .spectator where room.you.held || room.you.hand:
+                            // Back to playing through a raised hand (the device refuses "queue").
+                            SwiftUI.Button(L(room.you.hand ? "hand_lower" : "hand_raise")) {
+                                if !room.you.hand && !room.hostOnline { return }
+                                session.client.raiseHand(!room.you.hand)
+                            }
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(!room.you.hand && !room.hostOnline ? Tokens.dim : Tokens.accent)
+                            .disabled(!room.you.hand && !room.hostOnline)
+                            .frame(minHeight: Tokens.control)
+                            .accessibilityIdentifier("players-hand")
                         case .spectator:
                             SwiftUI.Button(L("room_join_queue")) { session.client.joinQueue() }
                                 .font(.footnote.weight(.semibold)).foregroundStyle(Tokens.accent)
@@ -224,16 +240,31 @@ struct PlayersPanel: View {
                                 .accessibilityIdentifier("players-spectate")
                         }
                     }
+                    if let note = handNote(room) {
+                        Text(note).font(.footnote).foregroundStyle(Tokens.muted)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .accessibilityIdentifier("players-hand-note")
+                    }
                     if !room.queue.isEmpty {
                         section(L("room_queue_title"))
                         ForEach(Array(room.queue.enumerated()), id: \.offset) { _, q in
-                            nameLine("\(ordinal(q.position))  \(localName(q.name))", you: q.you)
+                            HStack(spacing: 6) {
+                                nameLine("\(ordinal(q.position))  \(localName(q.name))", you: q.you)
+                                if session.speaking.names.contains(q.name) { speakingMark }
+                                if !q.you { silenceButton(q.name, room: room) }
+                            }
                         }
                     }
                     if !room.spectators.isEmpty {
                         section(L("room_spectators_title"))
                         ForEach(Array(room.spectators.enumerated()), id: \.offset) { _, s in
-                            nameLine(localName(s.name), you: s.you)
+                            HStack(spacing: 6) {
+                                nameLine(localName(s.name), you: s.you)
+                                if s.hand {
+                                    Text("✋").font(.subheadline)
+                                        .accessibilityLabel(L("hand_raised", localName(s.name)))
+                                }
+                            }
                         }
                     }
                 }
@@ -241,6 +272,28 @@ struct PlayersPanel: View {
             }
         } else {
             Spacer()
+        }
+    }
+
+    /** Your raised hand, or why a held spectator raises one. */
+    private func handNote(_ room: RoomStateView) -> String? {
+        guard room.me == .spectator else { return nil }
+        if room.you.hand { return L("hand_up") }
+        if room.you.held { return L(room.hostOnline ? "hand_ask_host" : "hand_no_host") }
+        return nil
+    }
+
+    private var speakingMark: some View {
+        Image(systemName: "mic.fill").font(.system(size: 12, weight: .semibold)).foregroundStyle(Tokens.voice)
+            .accessibilityLabel(L("room_speaking"))
+    }
+
+    /** Silence (or hear again) one person's voice, on this phone only. */
+    @ViewBuilder private func silenceButton(_ name: String, room: RoomStateView) -> some View {
+        if room.voice, !session.sound.voices.isEmpty, !name.isEmpty {
+            SwiftUI.Button(L(session.sound.silenced.contains(name) ? "room_unsilence" : "room_silence")) { session.toggleSilence(name) }
+                .font(.caption.weight(.semibold)).foregroundStyle(Tokens.voice)
+                .frame(minHeight: Tokens.control)
         }
     }
 
@@ -253,16 +306,15 @@ struct PlayersPanel: View {
                 .frame(width: 34, height: 34)
                 .overlay(Circle().strokeBorder(color, style: StrokeStyle(lineWidth: 2, dash: seat == nil ? [4, 3] : [])))
             VStack(alignment: .leading, spacing: 2) {
-                Text(seat.map { localName($0.name) + ($0.you ? " (\(L("room_you")))" : "") } ?? L("room_seat_free"))
-                    .font(.subheadline).foregroundStyle(seat == nil ? Tokens.faint : Tokens.text).lineLimit(1)
+                HStack(spacing: 6) {
+                    Text(seat.map { localName($0.name) + ($0.you ? " (\(L("room_you")))" : "") } ?? L("room_seat_free"))
+                        .font(.subheadline).foregroundStyle(seat == nil ? Tokens.faint : Tokens.text).lineLimit(1)
+                    if seat != nil && session.speaking.ports.contains(port) { speakingMark }
+                }
                 if asked { Text(L("room_swap_waiting", port)).font(.caption).foregroundStyle(Tokens.muted) }
             }
             Spacer(minLength: 4)
-            if let seat, !seat.you, session.sound.voices.contains(port) {
-                SwiftUI.Button(L(session.sound.silenced.contains(port) ? "room_unsilence" : "room_silence")) { session.toggleSilence(port) }
-                    .font(.caption.weight(.semibold)).foregroundStyle(Tokens.voice)
-                    .frame(minHeight: Tokens.control)
-            }
+            if let seat, !seat.you { silenceButton(seat.name, room: room) }
             if seat?.you == true {
                 Text(L("seat_playing")).font(.caption).foregroundStyle(Tokens.muted)
             } else if let myPort {
@@ -318,6 +370,9 @@ struct YouPanel: View {
                         }
                     }
                     .accessibilityIdentifier("you-seat")
+                    if let room = session.ui.room, me == .spectator, room.you.hand || room.you.held {
+                        Text(L(room.you.hand ? "hand_up" : "hand_ask_host")).font(.footnote).foregroundStyle(Tokens.muted)
+                    }
                 }
                 if let name = session.ui.room?.you.name, !name.isEmpty {
                     Text(localName(name)).font(.subheadline).foregroundStyle(Tokens.text2)

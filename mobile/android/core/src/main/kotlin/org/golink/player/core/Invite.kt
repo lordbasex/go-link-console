@@ -7,7 +7,17 @@ package org.golink.player.core
  * 9-digit code. The PIN is never part of either: the person types it.
  */
 sealed interface InviteTarget {
-    data class Link(val invite: String) : InviteTarget
+    /**
+     * key is a group invitation's key from the link's fragment
+     * (/g/<invite>#k=<key>), or "": with it the person knocks with a name
+     * instead of typing a PIN. It stays in memory only (never logged or
+     * saved), so toString leaves it out.
+     */
+    data class Link(val invite: String, val key: String = "") : InviteTarget {
+        val group: Boolean get() = key.isNotEmpty()
+
+        override fun toString(): String = "Link(invite=$invite, group=$group)"
+    }
 
     data class Code(val code: String) : InviteTarget
 
@@ -23,7 +33,8 @@ object Invites {
     const val HOST = "go-link.org"
 
     private val INVITE = Regex("^[A-Za-z0-9_-]{22}$")
-    private val LINK = Regex("^https://go-link\\.org/g/([A-Za-z0-9_-]{22})/?$")
+    private val LINK = Regex("^https://go-link\\.org/g/([A-Za-z0-9_-]{22})/?(?:#([^#\\s]*))?$")
+    private val KEY = Regex("^[A-Za-z0-9_-]{43}$")
     private val CODE = Regex("^\\d{9}$")
 
     /** Largest text worth looking at: a QR code can carry kilobytes. */
@@ -32,13 +43,14 @@ object Invites {
     /**
      * Reads a scanned QR code. Only two things are accepted: exactly an
      * https://go-link.org/g/<invite> link, or a 9-digit code. Anything
-     * else (another site, a signaling server, a PIN, parameters) is
-     * rejected, so a hostile QR can never point the app elsewhere.
+     * else (another site, a signaling server, query parameters) is
+     * rejected, so a hostile QR can never point the app elsewhere. From
+     * the link's fragment only a group invitation's key (k) is read.
      */
     fun parseScanned(text: String): InviteTarget? {
         if (text.length > MAX_INPUT) return null
         val t = text.trim()
-        LINK.matchEntire(t)?.let { return InviteTarget.Link(it.groupValues[1]) }
+        parseLink(t)?.let { return it }
         return parseCode(t)
     }
 
@@ -50,19 +62,36 @@ object Invites {
     fun parseTyped(text: String): InviteTarget? {
         if (text.length > MAX_INPUT) return null
         val t = text.trim()
-        LINK.matchEntire(t)?.let { return InviteTarget.Link(it.groupValues[1]) }
+        parseLink(t)?.let { return it }
         if (INVITE.matches(t)) return InviteTarget.Link(t)
         return parseCode(t)
     }
 
     /**
      * Reads an Android App Link: scheme https, host go-link.org, path
-     * /g/<invite>. Query and fragment are ignored, never used.
+     * /g/<invite>. The query is ignored; from the fragment only a group
+     * invitation's key is read.
      */
-    fun parseAppLink(scheme: String?, host: String?, path: String?): InviteTarget? {
+    fun parseAppLink(scheme: String?, host: String?, path: String?, fragment: String? = null): InviteTarget? {
         if (scheme != "https" || host != HOST || path == null) return null
         val m = Regex("^/g/([A-Za-z0-9_-]{22})/?$").matchEntire(path) ?: return null
-        return InviteTarget.Link(m.groupValues[1])
+        if (fragment != null && fragment.length > MAX_INPUT) return InviteTarget.Link(m.groupValues[1])
+        return InviteTarget.Link(m.groupValues[1], groupKeyOf(fragment ?: ""))
+    }
+
+    /**
+     * The key of a group invitation from a link's fragment ("k=<key>",
+     * among other "&" separated values, like the web's groupKeyOf): exactly
+     * 43 base64url characters, or "" for anything else.
+     */
+    fun groupKeyOf(fragment: String): String {
+        val v = fragment.removePrefix("#").split('&').firstOrNull { it.startsWith("k=") }?.substring(2) ?: return ""
+        return if (KEY.matches(v)) v else ""
+    }
+
+    private fun parseLink(t: String): InviteTarget? {
+        val m = LINK.matchEntire(t) ?: return null
+        return InviteTarget.Link(m.groupValues[1], groupKeyOf(m.groupValues[2]))
     }
 
     private fun parseCode(t: String): InviteTarget? {

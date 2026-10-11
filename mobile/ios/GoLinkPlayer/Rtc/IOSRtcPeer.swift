@@ -9,8 +9,11 @@ import GoLinkCore
 protocol MediaListener: AnyObject {
     func onVideo(_ track: RTCVideoTrack)
     func onGameAudio(_ track: RTCAudioTrack)
-    /** The voice of the player at a port (1-4), forwarded by the device. */
-    func onVoice(port: Int, track: RTCAudioTrack)
+    /**
+     * One of the four voice tracks (slot 1-4), forwarded by the device: it
+     * carries whoever speaks now (room_state.voice_slots says who).
+     */
+    func onVoice(slot: Int, track: RTCAudioTrack)
     /** The connection is closing: its tracks go away. */
     func onMediaClosed()
 }
@@ -19,7 +22,7 @@ protocol MediaListener: AnyObject {
  * The app's side of the WebRTC link with the device, the iOS counterpart
  * of the web's HostStream (frontend/packages/shared/src/stream.ts) and the
  * Android app's AndroidRtcPeer: it answers the device's offer, receives the
- * game's video and sound and the other players' voices, and speaks the
+ * game's video and sound and the others' voices, and speaks the
  * "control" and "input" channels.
  */
 @MainActor
@@ -176,9 +179,9 @@ extension IOSRtcPeer: RTCPeerConnectionDelegate {
                 self.trackLabels[v.trackId] = "video"
                 self.media?.onVideo(v)
             } else if let a = track as? RTCAudioTrack {
-                let port = RtcSignals.voicePort(id)
-                self.trackLabels[a.trackId] = port.map { "voice-p\($0)" } ?? "game"
-                if let port { self.media?.onVoice(port: port, track: a) } else { self.media?.onGameAudio(a) }
+                let slot = RtcSignals.voicePort(id)
+                self.trackLabels[a.trackId] = slot.map { "voice-p\($0)" } ?? "game"
+                if let slot { self.media?.onVoice(slot: slot, track: a) } else { self.media?.onGameAudio(a) }
             }
         }
     }

@@ -172,8 +172,14 @@ struct RoomView: View {
         .onChange(of: statsOn, initial: true) { _, on in session.setStatsOn(on) }
         .onChange(of: room?.picture, initial: true) { _, p in picture.setRoomDefault(p) }
         .onChange(of: ui.chat.last) { _, line in
-            // A declined pause request comes as a notice only to this player.
+            // A declined pause request (or a raised hand's "not now") comes as a notice only to this guest.
             if case .system(_, _, .pauseDeclined?, _)? = line { toast(L("ev_pause_declined")) }
+            if case .system(_, _, .handLater?, _)? = line { toast(L("hand_later")) }
+        }
+        .onChange(of: ui.refused) { _, r in
+            // A refused raised hand or queue: say why for a moment.
+            guard let r, let text = refusalText(r.code, handAgain: room?.you.handAgain ?? 0) else { return }
+            toast(text)
         }
         .onChange(of: drawer) { _, d in if d == .chat || d == nil { chatSeen = userLines } }
         .onChange(of: userLines) { _, n in if drawer == .chat { chatSeen = n } }
@@ -252,8 +258,16 @@ struct RoomView: View {
                             .foregroundStyle(Tokens.text).padding(16)
                             .background(RoundedRectangle(cornerRadius: 12).fill(Tokens.video.opacity(0.8)))
                     }
-                    SwapOffers(room: room, client: session.client)
-                        .frame(maxHeight: .infinity, alignment: .bottom).padding(8)
+                    VStack(spacing: 8) {
+                        if session.voiceAsk && !session.askName {
+                            VoiceAskCard(onYes: {
+                                session.dismissVoiceAsk()
+                                turnMicOn()
+                            }, onNo: { session.dismissVoiceAsk() })
+                        }
+                        SwapOffers(room: room, client: session.client)
+                    }
+                    .frame(maxHeight: .infinity, alignment: .bottom).padding(8)
                 }
             }
         }
@@ -299,27 +313,37 @@ struct RoomView: View {
         }
     }
 
-    /** The room's menu: microphone, sound, pause, chat, players, the pad and Game settings. */
+    /** Turns the microphone on, asking for it first when the system has not allowed it yet. */
+    private func turnMicOn() {
+        if AudioRouter.micPermission == .granted {
+            session.setMic(true)
+        } else {
+            micAsk = true
+        }
+    }
+
+    /** The room's menu: microphone, a spectator's raised hand, sound, pause, chat, players, the pad and Game settings. */
     @ViewBuilder private func dockItems() -> some View {
         let seated = room?.me.isPlayer ?? false
+        // The players and the queue talk; spectators listen.
+        let talker = room?.talker ?? false
         let voiceOn = room?.voice != false
-        let canTalk = seated && voiceOn
+        let canTalk = talker && voiceOn
         let sound = session.sound
         DockButton(
             icon: sound.micOn && canTalk ? "mic.fill" : "mic.slash",
-            label: L(!voiceOn ? "room_voice_off" : !seated ? "room_voice_players_only" : AudioRouter.micPermission == .denied ? "room_mic_blocked" : sound.micOn ? "room_mic_on" : "room_mic_off"),
+            label: L(!voiceOn ? "room_voice_off" : !talker ? "room_voice_players_only" : AudioRouter.micPermission == .denied ? "room_mic_blocked" : sound.micOn ? "room_mic_on" : "room_mic_off"),
             on: sound.micOn && canTalk,
             enabled: canTalk,
             tag: "dock-mic"
         ) {
             if sound.micOn {
                 session.setMic(false)
-            } else if AudioRouter.micPermission == .granted {
-                session.setMic(true)
             } else {
-                micAsk = true
+                turnMicOn()
             }
         }
+        if streaming, let room, room.me == .spectator { handButton(room) }
         DockButton(
             icon: session.gameMuted ? "speaker.slash.fill" : (session.router.output == .speaker ? "speaker.wave.2.fill" : "headphones"),
             label: L(session.gameMuted ? "room_sound_off" : "room_sound_on"),
@@ -353,6 +377,29 @@ struct RoomView: View {
 }
 
 extension RoomView {
+    /**
+     * A spectator raises a hand to ask the host to play (the device allows
+     * one raise a minute, and only while the host is in the room).
+     */
+    fileprivate func handButton(_ room: RoomStateView) -> some View {
+        let up = room.you.hand
+        let away = !up && !room.hostOnline
+        return DockButton(
+            icon: up ? "hand.raised.fill" : "hand.raised",
+            label: L(up ? "hand_lower" : "hand_raise") + (away ? ". " + L("hand_no_host") : ""),
+            on: up,
+            dimmed: away,
+            tag: "dock-hand"
+        ) {
+            if away {
+                toast(L("hand_no_host"))
+            } else {
+                session.client.raiseHand(!up)
+                if !up { toast(L("hand_up")) }
+            }
+        }
+    }
+
     /**
      * Only the host pauses and resumes. A player asks for a pause (and can
      * withdraw the request); the button explains why it cannot when the
@@ -461,7 +508,11 @@ struct RoomOverlay: View {
 
     var body: some View {
         let ui = session.ui
-        if let text = progressText(ui) {
+        if ui.knock == .waiting {
+            knockCard(title: L("knock_waiting_title"), text: L("knock_waiting_text"), hand: true, button: L("knock_leave"))
+        } else if case let .ended(reason) = ui.knock {
+            knockCard(title: L("knock_ended_title"), text: knockEndedText(reason), hand: false, button: L("knock_back"))
+        } else if let text = progressText(ui) {
             VStack(spacing: 12) {
                 ProgressView().tint(Tokens.accent).controlSize(.large)
                 Text(text).foregroundStyle(Tokens.text).multilineTextAlignment(.center)
@@ -474,6 +525,9 @@ struct RoomOverlay: View {
         } else if let problem = problemKey(ui.phase) {
             VStack(alignment: .leading, spacing: 12) {
                 Text(L(problem)).foregroundStyle(Tokens.text).accessibilityIdentifier("room-problem")
+                if ui.phase == .removed {
+                    Text(L("hand_removed_text")).font(.subheadline).foregroundStyle(Tokens.muted)
+                }
                 HStack(spacing: 8) {
                     if ui.phase == .rateLimited || ui.phase == .unreachable {
                         PrimaryButton(title: L("room_retry")) { session.client.reconnect() }
@@ -504,8 +558,37 @@ struct RoomOverlay: View {
         case .notFound: return "room_not_found"
         case .rateLimited: return "room_rate_limited"
         case .unreachable: return "room_unreachable"
+        case .removed: return "hand_removed_title"
         default: return nil
         }
+    }
+
+    /**
+     * A group invitation: waiting while the host decides (the website's
+     * KnockPrompt), or why the way in closed.
+     */
+    private func knockCard(title: String, text: String, hand: Bool, button: String) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 12) {
+                if hand {
+                    Text("✋").font(.system(size: 30)).accessibilityHidden(true)
+                }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title).font(.headline).foregroundStyle(Tokens.text)
+                        .accessibilityIdentifier("room-knock-title")
+                    Text(text).font(.subheadline).foregroundStyle(Tokens.muted).fixedSize(horizontal: false, vertical: true)
+                        .accessibilityIdentifier("room-knock-text")
+                }
+            }
+            SecondaryButton(title: button, action: onLeave).accessibilityIdentifier("room-knock-leave")
+        }
+        .padding(18)
+        .frame(maxWidth: 420)
+        .background(RoundedRectangle(cornerRadius: 16).fill(Tokens.surface))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Tokens.border, lineWidth: 1))
+        .padding(16)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(hand ? "room-knock-waiting" : "room-knock-ended")
     }
 
     /** The room asks again: the PIN the person typed failed (or a return token expired). */
@@ -569,5 +652,33 @@ struct SwapOffers: View {
             .background(RoundedRectangle(cornerRadius: 14).fill(Tokens.surface))
             .overlay(RoundedRectangle(cornerRadius: 14).stroke(Tokens.accentTintBorder, lineWidth: 1))
         }
+    }
+}
+
+/**
+ * "Do you want to join the voice?": a small card under the picture when
+ * this app becomes able to talk with its microphone off (never with the
+ * name step; it goes away by itself, see GoLinkCore.VoiceAsk).
+ */
+struct VoiceAskCard: View {
+    let onYes: () -> Void
+    let onNo: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(L("voice_ask_title"), systemImage: "mic.fill")
+                .font(.subheadline).foregroundStyle(Tokens.text)
+                .accessibilityIdentifier("voice-ask-title")
+            HStack(spacing: 8) {
+                PrimaryButton(title: L("voice_ask_yes"), action: onYes).accessibilityIdentifier("voice-ask-yes")
+                SecondaryButton(title: L("voice_ask_no"), action: onNo).accessibilityIdentifier("voice-ask-no")
+            }
+        }
+        .padding(12)
+        .frame(maxWidth: 420)
+        .background(RoundedRectangle(cornerRadius: 14).fill(Tokens.surface))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Tokens.accentTintBorder, lineWidth: 1))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("voice-ask")
     }
 }

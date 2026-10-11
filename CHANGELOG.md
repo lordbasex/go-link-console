@@ -24,6 +24,10 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 - **CI:** gitleaks runs from GitHub's registry (`ghcr.io/gitleaks/gitleaks`): Docker Hub refused the image past its unauthenticated pull limit and failed the secrets check.
 - **go-link HD games drawn in HD:** a game made for 720p or 1080p (format 3's `resolution`) streams at its own size instead of being enlarged again (a 720p game in a 1080p room was 2560 x 1440); a 360p game is still enlarged 2 or 3 times.
 
+### Added (Android and iOS apps)
+
+- **The players' apps join the new invitations and rules:** a group or spectators' QR code (`#k=` in the link) asks a name and waits for the host instead of a PIN, with the reasons when it does not get in; "The host took you out of this room" when removed; a spectator's raise-your-hand button and notices; the queue talks too, the four voice tracks follow whoever speaks (silencing follows the person), and "Do you want to join the voice?" when the app can start talking. Android is checked end to end on the emulator (a spectators' QR code, the host's OK, the hand, the removal).
+
 ### Added (iOS)
 
 - **go-link Player on TestFlight:** the iPhone and iPad app is signed with the developer account and uploaded to App Store Connect: `make testflight` (archive, sign, upload, a new build number each time) and `make install-device` (signed and installed on the connected iPhone), both with an App Store Connect API key from the environment, and `scripts/asc.py` for the TestFlight groups and beta review. The app now has its privacy manifest (no tracking, no data collected) and Universal Links (`go-link.org/g/...`) are on.

@@ -13,12 +13,15 @@ public struct SeatView: Equatable, Sendable {
     public let name: String
     public let localPlayer: Int
     public let you: Bool
+    /** The player's peer id: sent only to the host's own browsers ("" otherwise). */
+    public var peer = ""
 
-    public init(port: Int, name: String, localPlayer: Int, you: Bool) {
+    public init(port: Int, name: String, localPlayer: Int, you: Bool, peer: String = "") {
         self.port = port
         self.name = name
         self.localPlayer = localPlayer
         self.you = you
+        self.peer = peer
     }
 }
 
@@ -26,11 +29,45 @@ public struct QueueEntry: Equatable, Sendable {
     public let position: Int
     public let name: String
     public let you: Bool
+    /** Sent only to the host's own browsers ("" otherwise). */
+    public var peer = ""
+
+    public init(position: Int, name: String, you: Bool, peer: String = "") {
+        self.position = position
+        self.name = name
+        self.you = you
+        self.peer = peer
+    }
 }
 
 public struct Spectator: Equatable, Sendable {
     public let name: String
     public let you: Bool
+    /** Sent only to the host's own browsers ("" otherwise). */
+    public var peer = ""
+    /** A raised hand: this spectator asks the host to play. */
+    public var hand = false
+
+    public init(name: String, you: Bool, peer: String = "", hand: Bool = false) {
+        self.name = name
+        self.you = you
+        self.peer = peer
+        self.hand = hand
+    }
+}
+
+/** A person speaking on one of the four voice tracks (voice-p1..voice-p4). */
+public struct VoiceSlot: Equatable, Sendable {
+    public let name: String
+    /** Their seat, or 0 when they wait in the queue. */
+    public let port: Int
+    public let you: Bool
+
+    public init(name: String, port: Int, you: Bool) {
+        self.name = name
+        self.port = port
+        self.you = you
+    }
 }
 
 /** A request to swap controllers: from port asks to move to port to. */
@@ -88,6 +125,12 @@ public struct YouView: Equatable, Sendable {
     public let swapAsked: [SwapView]
     /** Your pending request for a pause (only the host pauses), or nil. */
     public var pauseAsked: PauseAsk?
+    /** Your hand is up (a spectator asking the host to play). */
+    public var hand = false
+    /** When you may raise your hand again (ms since the epoch), or 0. */
+    public var handAgain: Double = 0
+    /** The host moved you to watching: you raise a hand instead of joining the queue alone. */
+    public var held = false
 }
 
 /** A pause this guest asked the host for; expiresAt is the device's RFC 3339 time ("" if not sent). */
@@ -126,6 +169,12 @@ public struct RoomStateView: Equatable, Sendable {
     public var hostOnline: Bool = true
     /** The host's default picture for this room (picture: {style, bands}); nil = the app's default. */
     public var picture: PictureSettings?
+    /** Spectators hear the voices too (the host's switch). */
+    public var spectatorsHear = false
+    /** Spectators get the lighter video (the host's switch). */
+    public var spectatorSaver = false
+    /** Who each voice track (voice-p1..voice-p4) carries now, always 4 entries; nil: nobody. */
+    public var voiceSlots: [VoiceSlot?] = [nil, nil, nil, nil]
 
     public var me: Me {
         if !you.ports.isEmpty { return .player(you.ports) }
@@ -134,6 +183,14 @@ public struct RoomStateView: Equatable, Sendable {
     }
 
     public var seated: Int { seats.filter { $0 != nil }.count }
+
+    /** The players and the queue talk (the device drops a spectator's voice). */
+    public var talker: Bool {
+        switch me {
+        case .player, .queue: return true
+        case .spectator: return false
+        }
+    }
 
     /** The ports this player holds (empty when not seated). */
     public var myPorts: [Int] {
@@ -156,8 +213,19 @@ public enum ChatEvent: String, CaseIterable, Sendable {
     case leftSeat = "left_seat"
     case seatFree = "seat_free"
     case tookSeat = "took_seat"
+    case sentToQueue = "sent_to_queue"
+    case sentToWatch = "sent_to_watch"
+    /** The host (name) let a spectator (name2) into the queue. */
+    case letQueue = "let_queue"
+    /** The host (name) seated name2 at port. */
+    case playNow = "play_now"
+    case firstInQueue = "first_in_queue"
+    /** The host (name) took name2 out of the room. */
+    case removed
     /** Sent only to the guest whose pause request the host declined. */
     case pauseDeclined = "pause_declined"
+    /** Sent only to the spectator whose raised hand the host answered "not now". */
+    case handLater = "hand_later"
 }
 
 /** The values of a chat event (who and which seat). */
@@ -256,7 +324,7 @@ public enum RoomMessages {
         var seats = [SeatView?](repeating: nil, count: maxPlayers)
         for (i, s) in m["seats"].arr.enumerated() {
             guard i < maxPlayers, case let .object(o) = s else { continue }
-            seats[i] = SeatView(port: i + 1, name: o["name"].str(40), localPlayer: Int(o["local_player"].num), you: o["you"].isTrue)
+            seats[i] = SeatView(port: i + 1, name: o["name"].str(40), localPlayer: Int(o["local_player"].num), you: o["you"].isTrue, peer: o["peer"].str(80))
         }
         let you = m["you"].obj
         return RoomStateView(
@@ -267,11 +335,11 @@ public enum RoomMessages {
             seats: seats,
             queue: m["queue"].arr.prefix(64).map { q in
                 let o = Optional(q).obj
-                return QueueEntry(position: Int(o["position"].num), name: o["name"].str(40), you: o["you"].isTrue)
+                return QueueEntry(position: Int(o["position"].num), name: o["name"].str(40), you: o["you"].isTrue, peer: o["peer"].str(80))
             },
             spectators: m["spectators"].arr.prefix(64).map { p in
                 let o = Optional(p).obj
-                return Spectator(name: o["name"].str(40), you: o["you"].isTrue)
+                return Spectator(name: o["name"].str(40), you: o["you"].isTrue, peer: o["peer"].str(80), hand: o["hand"].isTrue)
             },
             you: YouView(
                 name: you["name"].str(40),
@@ -280,7 +348,10 @@ public enum RoomMessages {
                 spectator: you["spectator"].isTrue,
                 swapOffers: parseSwaps(you["swap_offers"], maxPlayers: maxPlayers),
                 swapAsked: parseSwaps(you["swap_asked"], maxPlayers: maxPlayers),
-                pauseAsked: parsePauseAsk(you["pause_asked"])
+                pauseAsked: parsePauseAsk(you["pause_asked"]),
+                hand: you["hand"].isTrue,
+                handAgain: parseTime(you["hand_again"]),
+                held: you["held"].isTrue
             ),
             pausable: m["pausable"].isTrue,
             paused: m["paused"].isTrue,
@@ -288,8 +359,39 @@ public enum RoomMessages {
             controls: parseControls(m["controls"]),
             recording: m["recording"].isTrue,
             hostOnline: !m["host_online"].isFalse,
-            picture: parsePicture(m["picture"])
+            picture: parsePicture(m["picture"]),
+            spectatorsHear: m["spectators_hear"].isTrue,
+            spectatorSaver: m["spectator_saver"].isTrue,
+            voiceSlots: parseVoiceSlots(m["voice_slots"], maxPlayers: maxPlayers)
         )
+    }
+
+    /** room_state.voice_slots: always 4 entries; a port outside the seats counts as the queue (0). */
+    static func parseVoiceSlots(_ v: JSON?, maxPlayers: Int) -> [VoiceSlot?] {
+        let list = v.arr
+        return (0..<4).map { i in
+            guard i < list.count, case let .object(o) = list[i] else { return nil }
+            return VoiceSlot(name: o["name"].str(40), port: port(o["port"], max: maxPlayers), you: o["you"].isTrue)
+        }
+    }
+
+    private static let rfc3339 = try! NSRegularExpression(pattern: "^(\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d)(\\.\\d{1,9})?(Z|[+-]\\d\\d:\\d\\d)$")
+
+    /**
+     * An RFC 3339 time from the device (Go writes up to 9 decimals) as ms
+     * since the epoch, or 0 when absent or not a time (the website's time()).
+     */
+    public static func parseTime(_ v: JSON?) -> Double {
+        guard let s = v.strOrNil, s.count <= 40,
+              let m = rfc3339.firstMatch(in: s, range: NSRange(s.startIndex..., in: s)),
+              let base = Range(m.range(at: 1), in: s), let zone = Range(m.range(at: 3), in: s)
+        else { return 0 }
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime]
+        guard let date = f.date(from: String(s[base]) + String(s[zone])) else { return 0 }
+        var ms = date.timeIntervalSince1970 * 1000
+        if let frac = Range(m.range(at: 2), in: s), let x = Double("0" + s[frac]) { ms += x * 1000 }
+        return ms.rounded(.down)
     }
 
     /** room_state.picture: nil when absent or when either value is unknown (the website's parseRoomPicture). */

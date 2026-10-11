@@ -20,6 +20,24 @@ final class RtcSignalTests: XCTestCase {
         XCTAssertEqual(#"{"kind":"pin","token":"\#(token)"}"#, RtcSignals.token(token).text)
     }
 
+    func testGroupInvitationKeyMessage() {
+        XCTAssertEqual(#"{"kind":"pin","key":"\#(token)","name":"Ana"}"#, RtcSignals.key(token, name: "Ana").text)
+        // The name the host sees is 24 characters at most.
+        let long = String(repeating: "n", count: 30)
+        XCTAssertEqual(#"{"kind":"pin","key":"\#(token)","name":"\#(String(repeating: "n", count: 24))"}"#, RtcSignals.key(token, name: long).text)
+    }
+
+    func testRemovedAndWaitingResults() {
+        XCTAssertEqual(
+            .pinResult(PinResult(ok: false, token: "", reason: "removed", left: 0, retryAfter: 0)),
+            RtcSignals.parse(JSONText.parse(#"{"kind":"pin_result","ok":false,"reason":"removed"}"#))
+        )
+        XCTAssertEqual(
+            .pinResult(PinResult(ok: false, token: "", reason: "waiting", left: 0, retryAfter: 0)),
+            RtcSignals.parse(JSONText.parse(#"{"kind":"pin_result","ok":false,"reason":"waiting"}"#))
+        )
+    }
+
     func testNegotiation() {
         XCTAssertEqual(.offer("v=0"), RtcSignals.parse(JSONText.parse(#"{"kind":"offer","sdp":"v=0"}"#)))
         XCTAssertEqual(

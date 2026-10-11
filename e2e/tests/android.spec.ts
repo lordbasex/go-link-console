@@ -103,6 +103,16 @@ function appIn(track: string, key: keyof A.TrackStats): number {
   return Number(probe.lastStats()?.in?.[track]?.[key] ?? 0);
 }
 
+/**
+ * "Do you want to join the voice?": asked under the picture each time the
+ * app becomes able to talk with its microphone off. Not now keeps it
+ * listening (the card would cover the bottom of the test card).
+ */
+async function voiceNotNow() {
+  await A.tapOn({ id: "voice-ask-no" }, 20_000);
+  await A.waitGone({ id: "voice-ask" });
+}
+
 async function leaveRoom() {
   A.hideKeyboard();
   await A.tapOn({ desc: "Leave" });
@@ -113,27 +123,6 @@ async function leaveRoom() {
 async function clickOnStage(target: ReturnType<Page["locator"]>) {
   await wakeStage(page);
   await target.click();
-}
-
-/** The owner's inbound RTP packets for a stream id (e.g. voice-p2), from the SDP's msid lines. */
-async function ownerInbound(stream: string): Promise<number> {
-  return page.evaluate(async (want) => {
-    let total = 0;
-    for (const pc of (window as unknown as { __pcs: RTCPeerConnection[] }).__pcs) {
-      if (pc.connectionState === "closed" || !pc.remoteDescription) continue;
-      const mids = new Map<string, string>();
-      for (const section of pc.remoteDescription.sdp.split(/\r?\nm=/)) {
-        const mid = section.match(/a=mid:(\S+)/)?.[1];
-        const msid = section.match(/a=msid:(\S+)/)?.[1];
-        if (mid && msid) mids.set(mid, msid);
-      }
-      const stats = await pc.getStats();
-      stats.forEach((s: { type: string; kind?: string; mid?: string; packetsReceived?: number }) => {
-        if (s.type === "inbound-rtp" && s.kind === "audio" && s.mid && mids.get(s.mid) === want) total += s.packetsReceived ?? 0;
-      });
-    }
-    return total;
-  }, stream);
 }
 
 test("the owner links the device and opens the test pattern room", async () => {
@@ -159,6 +148,10 @@ test("joins by App Link with the PIN and the terms, takes a seat and shows the p
   appPort = await waitSeated(from);
   snap("alias-step");
   await enterAlias();
+  // Seated, the app is asked about the voice (never together with the name step).
+  await A.waitFor({ id: "voice-ask" });
+  snap("voice-ask");
+  await voiceNotNow();
   const seat = await A.waitFor({ id: "room-seat", text: `You are P${appPort}` });
   const ui = probe.lastUi()!;
   ownerPort = Number(String(ui.seats).match(/P(\d)=(?!-)\S+/g)?.map((s) => Number(s[1])).find((p) => p !== appPort) ?? 0);
@@ -259,11 +252,13 @@ test("chat goes both ways", async () => {
 });
 
 test("voice goes both ways between the seated players", async () => {
-  // The owner's fake microphone (a tone) -> the device -> the app's voice-pN track.
+  // The owner's fake microphone (a tone) -> the device -> the app. The four
+  // voice tracks are slots carrying whoever speaks: the owner, the first to
+  // speak, gets the first one.
   const mic = page.locator("button.mic-toggle");
   await clickOnStage(mic);
   await expect(mic).toHaveAttribute("aria-pressed", "true");
-  const track = `voice-p${ownerPort}`;
+  const track = "voice-p1";
   const v0 = appIn(track, "packets");
   await expect.poll(() => appIn(track, "packets"), { timeout: 20_000 }).toBeGreaterThan(v0 + 100);
   console.log(`app ${track}: packets ${v0} -> ${appIn(track, "packets")}, level ${appIn(track, "level")}`);
@@ -273,11 +268,12 @@ test("voice goes both ways between the seated players", async () => {
   const mark = probe.mark();
   await A.tapOn({ id: "dock-mic" });
   await probe.waitFor((e) => e.ev === "ui" && e.mic === true, 15_000, mark);
-  const ownerTrack = `voice-p${appPort}`;
-  const o0 = await ownerInbound(ownerTrack);
   await expect.poll(() => Number(probe.lastStats()?.out?.mic?.packets ?? 0), { timeout: 20_000 }).toBeGreaterThan(50);
-  await expect.poll(() => ownerInbound(ownerTrack), { timeout: 20_000 }).toBeGreaterThan(o0 + 50);
-  console.log(`app mic out ${probe.lastStats()?.out?.mic?.packets} packets; owner ${ownerTrack}: ${o0} -> ${await ownerInbound(ownerTrack)}`);
+  // The emulator's microphone records silence, and the device gives a voice
+  // slot only to someone speaking (silence is never forwarded), so the owner
+  // hears nothing from it: the app's microphone leaving the phone is what is
+  // checked here (the device's forwarding has its own tests and the web e2e).
+  console.log(`app mic out ${probe.lastStats()?.out?.mic?.packets} packets (port ${appPort})`);
   snap("voice");
   await A.tapOn({ id: "dock-mic" });
   await clickOnStage(mic);
@@ -335,6 +331,7 @@ test("a wrong PIN and an already used PIN are refused; the new invitation's PIN 
   usedPins.push(inv.pin);
   appPort = await waitSeated(mark);
   await enterAlias();
+  await voiceNotNow();
   snap("admitted-after-refusals");
 });
 
@@ -348,6 +345,7 @@ test("joins with the 9-digit code typed on the home screen", async () => {
   usedPins.push(inv.pin);
   appPort = await waitSeated(mark);
   await enterAlias();
+  await voiceNotNow();
   await A.waitFor({ id: "room-seat", text: `You are P${appPort}` });
   await expect.poll(() => appIn("video", "frames"), { timeout: 30_000 }).toBeGreaterThan(30);
   snap("code-join-streaming");
@@ -450,6 +448,8 @@ test("with the four seats taken the app waits in the queue, takes the freed seat
   await joinWithPin(inv.pin);
   await probe.waitFor((e) => e.ev === "ui" && e.phase === "STREAMING" && e.me === "queue:1", 60_000, mark);
   await enterAlias();
+  // The queue talks with the players too: it is asked about the voice.
+  await voiceNotNow();
   await A.waitFor({ id: "room-seat", text: "You are #1 in the queue" });
   expect(seatedCount()).toBe(4);
   // The queue still watches the picture.
@@ -479,6 +479,8 @@ test("with the four seats taken the app waits in the queue, takes the freed seat
   await A.tapOn({ text: "Join the queue" });
   appPort = await waitSeated(mark);
   A.shell("input keyevent 4"); // close the sheet
+  // From watching to playing: asked about the voice again.
+  await voiceNotNow();
   await A.waitFor({ id: "room-seat", text: `You are P${appPort}` });
   snap("back-from-spectating");
 });
@@ -526,4 +528,60 @@ test("seats are swapped between the app and a browser guest, asked from either s
   await expect.poll(() => ownSeat(g.page)).toBe(guestPort);
   await A.waitFor({ id: "room-seat", text: `You are P${myPort}` });
   appPort = myPort;
+});
+
+test("a spectators' QR code: the app asks to come in, the host lets it in to watch, it raises a hand, and the host takes it out", async () => {
+  await leaveRoom();
+  // The owner makes the spectators' QR code (Ask me first is on).
+  await page.getByRole("button", { name: "Invite", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: /Invite to/ });
+  await dialog.getByRole("button", { name: "Spectators" }).click();
+  await dialog.getByRole("button", { name: "Make the spectators' QR code" }).click();
+  const link = (await dialog.locator(".invite-url[data-link]").getAttribute("data-link")) ?? "";
+  const m = link.match(/\/g\/([A-Za-z0-9_-]{22})#k=([A-Za-z0-9_-]{43})$/);
+  expect(m).not.toBeNull();
+  await dialog.getByRole("button", { name: "Got it" }).click();
+
+  // The app opens it as an App Link: a name for the host, no PIN, then a wait.
+  A.shell(`am start -a android.intent.action.VIEW -d 'https://go-link.org/g/${m![1]}#k=${m![2]}' ${A.PACKAGE}`);
+  await A.fill({ id: "knock-name" }, "Droid");
+  A.hideKeyboard();
+  expect(A.find({ id: "join-pin" })).toBeUndefined();
+  const terms = A.find({ id: "terms-check" });
+  if (terms && !terms.checked) A.tap(terms);
+  await A.tapOn({ id: "join-button" });
+  await A.waitFor({ id: "room-knock-waiting" });
+  snap("knock-waiting");
+
+  // The host sees that Droid comes to watch and lets it in.
+  const row = page.locator(".knock-row", { hasText: "Droid" });
+  await expect(row.getByText("to watch")).toBeVisible({ timeout: 30_000 });
+  await page.getByRole("button", { name: "Let Droid in", exact: true }).click();
+  const mark = probe.mark();
+  await probe.waitFor((e) => e.ev === "ui" && e.phase === "STREAMING" && e.me === "spectator", 60_000, mark);
+  // Watching, it is not asked about the voice; it raises a hand from the dock.
+  expect(A.find({ id: "voice-ask" })).toBeUndefined();
+  await A.tapOn({ id: "dock-hand" });
+  snap("hand-up");
+  await wakeStage(page);
+  await page.getByRole("button", { name: "1 raised hand" }).click();
+  await expect(page.getByRole("group", { name: "Droid raised a hand" })).toBeVisible();
+  await page.getByRole("menuitem", { name: "Not now" }).click();
+  await A.waitFor({ text: "The host will let you play later" });
+  snap("hand-not-now");
+
+  // The host takes Droid out: the app says so and does not try again.
+  await page.getByRole("tablist", { name: "Room", exact: true }).getByRole("tab", { name: /Spectators/ }).click();
+  await page.getByRole("button", { name: "What to do with Droid" }).click();
+  await page.getByRole("menuitem", { name: "Remove Droid from the room" }).click();
+  await A.waitFor({ id: "room-removed" });
+  await A.waitFor({ text: "The host took you out of this room" });
+  snap("removed");
+
+  // Back to one person invitations for any later test.
+  await page.getByRole("button", { name: "Invite", exact: true }).click();
+  await dialog.getByRole("button", { name: "Spectators" }).click();
+  await dialog.getByRole("button", { name: "Stop this QR code" }).click();
+  await dialog.getByRole("button", { name: "One person" }).click();
+  await dialog.getByRole("button", { name: "Got it" }).click();
 });

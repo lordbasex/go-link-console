@@ -146,13 +146,14 @@ class MainActivity : ComponentActivity() {
 
     /**
      * An App Link (https://go-link.org/g/<invite>) goes straight to the PIN
-     * form for that invitation. Only the invitation is read from the link:
-     * never a PIN or a signaling server.
+     * form for that invitation (or the name, for a group invitation's
+     * #k=<key>). Only the invitation and that key are read from the link:
+     * never a PIN or a signaling server. The key stays in memory.
      */
     private fun handleLink(intent: Intent?) {
         if (intent?.action != Intent.ACTION_VIEW) return
         val uri = intent.data ?: return
-        val target = Invites.parseAppLink(uri.scheme, uri.host, uri.path) ?: return
+        val target = Invites.parseAppLink(uri.scheme, uri.host, uri.path, uri.encodedFragment) ?: return
         vm.openInvite(target)
     }
 
@@ -216,14 +217,15 @@ private fun App(vm: PlayerViewModel) {
         is Screen.Join -> JoinScreen(
             fixedTarget = s.target,
             termsAccepted = vm.termsAccepted(),
-            onJoin = { target, pin ->
+            savedName = vm.prefs.playerName,
+            onJoin = { target, pin, name ->
                 val bt = Perms.BLUETOOTH
                 val ask = bt != null && !Perms.granted(activity, bt) && !vm.prefs.asked(bt)
-                vm.join(target, pin, askHeadphones = ask)
+                vm.join(target, pin, name, askHeadphones = ask)
             },
             onBack = { vm.go(Screen.Home) },
         )
-        is Screen.Headphones -> HeadphonesScreen(vm.prefs) { vm.enterRoom(s.target, s.pin) }
+        is Screen.Headphones -> HeadphonesScreen(vm.prefs) { vm.enterRoom(s.target, s.pin, s.name) }
         Screen.Room -> {
             val session = vm.session
             if (session == null) {

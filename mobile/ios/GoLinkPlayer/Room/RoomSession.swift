@@ -9,9 +9,13 @@ import UIKit
 /** What the room screen shows about sound and voice. */
 struct SoundState: Equatable {
     var micOn = false
-    /** Ports whose voice this player silenced. */
-    var silenced = Set<Int>()
-    /** Ports whose voice track arrived. */
+    /**
+     * People whose voice this player silenced, by name: a voice track is a
+     * slot that carries whoever speaks now, so a seat or a track is not
+     * the person.
+     */
+    var silenced = Set<String>()
+    /** Voice slots (1-4) whose track arrived. */
     var voices = Set<Int>()
     /** 0 to 1 (0-100 %; 1 = as sent). */
     var gameVolume = 1.0
@@ -45,6 +49,10 @@ final class RoomSession: ObservableObject {
     @Published private(set) var askName = true
     /** The stats overlay's numbers, while it is on (nil until the first reading). */
     @Published private(set) var liveStats: LiveStatsView?
+    /** Who speaks now (seats, and names in the queue), from the voice tracks' levels. */
+    @Published private(set) var speaking = Speaking()
+    /** "Do you want to join the voice?" (see GoLinkCore.VoiceAsk). */
+    @Published private(set) var voiceAsk = false
 
     private let prefs: Prefs
     private let engine = WebRtcEngine.shared
@@ -59,14 +67,26 @@ final class RoomSession: ObservableObject {
     private var stopProbe: () -> Void = {}
     private let statsMeter = LiveStatsMeter()
     private var statsTimer: Timer?
+    private var levelsTimer: Timer?
+    private var voiceAskState = VoiceAsk()
+    private var talker = false
 
-    init(prefs: Prefs, target: InviteTarget, pin: String) {
+    /**
+     * pin is the typed PIN of a one-person invitation; a group invitation
+     * sends its key with name instead (the key stays in memory only).
+     */
+    init(prefs: Prefs, invitation: Invitation, pin: String, name: String = "") {
         self.prefs = prefs
-        self.target = target
+        target = invitation.target
         signal = SignalClient(url: prefs.signal.url, factory: URLSessionSockets(), scheduler: MainScheduler.shared)
         router = AudioRouter(prefs: prefs, device: WebRtcEngine.shared.audioDevice)
         let peers = PeerFactory()
-        client = RoomClient(signal: signal, target: target, typedPin: pin, passes: RoomPasses(prefs), peers: peers, scheduler: MainScheduler.shared)
+        client = RoomClient(
+            signal: signal, target: invitation.target, typedPin: pin, key: invitation.key, keyName: name,
+            passes: RoomPasses(prefs), peers: peers, scheduler: MainScheduler.shared
+        )
+        // A group invitation already asked the name, for the host.
+        askName = !invitation.isGroup
         var pushPads: () -> Void = {}
         gamepads = GamepadInput { pushPads() }
         pushPads = { [weak self] in self?.pushPads() }
@@ -89,7 +109,7 @@ final class RoomSession: ObservableObject {
     }
 
     func start() {
-        uiToken = client.onUi { [weak self] in self?.ui = $0 }
+        uiToken = client.onUi { [weak self] in self?.onUi($0) }
         gamepads.$controllers.sink { [weak self] list in
             guard let self else { return }
             self.controllers = list
@@ -106,6 +126,7 @@ final class RoomSession: ObservableObject {
 
     func close() {
         setStatsOn(false)
+        setLevelsOn(false)
         stopProbe()
         uiToken?.cancel()
         bag = []
@@ -118,6 +139,30 @@ final class RoomSession: ObservableObject {
     }
 
     func leave() { close() }
+
+    private func onUi(_ next: RoomUi) {
+        let slotsChanged = next.room?.voiceSlots != ui.room?.voiceSlots
+        ui = next
+        if slotsChanged { applyVolumes() }
+        // The players and the queue talk: the microphone only sends while this app is one of them.
+        let canTalk = next.room?.talker ?? false
+        if canTalk != talker {
+            talker = canTalk
+            applyMic()
+        }
+        updateVoiceAsk()
+    }
+
+    private func updateVoiceAsk() {
+        let shown = voiceAskState.update(talker: talker, roomVoice: ui.room?.voice != false, micOn: sound.micOn)
+        if shown != voiceAsk { voiceAsk = shown }
+    }
+
+    /** The voice question's "Not now". */
+    func dismissVoiceAsk() {
+        voiceAskState.dismiss()
+        voiceAsk = false
+    }
 
     func setName(_ name: String) {
         prefs.playerName = name
@@ -145,6 +190,32 @@ final class RoomSession: ObservableObject {
         RunLoop.main.add(t, forMode: .common)
         statsTimer = t
         readStats()
+    }
+
+    /** Reads the voice tracks' levels a few times a second while there are voices, to show who speaks. */
+    private func setLevelsOn(_ on: Bool) {
+        if on == (levelsTimer != nil) { return }
+        levelsTimer?.invalidate()
+        levelsTimer = nil
+        guard on else {
+            if speaking != Speaking() { speaking = Speaking() }
+            return
+        }
+        let t = Timer(timeInterval: 0.3, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.readLevels() }
+        }
+        RunLoop.main.add(t, forMode: .common)
+        levelsTimer = t
+    }
+
+    private func readLevels() {
+        guard let peer else { return }
+        peer.stats { [weak self] report in
+            guard let self, self.levelsTimer != nil else { return }
+            let levels = LiveStatsReader.voiceLevels(report, labels: peer.trackLabels)
+            let now = VoiceSlots.speaking(slots: self.ui.room?.voiceSlots ?? [], levels: levels, silenced: self.sound.silenced)
+            if now != self.speaking { self.speaking = now }
+        }
     }
 
     private func readStats() {
@@ -199,9 +270,10 @@ final class RoomSession: ObservableObject {
         applyVolumes()
     }
 
-    /** Silences (or not) one player's voice, only for this device. */
-    func toggleSilence(_ port: Int) {
-        if sound.silenced.contains(port) { sound.silenced.remove(port) } else { sound.silenced.insert(port) }
+    /** Silences (or not) one person's voice, by name, only for this device. */
+    func toggleSilence(_ name: String) {
+        guard !name.isEmpty else { return }
+        if sound.silenced.contains(name) { sound.silenced.remove(name) } else { sound.silenced.insert(name) }
         applyVolumes()
     }
 
@@ -209,20 +281,24 @@ final class RoomSession: ObservableObject {
     func setMic(_ on: Bool) {
         sound.micOn = on
         applyMic()
+        updateVoiceAsk()
     }
 
     func testSound() { engine.audioDevice.chime() }
 
     fileprivate func applyMic() {
-        engine.audioDevice.micEnabled = sound.micOn
-        peer?.setMicTrack(sound.micOn ? engine.microphone() : nil)
+        // Only the players and the queue talk (the device drops a spectator's voice too).
+        let on = sound.micOn && talker
+        engine.audioDevice.micEnabled = on
+        peer?.setMicTrack(on ? engine.microphone() : nil)
     }
 
     private func applyVolumes() {
         // libwebrtc's remote volume goes from 0 to 10 (1 = as received).
         gameAudio?.source.volume = gameMuted ? 0 : sound.gameVolume
-        for (port, track) in voiceTracks {
-            track.source.volume = sound.silenced.contains(port) ? 0 : sound.voiceVolume
+        let muted = VoiceSlots.mutedSlots(slots: ui.room?.voiceSlots ?? [], silenced: sound.silenced)
+        for (slot, track) in voiceTracks {
+            track.source.volume = muted.contains(slot) ? 0 : sound.voiceVolume
         }
     }
 }
@@ -235,10 +311,11 @@ extension RoomSession: MediaListener {
         applyVolumes()
     }
 
-    func onVoice(port: Int, track: RTCAudioTrack) {
-        voiceTracks[port] = track
-        sound.voices.insert(port)
+    func onVoice(slot: Int, track: RTCAudioTrack) {
+        voiceTracks[slot] = track
+        sound.voices.insert(slot)
         applyVolumes()
+        setLevelsOn(true)
     }
 
     func onMediaClosed() {
@@ -246,5 +323,6 @@ extension RoomSession: MediaListener {
         gameAudio = nil
         voiceTracks = [:]
         sound.voices = []
+        setLevelsOn(false)
     }
 }

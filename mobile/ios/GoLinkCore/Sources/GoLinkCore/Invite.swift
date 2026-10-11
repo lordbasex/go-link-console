@@ -23,6 +23,27 @@ public enum InviteTarget: Equatable, Hashable, Sendable {
     }
 }
 
+/**
+ * An invitation as the app opens it: where it points, and the key of a
+ * group invitation (one link for several people, `#k=<key>` after the
+ * link) or "" for a one-person invitation. The key only lives in memory:
+ * it is never logged or saved, and description leaves it out.
+ */
+public struct Invitation: Equatable, Hashable, Sendable, CustomStringConvertible {
+    public let target: InviteTarget
+    public let key: String
+
+    public init(target: InviteTarget, key: String = "") {
+        self.target = target
+        self.key = key
+    }
+
+    /** A group invitation: the person sends a name instead of a PIN. */
+    public var isGroup: Bool { !key.isEmpty }
+
+    public var description: String { "Invitation(\(target.display)\(isGroup ? ", group" : ""))" }
+}
+
 public enum Invites {
     /** The only site whose invitation links the app follows. */
     public static let host = "go-link.org"
@@ -32,6 +53,9 @@ public enum Invites {
 
     private static let invite = try! NSRegularExpression(pattern: "^[A-Za-z0-9_-]{22}$")
     private static let link = try! NSRegularExpression(pattern: "^https://go-link\\.org/g/([A-Za-z0-9_-]{22})/?$")
+    /** The same link with a group invitation's key: exactly #k=<43 base64url characters>. */
+    private static let groupLink = try! NSRegularExpression(pattern: "^https://go-link\\.org/g/([A-Za-z0-9_-]{22})/?#k=([A-Za-z0-9_-]{43})$")
+    private static let fragmentKey = try! NSRegularExpression(pattern: "(?:^|[#&])k=([A-Za-z0-9_-]{43})(?:&|$)")
     private static let path = try! NSRegularExpression(pattern: "^/g/([A-Za-z0-9_-]{22})/?$")
     private static let code = try! NSRegularExpression(pattern: "^[0-9]{9}$")
     private static let separators = try! NSRegularExpression(pattern: "[\\s.-]")
@@ -78,6 +102,52 @@ public enum Invites {
               c.user == nil, c.password == nil, c.port == nil
         else { return nil }
         return parseAppLink(scheme: c.scheme?.lowercased(), host: c.host?.lowercased(), path: c.percentEncodedPath)
+    }
+
+    /**
+     * Reads a scanned QR code like parseScanned, also taking a group
+     * invitation's link (https://go-link.org/g/<invite>#k=<key>).
+     */
+    public static func scanned(_ text: String) -> Invitation? {
+        if text.count > maxInput { return nil }
+        let t = trim(text)
+        if let g = groupOf(t) { return g }
+        return parseScanned(t).map { Invitation(target: $0) }
+    }
+
+    /** Reads typed or pasted text like parseTyped, also taking a group invitation's link. */
+    public static func typed(_ text: String) -> Invitation? {
+        if text.count > maxInput { return nil }
+        let t = trim(text)
+        if let g = groupOf(t) { return g }
+        return parseTyped(t).map { Invitation(target: $0) }
+    }
+
+    /**
+     * Reads a Universal Link like parseAppLink, plus a group invitation's
+     * key from its fragment (k=<key>; anything else there is ignored).
+     */
+    public static func appLink(_ url: URL) -> Invitation? {
+        guard let target = parseAppLink(url) else { return nil }
+        let fragment = URLComponents(url: url, resolvingAgainstBaseURL: false)?.percentEncodedFragment ?? ""
+        return Invitation(target: target, key: groupKey(fragment: fragment))
+    }
+
+    /**
+     * The key of a group invitation from a link's fragment ("k=<key>",
+     * maybe among other values joined by &), or "" when there is none or
+     * it is not exactly 43 base64url characters. A "#" in front is allowed.
+     */
+    public static func groupKey(fragment: String) -> String {
+        if fragment.count > maxInput { return "" }
+        return firstGroup(fragmentKey, fragment) ?? ""
+    }
+
+    private static func groupOf(_ t: String) -> Invitation? {
+        guard let m = groupLink.firstMatch(in: t, range: NSRange(t.startIndex..., in: t)), m.numberOfRanges > 2,
+              let a = Range(m.range(at: 1), in: t), let b = Range(m.range(at: 2), in: t)
+        else { return nil }
+        return Invitation(target: .link(String(t[a])), key: String(t[b]))
     }
 
     /** A PIN is exactly 6 digits. */

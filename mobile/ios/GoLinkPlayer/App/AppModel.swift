@@ -8,8 +8,12 @@ import SwiftUI
 enum Screen: Equatable {
     case home
     case scan
-    /** The PIN form. The target is fixed when it came from a QR code or a link, or nil to type the code too. */
-    case join(InviteTarget?)
+    /**
+     * The PIN form (or the name form of a group invitation). The invitation
+     * is fixed when it came from a QR code or a link, or nil to type the
+     * code too. A group invitation's key stays in memory only.
+     */
+    case join(Invitation?)
     case room
     case settings
     /** The offline controller test (no device, no network). */
@@ -50,27 +54,33 @@ final class AppModel: ObservableObject {
 
     /**
      * A Universal Link (https://go-link.org/g/<invite>) goes straight to the
-     * PIN form for that invitation. Only the invitation is read from the
-     * link: never a PIN or a signaling server.
+     * PIN form for that invitation. Only the invitation (and a group
+     * invitation's key, #k=<key>) is read from the link: never a PIN or a
+     * signaling server.
      */
     func open(url: URL) {
-        guard let target = Invites.parseAppLink(url) else { return }
-        openInvite(target)
+        guard let invitation = Invites.appLink(url) else { return }
+        openInvite(invitation)
     }
 
-    /** An invitation from a QR code or a link: straight to the PIN. */
-    func openInvite(_ target: InviteTarget) {
+    /** An invitation from a QR code or a link: straight to the PIN (or the name, for a group invitation). */
+    func openInvite(_ invitation: Invitation) {
         leaveRoom()
-        screen = .join(target)
+        screen = .join(invitation)
     }
 
     var termsAccepted: Bool { Terms.accepted(prefs) }
 
-    /** Joins with the typed PIN, after the terms were accepted on the form. */
-    func join(_ target: InviteTarget, pin: String) {
+    /**
+     * Joins with the typed PIN, or a group invitation's key with the name
+     * the person gave (saved as the player name), after the terms were
+     * accepted on the form.
+     */
+    func join(_ invitation: Invitation, pin: String, name: String = "") {
         Terms.accept(prefs, isoNow: ISO8601DateFormatter().string(from: Date()))
+        if invitation.isGroup { prefs.playerName = name }
         leaveRoom()
-        let s = RoomSession(prefs: prefs, target: target, pin: pin)
+        let s = RoomSession(prefs: prefs, invitation: invitation, pin: pin, name: name)
         session = s
         s.start()
         screen = .room

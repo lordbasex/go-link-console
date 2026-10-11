@@ -25,8 +25,8 @@ sealed interface Screen {
      */
     data class Join(val target: InviteTarget?) : Screen
 
-    /** Asks for the headphones permission (Android 12+) before a room. */
-    data class Headphones(val target: InviteTarget, val pin: String) : Screen
+    /** Asks for the headphones permission (Android 12+) before a room. name: a group invitation's knock name. */
+    data class Headphones(val target: InviteTarget, val pin: String, val name: String = "") : Screen
 
     data object Room : Screen
 
@@ -66,19 +66,24 @@ class PlayerViewModel(app: Application) : AndroidViewModel(app) {
 
     fun termsAccepted(): Boolean = Terms.accepted(prefs)
 
-    /** Joins with the typed PIN, after the terms were accepted on the form. */
-    fun join(target: InviteTarget, pin: String, askHeadphones: Boolean) {
+    /**
+     * Joins with the typed PIN, or with a group invitation's key and the
+     * name the host sees, after the terms were accepted on the form.
+     */
+    fun join(target: InviteTarget, pin: String, name: String, askHeadphones: Boolean) {
         Terms.accept(prefs, Instant.now().toString())
+        // The knock's name is the player's name from now on.
+        if (name.isNotEmpty()) prefs.playerName = name
         if (askHeadphones) {
-            _screen.value = Screen.Headphones(target, pin)
+            _screen.value = Screen.Headphones(target, pin, name)
             return
         }
-        enterRoom(target, pin)
+        enterRoom(target, pin, name)
     }
 
-    fun enterRoom(target: InviteTarget, pin: String) {
+    fun enterRoom(target: InviteTarget, pin: String, name: String = "") {
         leaveRoom()
-        val s = RoomSession(getApplication(), prefs, target, pin, viewModelScope)
+        val s = RoomSession(getApplication(), prefs, target, pin, viewModelScope, knockName = name)
         session = s
         s.start()
         _screen.value = Screen.Room

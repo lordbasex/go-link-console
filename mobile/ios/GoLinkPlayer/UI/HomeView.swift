@@ -33,7 +33,7 @@ struct HomeView: View {
                     SecondaryButton(title: L("home_enter_code"), icon: "number") { model.screen = .join(nil) }
                         .accessibilityIdentifier("home-code")
                     SecondaryButton(title: L("home_paste"), icon: "doc.on.clipboard") {
-                        let target = UIPasteboard.general.string.flatMap { Invites.parseTyped($0) }
+                        let target = UIPasteboard.general.string.flatMap { Invites.typed($0) }
                         pasteError = target == nil
                         if let target { model.openInvite(target) }
                     }

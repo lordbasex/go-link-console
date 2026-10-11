@@ -32,7 +32,14 @@ func systemText(text: String, event: ChatEvent?, args: ChatArgs?) -> String {
     case .leftSeat: return L("ev_left", n, p)
     case .seatFree: return L("ev_free", p)
     case .tookSeat: return L("ev_took", n, p)
+    case .sentToQueue: return L("ev_sent_to_queue", n, n2, p)
+    case .sentToWatch: return L("ev_sent_to_watch", n, n2, p)
+    case .letQueue: return L("ev_let_queue", n, n2)
+    case .playNow: return L("ev_play_now", n, n2, p)
+    case .firstInQueue: return L("ev_first_in_queue", n)
+    case .removed: return L("ev_removed", n, n2)
     case .pauseDeclined: return L("ev_pause_declined")
+    case .handLater: return L("hand_later")
     case nil: return text
     }
 }
@@ -59,5 +66,29 @@ func meLine(_ me: Me) -> String {
     case let .player(ports): return L("room_you_player", ports.map { "P\($0)" }.joined(separator: ", "))
     case let .queue(p): return L("room_you_queue", ordinal(p))
     case .spectator: return L("room_you_spectator")
+    }
+}
+
+/** Why a group invitation did not let this person in (the website's knock.ended). */
+func knockEndedText(_ reason: String) -> String {
+    switch reason {
+    case "declined", "full", "expired", "busy", "blocked", "locked": return L("knock_ended_" + reason)
+    default: return L("knock_ended_wrong")
+    }
+}
+
+/**
+ * The notice for a request the device refused (control "error"), or nil
+ * for codes this screen does not explain. handAgain is when the next
+ * raised hand is allowed (ms since the epoch, 0 = unknown).
+ */
+func refusalText(_ code: String, handAgain: Double, nowMs: Double = Date().timeIntervalSince1970 * 1000) -> String? {
+    switch code {
+    case "hand_too_soon":
+        let s = Int(((handAgain - nowMs) / 1000).rounded(.up))
+        return handAgain > 0 && s > 0 && s <= 60 ? L("hand_again", s) : L("hand_too_soon")
+    case "hand_no_host": return L("hand_no_host")
+    case "queue_ask_host": return L("hand_ask_host")
+    default: return nil
     }
 }

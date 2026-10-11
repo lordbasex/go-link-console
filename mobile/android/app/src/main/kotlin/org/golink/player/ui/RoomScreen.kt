@@ -59,6 +59,7 @@ import androidx.compose.material.icons.filled.Gamepad
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
+import androidx.compose.material.icons.filled.PanTool
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Settings
@@ -176,12 +177,14 @@ fun RoomScreen(session: RoomSession, prefs: Prefs, onLeave: () -> Unit, onAlias:
     // The gamepad's skin (Game settings › Skin); null is the classic pad.
     val skins = rememberSkinStore(prefs)
     val scope = rememberCoroutineScope()
-    val resources = LocalContext.current.resources
+    val context = LocalContext.current
+    val resources = context.resources
     LaunchedEffect(session) {
         // A chosen headset or microphone disconnected: say so, once.
         session.audioLost.collect { snackbar.showSnackbar(lostText(resources, it)) }
     }
-    // The host said no to this player's pause request: a notice in the chat and here.
+    // The host said no to this player's pause request, or "not now" to a
+    // raised hand: a notice in the chat and here.
     var seenLine by remember { mutableStateOf(ui.chat.lastOrNull()) }
     LaunchedEffect(ui.chat) {
         val from = seenLine?.let { ui.chat.lastIndexOf(it) + 1 } ?: 0
@@ -190,7 +193,29 @@ fun RoomScreen(session: RoomSession, prefs: Prefs, onLeave: () -> Unit, onAlias:
         if (fresh.any { it is ChatLine.System && it.event == ChatEvent.PAUSE_DECLINED }) {
             snackbar.showSnackbar(resources.getString(R.string.ev_pause_declined))
         }
+        if (fresh.any { it is ChatLine.System && it.event == ChatEvent.HAND_LATER }) {
+            snackbar.currentSnackbarData?.dismiss()
+            snackbar.showSnackbar(resources.getString(R.string.hand_later))
+        }
     }
+    // A request the device refused: why, in a short notice.
+    LaunchedEffect(ui.refused) {
+        val text = ui.refused?.let { refusalText(resources, it.code, ui.room?.you?.handAgain ?: 0) } ?: return@LaunchedEffect
+        snackbar.currentSnackbarData?.dismiss()
+        snackbar.showSnackbar(text)
+    }
+    // "Do you want to join the voice?": asked each time this phone becomes
+    // able to talk (it joins as a player or in the queue, or is moved there
+    // from watching) while its microphone is off. Not now keeps listening.
+    val talker = ui.room?.canTalk == true && ui.room?.voice != false
+    var voiceAsk by remember { mutableStateOf(false) }
+    var wasTalker by remember { mutableStateOf(false) }
+    LaunchedEffect(talker) {
+        if (talker && !wasTalker && !sound.micOn) voiceAsk = true
+        if (!talker) voiceAsk = false
+        wasTalker = talker
+    }
+    LaunchedEffect(sound.micOn) { if (sound.micOn) voiceAsk = false }
     val landscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val room = ui.room
     val picture = PictureSettings.resolve(savedPicture, room?.picture)
@@ -296,7 +321,19 @@ fun RoomScreen(session: RoomSession, prefs: Prefs, onLeave: () -> Unit, onAlias:
                         )
                     }
                 }
-                SwapOffers(room, session, Modifier.align(Alignment.BottomCenter).padding(8.dp))
+                Column(Modifier.align(Alignment.BottomCenter).padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (voiceAsk && aliasDone) {
+                        VoiceAsk(
+                            onYes = {
+                                voiceAsk = false
+                                session.setGameMuted(false) // talking implies listening
+                                if (Perms.granted(context, Perms.MIC)) session.setMic(true) else micAsk = true
+                            },
+                            onNo = { voiceAsk = false },
+                        )
+                    }
+                    SwapOffers(room, session, Modifier)
+                }
                 if (room.you.pauseAsked != null && !room.paused) {
                     PauseAskedBanner(
                         onCancel = { session.client.cancelPauseRequest() },
@@ -566,6 +603,41 @@ private fun Overlay(ui: RoomUi, onLeave: () -> Unit, onRetry: () -> Unit, onPin:
         PinPrompt(ui, onPin, onLeave)
         return
     }
+    when (ui.phase) {
+        RoomPhase.WAITING -> {
+            // A group invitation's knock: the host decides.
+            FinalCard(
+                title = stringResource(R.string.knock_waiting_title),
+                text = stringResource(R.string.knock_waiting_text),
+                button = stringResource(R.string.knock_leave),
+                onLeave = onLeave,
+                hand = true,
+                tag = "room-knock-waiting",
+            )
+            return
+        }
+        RoomPhase.REFUSED -> {
+            FinalCard(
+                title = stringResource(R.string.knock_ended_title),
+                text = knockEndText(LocalContext.current.resources, ui.knockEnd),
+                button = stringResource(R.string.knock_back),
+                onLeave = onLeave,
+                tag = "room-knock-ended",
+            )
+            return
+        }
+        RoomPhase.REMOVED -> {
+            FinalCard(
+                title = stringResource(R.string.removed_title),
+                text = stringResource(R.string.removed_text),
+                button = stringResource(R.string.room_leave),
+                onLeave = onLeave,
+                tag = "room-removed",
+            )
+            return
+        }
+        else -> Unit
+    }
     val problem = when (ui.phase) {
         RoomPhase.ENDED -> R.string.room_ended
         RoomPhase.NOT_FOUND -> R.string.room_not_found
@@ -581,6 +653,42 @@ private fun Overlay(ui: RoomUi, onLeave: () -> Unit, onRetry: () -> Unit, onPin:
                     PrimaryButton(stringResource(R.string.room_retry), onRetry)
                 }
                 SecondaryButton(stringResource(R.string.room_leave), onLeave)
+            }
+        }
+    }
+}
+
+/** A card over the picture with a title, a text and one way out (waiting for the host, or a final answer). */
+@Composable
+private fun FinalCard(title: String, text: String, button: String, onLeave: () -> Unit, tag: String, hand: Boolean = false) {
+    Surface(color = Tokens.surface, shape = RoundedCornerShape(16.dp), border = BorderStroke(1.dp, Tokens.border), modifier = Modifier.padding(16.dp).testTag(tag)) {
+        Column(Modifier.padding(18.dp).widthIn(max = 420.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            if (hand) Text("\u270B", fontSize = 28.sp, modifier = Modifier.clearAndSetSemantics {})
+            Text(title, color = Tokens.text, fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
+            Text(text, color = Tokens.muted, fontSize = 14.sp)
+            SecondaryButton(button, onLeave, Modifier.fillMaxWidth().testTag("$tag-leave"))
+        }
+    }
+}
+
+/** "Do you want to join the voice?", a small card under the picture: it never blocks the game. */
+@Composable
+private fun VoiceAsk(onYes: () -> Unit, onNo: () -> Unit) {
+    Surface(
+        color = Tokens.surface,
+        shape = RoundedCornerShape(14.dp),
+        border = BorderStroke(1.dp, Tokens.accentTintBorder),
+        modifier = Modifier.testTag("voice-ask"),
+    ) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Filled.Mic, contentDescription = null, tint = Tokens.accent, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.voice_ask_title), color = Tokens.text, fontSize = 14.sp)
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                PrimaryButton(stringResource(R.string.voice_ask_yes), onYes, Modifier.testTag("voice-ask-yes"))
+                SecondaryButton(stringResource(R.string.voice_ask_no), onNo, Modifier.testTag("voice-ask-no"))
             }
         }
     }
@@ -657,7 +765,8 @@ private fun Dock(
     val room = ui.room
     val seated = room?.me is Me.Player
     val voiceOn = room?.voice != false
-    val canTalk = seated && voiceOn
+    // The players and the queue talk (the device drops a spectator's voice).
+    val canTalk = room?.canTalk == true && voiceOn
     val items: List<@Composable () -> Unit> = listOf(
         {
             DockButton(
@@ -665,7 +774,7 @@ private fun Dock(
                 label = stringResource(
                     when {
                         !voiceOn -> R.string.room_voice_off
-                        !seated -> R.string.room_voice_players_only
+                        room?.canTalk != true -> R.string.room_voice_players_only
                         !micGranted -> R.string.room_mic_blocked
                         sound.micOn -> R.string.room_mic_on
                         else -> R.string.room_mic_off
@@ -691,6 +800,21 @@ private fun Dock(
             ) { session.setGameMuted(!sound.gameMuted) }
         },
         {
+            // A spectator raises a hand to ask the host to play (only while the host is in the room).
+            if (room != null && room.me is Me.Spectator) {
+                val up = room.you.hand
+                val label = stringResource(if (up) R.string.hand_lower else R.string.hand_raise)
+                val noHost = stringResource(R.string.hand_no_host)
+                DockButton(
+                    icon = Icons.Filled.PanTool,
+                    label = label,
+                    on = up,
+                    dimmed = !up && !room.hostOnline,
+                    tag = "dock-hand",
+                ) {
+                    if (!up && !room.hostOnline) onExplain(noHost) else session.client.raiseHand(!up)
+                }
+            }
             // Only the host pauses: a seated player asks for a pause.
             if (room != null && seated) {
                 val asked = room.you.pauseAsked != null
@@ -940,6 +1064,8 @@ private fun PlayersPanel(ui: RoomUi, session: RoomSession, onSound: () -> Unit, 
     val room = ui.room ?: return
     val sound by session.sound.collectAsState()
     val myPort = (room.me as? Me.Player)?.ports?.firstOrNull()
+    // Voices are silenced by person (a voice track carries whoever speaks now).
+    val voices = room.voice && sound.voices.isNotEmpty()
     LazyColumn(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         items(room.seats.size) { i ->
             val port = i + 1
@@ -958,9 +1084,9 @@ private fun PlayersPanel(ui: RoomUi, session: RoomSession, onSound: () -> Unit, 
                         val asked = room.you.swapAsked.any { it.to == port }
                         if (asked) Text(stringResource(R.string.room_swap_waiting, port), color = Tokens.muted, fontSize = 12.sp)
                     }
-                    if (seat != null && !seat.you && port in sound.voices) {
-                        TextButton(onClick = { session.toggleSilence(port) }) {
-                            Text(stringResource(if (port in sound.silenced) R.string.room_unsilence else R.string.room_silence), color = Tokens.voice)
+                    if (seat != null && !seat.you && voices) {
+                        TextButton(onClick = { session.toggleSilence(seat.name) }) {
+                            Text(stringResource(if (seat.name in sound.silenced) R.string.room_unsilence else R.string.room_silence), color = Tokens.voice)
                         }
                     }
                     if (myPort != null && seat?.you != true) {
@@ -974,10 +1100,25 @@ private fun PlayersPanel(ui: RoomUi, session: RoomSession, onSound: () -> Unit, 
                 }
             }
         }
+        if (room.me is Me.Spectator && (room.you.hand || room.you.held)) {
+            // Moved to watching by the host: back to playing through a raised hand.
+            item { Notice(stringResource(if (room.you.hand) R.string.hand_up else R.string.hand_ask_host), modifier = Modifier.testTag("hand-note")) }
+        }
         item {
             Row(Modifier.fillMaxWidth().padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                when (room.me) {
-                    is Me.Spectator -> PrimaryButton(stringResource(R.string.room_join_queue), { session.client.joinQueue() })
+                when {
+                    room.me is Me.Spectator && (room.you.held || room.you.hand) -> {
+                        val up = room.you.hand
+                        val noHost = !up && !room.hostOnline
+                        PrimaryButton(
+                            stringResource(if (up) R.string.hand_lower else R.string.hand_raise),
+                            { session.client.raiseHand(!up) },
+                            Modifier.testTag("players-hand"),
+                            enabled = !noHost,
+                            icon = Icons.Filled.PanTool,
+                        )
+                    }
+                    room.me is Me.Spectator -> PrimaryButton(stringResource(R.string.room_join_queue), { session.client.joinQueue() })
                     else -> SecondaryButton(stringResource(R.string.room_spectate), { session.client.spectate() })
                 }
                 // Volumes, microphone and output devices, and a test chime (Game settings).
@@ -987,16 +1128,36 @@ private fun PlayersPanel(ui: RoomUi, session: RoomSession, onSound: () -> Unit, 
         if (room.queue.isNotEmpty()) {
             item { Text(stringResource(R.string.room_queue_title), color = Tokens.muted, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 8.dp)) }
             items(room.queue) { q ->
-                Text(
-                    "${ordinal(res, q.position)}  ${localName(res, q.name)}" + if (q.you) " (${res.getString(R.string.room_you)})" else "",
-                    color = if (q.you) Tokens.accent else Tokens.text2,
-                )
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "${ordinal(res, q.position)}  ${localName(res, q.name)}" + if (q.you) " (${res.getString(R.string.room_you)})" else "",
+                        color = if (q.you) Tokens.accent else Tokens.text2,
+                        modifier = Modifier.weight(1f),
+                    )
+                    // The queue talks too: silence by person.
+                    if (!q.you && voices && q.name.isNotEmpty()) {
+                        TextButton(onClick = { session.toggleSilence(q.name) }) {
+                            Text(stringResource(if (q.name in sound.silenced) R.string.room_unsilence else R.string.room_silence), color = Tokens.voice)
+                        }
+                    }
+                }
             }
         }
         if (room.spectators.isNotEmpty()) {
             item { Text(stringResource(R.string.room_spectators_title), color = Tokens.muted, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 8.dp)) }
             items(room.spectators) { s ->
-                Text(localName(res, s.name) + if (s.you) " (${res.getString(R.string.room_you)})" else "", color = if (s.you) Tokens.accent else Tokens.text2)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(localName(res, s.name) + if (s.you) " (${res.getString(R.string.room_you)})" else "", color = if (s.you) Tokens.accent else Tokens.text2)
+                    if (s.hand) {
+                        Spacer(Modifier.width(6.dp))
+                        Icon(
+                            Icons.Filled.PanTool,
+                            contentDescription = stringResource(R.string.hand_raised, localName(res, s.name)),
+                            tint = Tokens.accent,
+                            modifier = Modifier.size(16.dp),
+                        )
+                    }
+                }
             }
         }
     }

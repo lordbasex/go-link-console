@@ -54,6 +54,30 @@ public enum RoomPhase: String, Sendable {
     case rateLimited
     /** The signaling server does not answer. */
     case unreachable
+    /** The host took this guest out of the room: only a new invitation brings it back. */
+    case removed
+}
+
+/**
+ * A group invitation's way in: the key went out with a name, and the host
+ * may have to let the person in. ended carries why it closed: declined,
+ * full, expired, busy, wrong, blocked or locked.
+ */
+public enum KnockState: Equatable, Sendable {
+    case none
+    case waiting
+    case ended(String)
+}
+
+/** A request the device refused (control "error"): code, and a number that changes with every refusal. */
+public struct Refusal: Equatable, Sendable {
+    public let code: String
+    public let seq: Int
+
+    public init(code: String, seq: Int) {
+        self.code = code
+        self.seq = seq
+    }
 }
 
 /** The PIN the room asks for. last is the most recent refusal, to explain it. */
@@ -80,6 +104,10 @@ public struct RoomUi: Equatable, Sendable {
     public var typing: [TypingView] = []
     public var stats = StreamStatsView(fps: nil, aspect: nil)
     public var controlOpen = false
+    /** The group invitation's state (none for a PIN). */
+    public var knock = KnockState.none
+    /** The last request the device refused, for a short notice. */
+    public var refused: Refusal?
 
     public init() {}
 }
@@ -94,6 +122,10 @@ public struct RoomUi: Equatable, Sendable {
  * PIN rule (the user's decision): a new join always sends the PIN the
  * person typed. The return token from pin_result is used only to get back
  * in automatically after the connection drops during this visit.
+ *
+ * A group invitation sends its key and the person's name instead of a PIN,
+ * on every ask (the host may answer "waiting" first). The key lives only in
+ * this object's memory.
  */
 @MainActor
 public final class RoomClient {
@@ -119,6 +151,12 @@ public final class RoomClient {
     private var pinToSend: String?
     private var sentToken = false
     private var admittedOnce = false
+    private let groupKey: String
+    private let keyName: String
+    private var knocking = false
+    /** The visit is over for good (taken out by the host, or the group invitation refused): no more joins. */
+    private var halted = false
+    private var refusals = 0
 
     private var joinedOn = "" // peer_id of the signaling connection that joined
     private var hostPeerId = ""
@@ -142,13 +180,20 @@ public final class RoomClient {
     private var envelopeToken: CancelHandle?
     private var stateToken: CancelHandle?
 
-    public init(signal: SignalClient, target: InviteTarget, typedPin: String, passes: RoomPasses, peers: RtcPeerFactory, scheduler: Scheduler) {
+    /**
+     * typedPin is the PIN of a one-person invitation; key and keyName, a
+     * group invitation's key (43 base64url characters) and the name the
+     * person gave for the host.
+     */
+    public init(signal: SignalClient, target: InviteTarget, typedPin: String, key: String = "", keyName: String = "", passes: RoomPasses, peers: RtcPeerFactory, scheduler: Scheduler) {
         self.signal = signal
         self.target = target
         self.passes = passes
         self.peers = peers
         self.scheduler = scheduler
         pinToSend = Invites.isPin(typedPin) ? typedPin : nil
+        groupKey = RtcSignals.tokenOf(.string(key))
+        self.keyName = keyName.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     /** Called with every new ui value; the result stops listening. */
@@ -174,7 +219,7 @@ public final class RoomClient {
     }
 
     private func onSignalState(_ s: ConnectionState) {
-        if closed { return }
+        if closed || halted { return }
         if s == .open {
             if joinedOn != signal.peerId && !joining { join() }
         } else if !joinedOn.isEmpty {
@@ -200,7 +245,7 @@ public final class RoomClient {
 
     /** Gets back in (new signaling connection, same visit): used after a failure. */
     public func reconnect() {
-        if closed { return }
+        if closed || halted { return }
         joinedOn = ""
         dropPeer()
         ui.phase = .joining
@@ -251,7 +296,7 @@ public final class RoomClient {
             guard env.from == hostPeerId, let sig = RtcSignals.parse(env.payload) else { return }
             handleSignal(sig)
         case "peer_left":
-            if !hostPeerId.isEmpty && env.from == hostPeerId {
+            if !hostPeerId.isEmpty && env.from == hostPeerId && !halted {
                 dropPeer()
                 hostPeerId = ""
                 ui.phase = .ended
@@ -277,6 +322,7 @@ public final class RoomClient {
     }
 
     private func onPinRequired(last: PinResult?) {
+        if halted { return }
         let roomId = ui.roomId
         // Getting back in after a drop: the token this app got on the way in.
         let token = admittedOnce && !sentToken && !roomId.isEmpty ? passes.get(roomId) : ""
@@ -285,6 +331,16 @@ public final class RoomClient {
             ui.phase = .pin
             ui.pin = PinView(needed: true, busy: true)
             sendSignal(RtcSignals.token(token))
+            return
+        }
+        if !groupKey.isEmpty {
+            // A group invitation: the key and the name, on every ask (a
+            // reconnection while waiting knocks again; the device never
+            // spends a place on a stale knock).
+            knocking = true
+            ui.phase = .pin
+            ui.pin = PinView(needed: true, busy: true)
+            sendSignal(RtcSignals.key(groupKey, name: keyName))
             return
         }
         if let pin = pinToSend {
@@ -303,10 +359,27 @@ public final class RoomClient {
         if r.ok {
             admittedOnce = true
             sentToken = false
+            knocking = false
+            ui.knock = .none
             if !r.token.isEmpty && !roomId.isEmpty { passes.save(roomId, r.token) }
             ui.phase = .connecting
             ui.pin = PinView()
             ui.reconnecting = false
+            return
+        }
+        if r.reason == "removed" {
+            // The host took this guest out: its token now answers
+            // "removed" too, so nothing else is tried. The token is kept:
+            // a retry would only hear the same.
+            sentToken = false
+            stop(.removed)
+            return
+        }
+        if r.reason == "waiting" {
+            // The host decides: keep waiting, nothing to type.
+            ui.phase = .pin
+            ui.pin = PinView(needed: true, busy: false, last: r)
+            ui.knock = .waiting
             return
         }
         if sentToken {
@@ -317,7 +390,28 @@ public final class RoomClient {
             onPinRequired(last: nil)
             return
         }
+        if knocking {
+            // The group invitation did not let this person in: say why, and stop.
+            knocking = false
+            ui.pin = PinView(needed: true, busy: false, last: r)
+            ui.knock = .ended(r.reason.isEmpty ? "wrong" : r.reason)
+            stop(.pin)
+            return
+        }
         onPinRequired(last: r)
+    }
+
+    /** Ends the visit for good, leaving the screen on phase: no more joins or reconnections. */
+    private func stop(_ phase: RoomPhase) {
+        halted = true
+        input.releaseAll()
+        dropPeer()
+        hostPeerId = ""
+        ui.phase = phase
+        ui.reconnecting = false
+        ui.controlOpen = false
+        if phase == .removed { ui.pin = PinView() }
+        signal.close()
     }
 
     /** A PIN the person typed on the room's PIN prompt. */
@@ -422,6 +516,12 @@ public final class RoomClient {
             peer?.sendControl(JSON.obj(("type", "pong"), ("id", m["id"])).text)
             return
         }
+        if m["type"].str(40) == "error" {
+            // A refused request: the screen shows a short notice for its code.
+            refusals += 1
+            ui.refused = Refusal(code: m["code"].str(40), seq: refusals)
+            return
+        }
         if let s = RoomMessages.parseRoomState(m) {
             ui.room = s
             return
@@ -480,6 +580,9 @@ public final class RoomClient {
     public func spectate() { sendControl(.obj(("type", "spectate"))) }
 
     public func joinQueue() { sendControl(.obj(("type", "queue"))) }
+
+    /** A spectator raises (true) or lowers its hand to ask the host to play. */
+    public func raiseHand(_ on: Bool) { sendControl(.obj(("type", "hand"), ("on", .bool(on)))) }
 
     /**
      * Only the host pauses and resumes a game: a guest asks for a pause

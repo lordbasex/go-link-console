@@ -204,6 +204,139 @@ class RoomClientTest {
     }
 
     @Test
+    fun groupInvitationKnocksWithTheKeyAndWaitsForTheHost() = runTest {
+        val key = "K".repeat(43)
+        val sockets = FakeSockets()
+        val store = MemoryStore()
+        val peers = mutableListOf<FakePeer>()
+        val signal = SignalClient("wss://signal.example.org/ws", sockets, backgroundScope, random = kotlin.random.Random(1))
+        val room = RoomClient(
+            signal,
+            InviteTarget.Link(invite, key),
+            "",
+            RoomPasses(store),
+            { _, events -> FakePeer().also { it.events = events; peers += it } },
+            backgroundScope,
+            knockName = "Ana",
+        )
+        room.start()
+        runCurrent()
+        val first = sockets.last
+        first.receive("""{"type":"hello","peer_id":"me1"}""")
+        runCurrent()
+        // The key goes in the fragment only: signalhub gets the invite alone.
+        assertEquals("""{"type":"join","app":"go-link","invite":"$invite"}""", first.sent.single().toString())
+        first.receive("""{"type":"joined","session_id":"s","remote":"dev","room_id":"room-1"}""")
+        first.receive("""{"type":"signal","from":"dev","payload":{"kind":"pin_required"}}""")
+        runCurrent()
+        assertEquals("""{"kind":"pin","key":"$key","name":"Ana"}""", payloadOf(first.sent.last()).toString())
+        assertEquals(RoomPhase.WAITING, room.ui.value.phase)
+
+        // The host decides: waiting, then in with a return token.
+        first.receive("""{"type":"signal","from":"dev","payload":{"kind":"pin_result","ok":false,"reason":"waiting"}}""")
+        runCurrent()
+        assertEquals(RoomPhase.WAITING, room.ui.value.phase)
+        first.receive("""{"type":"signal","from":"dev","payload":{"kind":"pin_result","ok":true,"token":"$token"}}""")
+        runCurrent()
+        assertEquals(RoomPhase.CONNECTING, room.ui.value.phase)
+        assertEquals(token, RoomPasses(store).get("room-1"))
+        assertEquals(listOf("pin"), kinds(first))
+
+        // A dropped connection comes back with the token, not the key.
+        first.listener.onClosed()
+        runCurrent()
+        advanceTimeBy(2_000)
+        val second = sockets.last
+        second.receive("""{"type":"hello","peer_id":"me2"}""")
+        runCurrent()
+        second.receive("""{"type":"joined","session_id":"s","remote":"dev","room_id":"room-1"}""")
+        second.receive("""{"type":"signal","from":"dev","payload":{"kind":"pin_required"}}""")
+        runCurrent()
+        assertEquals("""{"kind":"pin","token":"$token"}""", payloadOf(second.sent.last()).toString())
+        second.receive("""{"type":"signal","from":"dev","payload":{"kind":"pin_result","ok":true,"token":"$token"}}""")
+        second.receive("""{"type":"signal","from":"dev","payload":{"kind":"offer","sdp":"o1"}}""")
+        runCurrent()
+
+        // Refused requests reach the screen with their code; the hand goes out on control.
+        val peer = peers.last()
+        peer.events.onControlOpen()
+        peer.events.onControlMessage("""{"type":"error","code":"hand_too_soon","error":"once a minute"}""")
+        peer.events.onControlMessage("""{"type":"error","code":"hand_too_soon","error":"once a minute"}""")
+        runCurrent()
+        assertEquals(Refusal("hand_too_soon", 2), room.ui.value.refused)
+        room.raiseHand(true)
+        runCurrent()
+        assertEquals("""{"type":"hand","on":true}""", peer.control.last())
+
+        // The host takes this guest out: final, the token is kept, nothing else is tried.
+        second.receive("""{"type":"signal","from":"dev","payload":{"kind":"pin_result","ok":false,"reason":"removed"}}""")
+        runCurrent()
+        assertEquals(RoomPhase.REMOVED, room.ui.value.phase)
+        assertTrue(peer.closed)
+        assertTrue(second.closed)
+        assertEquals(token, RoomPasses(store).get("room-1"))
+        val sockets0 = sockets.conns.size
+        advanceTimeBy(30_000)
+        assertEquals(sockets0, sockets.conns.size)
+        room.reconnect()
+        runCurrent()
+        assertEquals(sockets0, sockets.conns.size)
+        room.close()
+    }
+
+    @Test
+    fun aKnockThatEndsSaysWhy() = runTest {
+        for (reason in listOf("declined", "full", "")) {
+            val sockets = FakeSockets()
+            val signal = SignalClient("wss://signal.example.org/ws", sockets, backgroundScope)
+            val room = RoomClient(signal, InviteTarget.Link(invite, "K".repeat(43)), "", RoomPasses(MemoryStore()), { _, _ -> FakePeer() }, backgroundScope, knockName = "Bo")
+            room.start()
+            runCurrent()
+            sockets.last.receive("""{"type":"hello","peer_id":"me"}""")
+            runCurrent()
+            sockets.last.receive("""{"type":"joined","session_id":"s","remote":"dev","room_id":"room-2"}""")
+            sockets.last.receive("""{"type":"signal","from":"dev","payload":{"kind":"pin_required"}}""")
+            sockets.last.receive("""{"type":"signal","from":"dev","payload":{"kind":"pin_result","ok":false,"reason":"$reason"}}""")
+            runCurrent()
+            assertEquals(RoomPhase.REFUSED, room.ui.value.phase)
+            assertEquals(reason.ifEmpty { "wrong" }, room.ui.value.knockEnd)
+            assertTrue(sockets.last.closed)
+            room.close()
+        }
+    }
+
+    @Test
+    fun removedAfterAReconnectionIsNeverAWrongPin() = runTest {
+        val sockets = FakeSockets()
+        val store = MemoryStore()
+        val signal = SignalClient("wss://signal.example.org/ws", sockets, backgroundScope)
+        val room = RoomClient(signal, InviteTarget.Link(invite), "482913", RoomPasses(store), { _, _ -> FakePeer() }, backgroundScope)
+        room.start()
+        runCurrent()
+        sockets.last.receive("""{"type":"hello","peer_id":"me"}""")
+        runCurrent()
+        sockets.last.receive("""{"type":"joined","session_id":"s","remote":"dev","room_id":"room-3"}""")
+        sockets.last.receive("""{"type":"signal","from":"dev","payload":{"kind":"pin_required"}}""")
+        sockets.last.receive("""{"type":"signal","from":"dev","payload":{"kind":"pin_result","ok":true,"token":"$token"}}""")
+        runCurrent()
+        sockets.last.listener.onClosed()
+        runCurrent()
+        advanceTimeBy(2_000)
+        sockets.last.receive("""{"type":"hello","peer_id":"me2"}""")
+        runCurrent()
+        sockets.last.receive("""{"type":"joined","session_id":"s","remote":"dev","room_id":"room-3"}""")
+        sockets.last.receive("""{"type":"signal","from":"dev","payload":{"kind":"pin_required"}}""")
+        runCurrent()
+        assertEquals("""{"kind":"pin","token":"$token"}""", payloadOf(sockets.last.sent.last()).toString())
+        sockets.last.receive("""{"type":"signal","from":"dev","payload":{"kind":"pin_result","ok":false,"reason":"removed"}}""")
+        runCurrent()
+        assertEquals(RoomPhase.REMOVED, room.ui.value.phase)
+        assertEquals(PinView(), room.ui.value.pin)
+        assertEquals(token, RoomPasses(store).get("room-3"))
+        room.close()
+    }
+
+    @Test
     fun joinErrors() = runTest {
         val sockets = FakeSockets()
         val signal = SignalClient("wss://signal.example.org/ws", sockets, backgroundScope)

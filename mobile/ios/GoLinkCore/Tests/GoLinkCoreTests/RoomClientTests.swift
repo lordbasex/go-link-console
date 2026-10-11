@@ -168,4 +168,116 @@ final class RoomClientTests: XCTestCase {
         XCTAssertEqual(PictureLayout.Size(w: 384, h: 224), room.ui.stats.video?.native)
         room.close()
     }
+
+    private let key = String(repeating: "k", count: 43)
+
+    private func groupRoom(_ sockets: FakeSockets, _ clock: ManualScheduler, _ store: MemoryStore, _ peers: FakePeers) -> RoomClient {
+        let signal = SignalClient(url: "wss://signal.example.org/ws", factory: sockets, scheduler: clock, random: { 0.5 })
+        let room = RoomClient(signal: signal, target: .link(invite), typedPin: "", key: key, keyName: "  Ana  ", passes: RoomPasses(store), peers: peers, scheduler: clock)
+        room.start()
+        sockets.last.receive(#"{"type":"hello","peer_id":"me1"}"#)
+        sockets.last.receive(#"{"type":"joined","session_id":"s","remote":"dev","room_id":"room-1"}"#)
+        return room
+    }
+
+    func testGroupInvitationKnocksWaitsAndComesIn() {
+        let clock = ManualScheduler()
+        let sockets = FakeSockets()
+        let store = MemoryStore()
+        let peers = FakePeers()
+        let room = groupRoom(sockets, clock, store, peers)
+        let first = sockets.last
+
+        // No PIN: the key and the name go out.
+        first.receive(#"{"type":"signal","from":"dev","payload":{"kind":"pin_required"}}"#)
+        XCTAssertEqual(#"{"key":"\#(key)","kind":"pin","name":"Ana"}"#, payload(first.sent.last!))
+        XCTAssertEqual(.pin, room.ui.phase)
+        XCTAssertTrue(room.ui.pin.busy)
+
+        // The host decides.
+        first.receive(#"{"type":"signal","from":"dev","payload":{"kind":"pin_result","ok":false,"reason":"waiting"}}"#)
+        XCTAssertEqual(.waiting, room.ui.knock)
+        XCTAssertEqual(.pin, room.ui.phase)
+
+        // Let in: the return token is saved and the knock is over.
+        first.receive(#"{"type":"signal","from":"dev","payload":{"kind":"pin_result","ok":true,"token":"\#(token)"}}"#)
+        XCTAssertEqual(.none, room.ui.knock)
+        XCTAssertEqual(.connecting, room.ui.phase)
+        XCTAssertEqual(token, RoomPasses(store).get("room-1"))
+
+        // A dropped connection gets back in with the token, not the key.
+        first.listener.onClosed()
+        clock.advance(by: 2000)
+        let second = sockets.last
+        second.receive(#"{"type":"hello","peer_id":"me2"}"#)
+        second.receive(#"{"type":"joined","session_id":"s","remote":"dev","room_id":"room-1"}"#)
+        second.receive(#"{"type":"signal","from":"dev","payload":{"kind":"pin_required"}}"#)
+        XCTAssertEqual(#"{"kind":"pin","token":"\#(token)"}"#, payload(second.sent.last!))
+        // An old token: the key is sent again.
+        second.receive(#"{"type":"signal","from":"dev","payload":{"kind":"pin_result","ok":false,"reason":"wrong","left":4}}"#)
+        XCTAssertEqual(#"{"key":"\#(key)","kind":"pin","name":"Ana"}"#, payload(second.sent.last!))
+        room.close()
+    }
+
+    func testGroupInvitationRefusedStops() {
+        for reason in ["declined", "full", "expired", "busy", "wrong", "blocked", "locked", ""] {
+            let clock = ManualScheduler()
+            let sockets = FakeSockets()
+            let room = groupRoom(sockets, clock, MemoryStore(), FakePeers())
+            let c = sockets.last
+            c.receive(#"{"type":"signal","from":"dev","payload":{"kind":"pin_required"}}"#)
+            c.receive(#"{"type":"signal","from":"dev","payload":{"kind":"pin_result","ok":false,"reason":"waiting"}}"#)
+            c.receive(#"{"type":"signal","from":"dev","payload":{"kind":"pin_result","ok":false,"reason":"\#(reason)"}}"#)
+            XCTAssertEqual(.ended(reason.isEmpty ? "wrong" : reason), room.ui.knock, reason)
+            // Nothing else is tried: no new join after the connection closes.
+            XCTAssertTrue(c.closed)
+            clock.advance(by: 60_000)
+            XCTAssertEqual(1, sockets.conns.count, reason)
+            XCTAssertEqual(1, kinds(c).filter { $0 == "pin" }.count, reason)
+            room.close()
+        }
+    }
+
+    func testRemovedByTheHostEndsTheVisit() {
+        let clock = ManualScheduler()
+        let sockets = FakeSockets()
+        let store = MemoryStore()
+        let peers = FakePeers()
+        let signal = SignalClient(url: "wss://signal.example.org/ws", factory: sockets, scheduler: clock, random: { 0.5 })
+        let room = RoomClient(signal: signal, target: .link(invite), typedPin: "482913", passes: RoomPasses(store), peers: peers, scheduler: clock)
+        room.start()
+        let c = sockets.last
+        c.receive(#"{"type":"hello","peer_id":"me1"}"#)
+        c.receive(#"{"type":"joined","session_id":"s","remote":"dev","room_id":"room-1"}"#)
+        c.receive(#"{"type":"signal","from":"dev","payload":{"kind":"pin_required"}}"#)
+        c.receive(#"{"type":"signal","from":"dev","payload":{"kind":"pin_result","ok":true,"token":"\#(token)"}}"#)
+        c.receive(#"{"type":"signal","from":"dev","payload":{"kind":"offer","sdp":"o1"}}"#)
+        let peer = peers.created[0]
+        peer.events.onState(.connected)
+        XCTAssertEqual(.streaming, room.ui.phase)
+
+        // Raised hands and refusals travel on control.
+        peer.events.onControlOpen()
+        room.raiseHand(true)
+        XCTAssertEqual(#"{"type":"hand","on":true}"#, peer.control.last)
+        room.raiseHand(false)
+        XCTAssertEqual(#"{"type":"hand","on":false}"#, peer.control.last)
+        peer.events.onControlMessage(#"{"type":"error","code":"hand_too_soon","error":"wait"}"#)
+        XCTAssertEqual(Refusal(code: "hand_too_soon", seq: 1), room.ui.refused)
+        peer.events.onControlMessage(#"{"type":"error","code":"hand_too_soon","error":"wait"}"#)
+        XCTAssertEqual(Refusal(code: "hand_too_soon", seq: 2), room.ui.refused)
+
+        // The host takes this guest out: the stream ends and nothing is tried again.
+        c.receive(#"{"type":"signal","from":"dev","payload":{"kind":"pin_result","ok":false,"reason":"removed"}}"#)
+        XCTAssertEqual(.removed, room.ui.phase)
+        XCTAssertTrue(peer.closed)
+        XCTAssertTrue(c.closed)
+        // The token is kept (it would only answer "removed" again).
+        XCTAssertEqual(token, RoomPasses(store).get("room-1"))
+        room.reconnect()
+        clock.advance(by: 60_000)
+        XCTAssertEqual(1, sockets.conns.count)
+        XCTAssertEqual(.removed, room.ui.phase)
+        room.close()
+    }
 }

@@ -22,8 +22,11 @@ public struct IceCandidateInit: Equatable, Sendable {
 /**
  * The answer to a PIN or token. reason is "wrong" (left tries remain),
  * "used" (someone already came in with that invitation), "blocked" (no
- * tries left) or "locked" (too many wrong PINs in the room: wait
- * retryAfter seconds). token lets this app come back without a PIN.
+ * tries left), "locked" (too many wrong PINs in the room: wait
+ * retryAfter seconds) or "removed" (the host took this guest out of the
+ * room: nothing brings it back but a new invitation). A group
+ * invitation's key also gets "waiting" (the host decides), "declined",
+ * "full", "expired" or "busy". token lets this app come back without a PIN.
  */
 public struct PinResult: Equatable, Sendable {
     public let ok: Bool
@@ -101,6 +104,17 @@ public enum RtcSignals {
     /** The PIN of an invitation, as the person typed it. */
     public static func pin(_ pin: String) -> JSON { .obj(("kind", "pin"), ("pin", .string(pin))) }
 
+    /** Most characters of the name sent with a group invitation's key. */
+    public static let keyNameMax = 24
+
+    /**
+     * A group invitation's key and the person's name, which the host sees
+     * while deciding (24 characters at most).
+     */
+    public static func key(_ key: String, name: String) -> JSON {
+        .obj(("kind", "pin"), ("key", .string(key)), ("name", .string(String(name.prefix(keyNameMax)))))
+    }
+
     /** The return token got on the way in, to come back without a PIN. */
     public static func token(_ token: String) -> JSON { .obj(("kind", "pin"), ("token", .string(token))) }
 
@@ -122,6 +136,9 @@ public enum RtcSignals {
         return nil
     }
 
-    /** Which player a voice track belongs to, from its stream id ("voice-p2" -> 2). */
+    /**
+     * Which voice slot (1-4) a voice track is, from its stream id
+     * ("voice-p2" -> 2). room_state.voice_slots says who each one carries.
+     */
     public static func voicePort(_ streamId: String) -> Int? { Invites.firstGroup(voice, streamId).flatMap(Int.init) }
 }

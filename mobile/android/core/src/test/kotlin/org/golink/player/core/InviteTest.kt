@@ -2,7 +2,9 @@
 package org.golink.player.core
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class InviteTest {
@@ -29,7 +31,6 @@ class InviteTest {
             "https://go-link.org/g/${invite}A", // 23 characters
             "https://go-link.org/g/${invite.dropLast(1)}",
             "https://go-link.org/g/$invite?server=wss://evil.example/ws",
-            "https://go-link.org/g/$invite#pin=123456",
             "https://go-link.org/r/$invite",
             "wss://evil.example/ws",
             "go-link://g/$invite",
@@ -58,6 +59,32 @@ class InviteTest {
         assertNull(Invites.parseAppLink("https", "evil.example", "/g/$invite"))
         assertNull(Invites.parseAppLink("https", "go-link.org", "/g/$invite/extra"))
         assertNull(Invites.parseAppLink("https", "go-link.org", null))
+    }
+
+    @Test
+    fun groupInvitationKeys() {
+        val key = "Ab_-".repeat(10) + "xyz" // 43 characters
+        assertEquals(InviteTarget.Link(invite, key), Invites.parseScanned("https://go-link.org/g/$invite#k=$key"))
+        assertEquals(InviteTarget.Link(invite, key), Invites.parseTyped("https://go-link.org/g/$invite/#k=$key"))
+        assertEquals(InviteTarget.Link(invite, key), Invites.parseAppLink("https", "go-link.org", "/g/$invite", "k=$key"))
+        // Other values in the fragment are ignored; k is still read.
+        assertEquals(InviteTarget.Link(invite, key), Invites.parseScanned("https://go-link.org/g/$invite#x=1&k=$key&y=2"))
+        // A key of the wrong length or with other characters is ignored: a plain invitation.
+        for (bad in listOf("k=${key.dropLast(1)}", "k=${key}A", "k=${key.dropLast(1)}=", "key=$key", "K=$key", "pin=123456", "")) {
+            assertEquals(bad, InviteTarget.Link(invite), Invites.parseScanned("https://go-link.org/g/$invite#$bad"))
+            assertEquals(bad, InviteTarget.Link(invite), Invites.parseAppLink("https", "go-link.org", "/g/$invite", bad))
+        }
+        // No fragment: no key.
+        assertEquals(InviteTarget.Link(invite), Invites.parseScanned("https://go-link.org/g/$invite"))
+        assertEquals(InviteTarget.Link(invite), Invites.parseAppLink("https", "go-link.org", "/g/$invite", null))
+        // Query parameters are still refused, key or not.
+        assertNull(Invites.parseScanned("https://go-link.org/g/$invite?x=1#k=$key"))
+        // The key never shows in the display text or in toString.
+        val link = InviteTarget.Link(invite, key)
+        assertTrue(link.group)
+        assertEquals("https://go-link.org/g/$invite", link.display())
+        assertFalse(link.toString().contains(key))
+        assertEquals(key, Invites.groupKeyOf("#k=$key"))
     }
 
     @Test

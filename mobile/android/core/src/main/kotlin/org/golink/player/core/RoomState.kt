@@ -9,11 +9,16 @@ import kotlinx.serialization.json.JsonObject
 // other guests, so everything is validated and shown as plain text.
 // Port of frontend/packages/shared/src/room-state.ts.
 
-data class SeatView(val port: Int, val name: String, val localPlayer: Int, val you: Boolean)
+/** peer is the player's peer id, sent only to the host's own browsers ("" otherwise). */
+data class SeatView(val port: Int, val name: String, val localPlayer: Int, val you: Boolean, val peer: String = "")
 
-data class QueueEntry(val position: Int, val name: String, val you: Boolean)
+data class QueueEntry(val position: Int, val name: String, val you: Boolean, val peer: String = "")
 
-data class Spectator(val name: String, val you: Boolean)
+/** Someone watching; hand is a raised hand (asking the host to play). */
+data class Spectator(val name: String, val you: Boolean, val peer: String = "", val hand: Boolean = false)
+
+/** A person speaking on one of the four voice tracks: their seat, or port 0 in the queue. */
+data class VoiceSlot(val name: String, val port: Int, val you: Boolean)
 
 /** A request to swap controllers: from port asks to move to port to. */
 data class SwapView(val from: Int, val to: Int, val name: String)
@@ -44,6 +49,12 @@ data class YouView(
     val swapAsked: List<SwapView>,
     /** Your pending request for a pause (only the host pauses), or null. */
     val pauseAsked: PauseAsk? = null,
+    /** Your hand is up (a spectator asking the host to play). */
+    val hand: Boolean = false,
+    /** When you may raise your hand again (ms since the epoch), or 0. */
+    val handAgain: Long = 0,
+    /** The host moved you to watching: you raise a hand instead of joining the queue alone. */
+    val held: Boolean = false,
 )
 
 /** A pause this guest asked the host for; expiresAt is the device's RFC 3339 time ("" if not sent). */
@@ -71,6 +82,12 @@ data class RoomStateView(
     val hostOnline: Boolean = true,
     /** The host's default picture for this room (room_state.picture); null = the app's default. */
     val picture: Picture? = null,
+    /** Spectators hear the voices too (the host's switch). */
+    val spectatorsHear: Boolean = false,
+    /** Spectators get the lighter video (the host's switch). */
+    val spectatorSaver: Boolean = false,
+    /** Who each voice track (voice-p1..voice-p4) carries now, index 0 = slot 1; null: nobody. */
+    val voiceSlots: List<VoiceSlot?> = List(4) { null },
 ) {
     /** Where you stand: seated, waiting in the queue, or watching. */
     val me: Me
@@ -81,6 +98,9 @@ data class RoomStateView(
         }
 
     val seated: Int get() = seats.count { it != null }
+
+    /** The players and the queue talk (the device drops a spectator's voice). */
+    val canTalk: Boolean get() = you.ports.isNotEmpty() || you.queuePositions.isNotEmpty()
 }
 
 sealed interface Me {
@@ -106,8 +126,18 @@ enum class ChatEvent(val wire: String) {
     SEAT_FREE("seat_free"),
     TOOK_SEAT("took_seat"),
 
+    SENT_TO_QUEUE("sent_to_queue"),
+    SENT_TO_WATCH("sent_to_watch"),
+    LET_QUEUE("let_queue"),
+    PLAY_NOW("play_now"),
+    FIRST_IN_QUEUE("first_in_queue"),
+    REMOVED("removed"),
+
     /** Sent only to the guest whose pause request the host declined. */
     PAUSE_DECLINED("pause_declined"),
+
+    /** Sent only to the spectator whose raised hand the host answered "not now". */
+    HAND_LATER("hand_later"),
     ;
 
     companion object {
@@ -172,13 +202,33 @@ object RoomMessages {
         return PauseAsk(text)
     }
 
+    /** An RFC 3339 time as ms since the epoch, or 0. */
+    private fun time(v: JsonElement?): Long {
+        val text = v.strOrNull()?.takeIf { it.length <= 40 } ?: return 0
+        return try {
+            java.time.OffsetDateTime.parse(text).toInstant().toEpochMilli()
+        } catch (_: Exception) {
+            0
+        }
+    }
+
+    private fun parseVoiceSlots(v: JsonElement?, maxPlayers: Int): List<VoiceSlot?> {
+        val list = v.arr()
+        return List(4) { i ->
+            val o = list.getOrNull(i) as? JsonObject ?: return@List null
+            val n = o["port"].num()
+            val port = if (n == kotlin.math.floor(n) && n >= 1 && n <= maxPlayers) n.toInt() else 0
+            VoiceSlot(o["name"].str(40), port, o["you"].isTrue())
+        }
+    }
+
     fun parseRoomState(m: JsonObject): RoomStateView? {
         if (m["type"].str(40) != "room_state") return null
         val maxPlayers = m["max_players"].num().coerceIn(1.0, 4.0).toInt()
         val seats = MutableList<SeatView?>(maxPlayers) { null }
         m["seats"].arr().forEachIndexed { i, s ->
             if (i >= maxPlayers || s !is JsonObject) return@forEachIndexed
-            seats[i] = SeatView(i + 1, s["name"].str(40), s["local_player"].num().toInt(), s["you"].isTrue())
+            seats[i] = SeatView(i + 1, s["name"].str(40), s["local_player"].num().toInt(), s["you"].isTrue(), s["peer"].str(80))
         }
         val you = m["you"].obj()
         return RoomStateView(
@@ -189,11 +239,11 @@ object RoomMessages {
             seats = seats,
             queue = m["queue"].arr().take(64).map { q ->
                 val o = q.obj()
-                QueueEntry(o["position"].num().toInt(), o["name"].str(40), o["you"].isTrue())
+                QueueEntry(o["position"].num().toInt(), o["name"].str(40), o["you"].isTrue(), o["peer"].str(80))
             },
             spectators = m["spectators"].arr().take(64).map { p ->
                 val o = p.obj()
-                Spectator(o["name"].str(40), o["you"].isTrue())
+                Spectator(o["name"].str(40), o["you"].isTrue(), o["peer"].str(80), o["hand"].isTrue())
             },
             you = YouView(
                 name = you["name"].str(40),
@@ -203,6 +253,9 @@ object RoomMessages {
                 swapOffers = parseSwaps(you["swap_offers"], maxPlayers),
                 swapAsked = parseSwaps(you["swap_asked"], maxPlayers),
                 pauseAsked = parsePauseAsk(you["pause_asked"]),
+                hand = you["hand"].isTrue(),
+                handAgain = time(you["hand_again"]),
+                held = you["held"].isTrue(),
             ),
             pausable = m["pausable"].isTrue(),
             paused = m["paused"].isTrue(),
@@ -211,6 +264,9 @@ object RoomMessages {
             recording = m["recording"].isTrue(),
             hostOnline = !m["host_online"].isFalse(),
             picture = m["picture"]?.let { p -> val o = p.obj(); PictureSettings.parseRoom(o["style"].strOrNull(), o["bands"].strOrNull()) },
+            spectatorsHear = m["spectators_hear"].isTrue(),
+            spectatorSaver = m["spectator_saver"].isTrue(),
+            voiceSlots = parseVoiceSlots(m["voice_slots"], maxPlayers),
         )
     }
 
@@ -245,6 +301,12 @@ object RoomMessages {
         }.filter { it.name.isNotEmpty() }
     }
 
+    /** The code of a request the device refused ("error" with a code), or null. */
+    fun parseRefusal(m: JsonObject): String? {
+        if (m["type"].str(40) != "error") return null
+        return m["code"].strOrNull()?.take(40)?.takeIf { it.isNotEmpty() }
+    }
+
     fun parseStreamStats(m: JsonObject): StreamStatsView? {
         if (m["type"].str(40) != "stream_stats") return null
         val fps = if (m["fps"].isNumber()) m["fps"].num() else null
@@ -257,4 +319,15 @@ object RoomMessages {
      * the app can show it in the reader's language; null for real names.
      */
     fun guestId(name: String): String? = GUEST.matchEntire(name)?.groupValues?.get(1)
+}
+
+/**
+ * The four voice tracks carry whoever speaks now, not a seat
+ * (room_state.voice_slots), so what this phone does with a voice follows
+ * the person: silencing is by name, wherever they sit or wait.
+ */
+object VoiceSlots {
+    /** The voice slots (1-4) whose occupant this phone silenced. */
+    fun silencedSlots(slots: List<VoiceSlot?>, silenced: Set<String>): Set<Int> =
+        slots.mapIndexedNotNull { i, s -> if (s != null && s.name in silenced) i + 1 else null }.toSet()
 }

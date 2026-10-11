@@ -22,10 +22,13 @@ sealed interface DeviceSignal {
     data object PinRequired : DeviceSignal
 
     /**
-     * The answer to a PIN or token. reason is "wrong" (left tries remain),
-     * "used" (someone already came in with that invitation), "blocked" (no
-     * tries left) or "locked" (too many wrong PINs in the room: wait
-     * retryAfter seconds). token lets this app come back without a PIN.
+     * The answer to a PIN, token or group key. reason is "wrong" (left
+     * tries remain), "used" (someone already came in with that
+     * invitation), "blocked" (no tries left), "locked" (too many wrong
+     * PINs in the room: wait retryAfter seconds) or "removed" (the host
+     * took this guest out of the room). A group key may also get
+     * "waiting" (the host decides), "declined", "full", "expired" or
+     * "busy". token lets this app come back without a PIN.
      */
     data class PinResult(val ok: Boolean, val token: String, val reason: String, val left: Int, val retryAfter: Int) : DeviceSignal
 }
@@ -89,6 +92,16 @@ object RtcSignals {
         put("pin", pin)
     }
 
+    /**
+     * A group invitation's key with the name the host sees (24 characters
+     * at most), instead of a PIN.
+     */
+    fun key(key: String, name: String): JsonObject = buildJsonObject {
+        put("kind", "pin")
+        put("key", key)
+        put("name", name.take(24))
+    }
+
     /** The return token got on the way in, to come back without a PIN. */
     fun token(token: String): JsonObject = buildJsonObject {
         put("kind", "pin")
@@ -109,6 +122,10 @@ object RtcSignals {
         return null
     }
 
-    /** Which player a voice track belongs to, from its stream id ("voice-p2" -> 2). */
-    fun voicePort(streamId: String): Int? = Regex("^voice-p([1-4])$").matchEntire(streamId)?.groupValues?.get(1)?.toInt()
+    /**
+     * Which voice slot (1-4) a voice track is, from its stream id
+     * ("voice-p2" -> 2). A slot carries whoever speaks now, not a seat:
+     * room_state.voice_slots says who.
+     */
+    fun voiceSlot(streamId: String): Int? = Regex("^voice-p([1-4])$").matchEntire(streamId)?.groupValues?.get(1)?.toInt()
 }

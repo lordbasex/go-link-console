@@ -58,6 +58,7 @@ import org.golink.player.R
 import org.golink.player.core.CodeInput
 import org.golink.player.core.InviteTarget
 import org.golink.player.core.Invites
+import org.golink.player.core.PlayerName
 import org.golink.player.core.Terms
 
 /**
@@ -65,12 +66,17 @@ import org.golink.player.core.Terms
  * came from a QR code or a link, or typed: the 9-digit code or the link),
  * the 6-digit PIN the host gave this person, and the terms. The PIN is
  * always asked on a new join, and never travels in a link or a QR code.
+ *
+ * A group invitation (a link with #k=<key>, the website's KnockPrompt)
+ * asks no PIN: a name the host recognises, and the terms the first time.
+ * onJoin gets the target, the PIN ("" for a group invitation) and the name.
  */
 @Composable
 fun JoinScreen(
     fixedTarget: InviteTarget?,
     termsAccepted: Boolean,
-    onJoin: (InviteTarget, String) -> Unit,
+    savedName: String,
+    onJoin: (InviteTarget, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -80,11 +86,13 @@ fun JoinScreen(
     var pin by rememberSaveable { mutableStateOf("") }
     var agreed by rememberSaveable { mutableStateOf(termsAccepted) }
     var askTerms by remember { mutableStateOf(false) }
+    var name by rememberSaveable { mutableStateOf(savedName) }
     val target = fixedTarget ?: Invites.parseTyped(code)
-    val ready = target != null && Invites.isPin(pin)
+    val group = (target as? InviteTarget.Link)?.group == true
+    val ready = target != null && if (group) PlayerName.isValid(name) else Invites.isPin(pin)
     val submit = {
         if (target != null && ready) {
-            if (!agreed) askTerms = true else onJoin(target, pin)
+            if (!agreed) askTerms = true else onJoin(target, if (group) "" else pin, if (group) PlayerName.normalize(name) else "")
         }
     }
     val fieldColors = OutlinedTextFieldDefaults.colors(
@@ -99,7 +107,7 @@ fun JoinScreen(
             IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Tokens.text)
             }
-            Text(stringResource(R.string.join_title), color = Tokens.text, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+            Text(stringResource(if (group) R.string.knock_title else R.string.join_title), color = Tokens.text, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
         }
         Box(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), contentAlignment = Alignment.TopCenter) {
             Column(Modifier.widthIn(max = 480.dp).fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -138,7 +146,11 @@ fun JoinScreen(
                             modifier = Modifier.fillMaxWidth().testTag("join-code"),
                         )
                     }
-                    OutlinedTextField(
+                    if (group) {
+                        // A group invitation: the host lets each person in by name.
+                        Text(stringResource(R.string.knock_text), color = Tokens.text2, fontSize = 14.sp)
+                        NameField(name, { name = it }, tag = "knock-name", hintTag = "knock-name-hint", label = stringResource(R.string.knock_name), onDone = { submit() })
+                    } else OutlinedTextField(
                         value = pin,
                         onValueChange = { v -> pin = v.filter { it.isDigit() }.take(6) },
                         label = { Text(stringResource(R.string.join_pin_label)) },
@@ -155,7 +167,12 @@ fun JoinScreen(
                     TermsCheck(agreed, { agreed = it; askTerms = false }, askTerms) { url ->
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
                     }
-                    PrimaryButton(stringResource(R.string.join_button), { submit() }, Modifier.fillMaxWidth().testTag("join-button"), enabled = ready)
+                    PrimaryButton(
+                        stringResource(if (group) R.string.knock_send else R.string.join_button),
+                        { submit() },
+                        Modifier.fillMaxWidth().testTag("join-button"),
+                        enabled = ready,
+                    )
                 }
             }
         }

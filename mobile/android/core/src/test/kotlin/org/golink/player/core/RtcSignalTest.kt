@@ -24,6 +24,22 @@ class RtcSignalTest {
     }
 
     @Test
+    fun groupKeyAndItsAnswers() {
+        val key = "K".repeat(43)
+        assertEquals("""{"kind":"pin","key":"$key","name":"Ana"}""", RtcSignals.key(key, "Ana").toString())
+        // The name the host sees is cut to 24 characters.
+        assertEquals("""{"kind":"pin","key":"$key","name":"${"n".repeat(24)}"}""", RtcSignals.key(key, "n".repeat(30)).toString())
+        assertEquals(
+            DeviceSignal.PinResult(false, "", "waiting", 0, 0),
+            RtcSignals.parse(parseObject("""{"kind":"pin_result","ok":false,"reason":"waiting"}""")),
+        )
+        assertEquals(
+            DeviceSignal.PinResult(false, "", "removed", 0, 0),
+            RtcSignals.parse(parseObject("""{"kind":"pin_result","ok":false,"reason":"removed"}""")),
+        )
+    }
+
+    @Test
     fun negotiation() {
         assertEquals(DeviceSignal.Offer("v=0"), RtcSignals.parse(parseObject("""{"kind":"offer","sdp":"v=0"}""")))
         assertEquals(
@@ -48,7 +64,7 @@ class RtcSignalTest {
         ).joinToString("\r\n")
         assertEquals("6", RtcSignals.micMid(sdp))
         assertNull(RtcSignals.micMid("v=0\r\nm=audio 9 X 111\r\na=mid:1\r\na=sendonly"))
-        assertEquals(2, RtcSignals.voicePort("voice-p2"))
-        assertNull(RtcSignals.voicePort("go-link"))
+        assertEquals(2, RtcSignals.voiceSlot("voice-p2"))
+        assertNull(RtcSignals.voiceSlot("go-link"))
     }
 }

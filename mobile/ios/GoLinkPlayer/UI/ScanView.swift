@@ -6,7 +6,8 @@ import SwiftUI
 
 /**
  * The QR code scanner. It explains the camera first; the system asks
- * next. Only a go-link invitation is accepted (Invites.parseScanned):
+ * next. Only a go-link invitation is accepted (Invites.scanned, which
+ * also reads a group invitation's key after #k=):
  * another site, a signaling server or a PIN in a QR code is refused.
  */
 struct ScanView: View {
@@ -44,7 +45,7 @@ struct ScanView: View {
         } else if status == .authorized {
             ZStack(alignment: .bottom) {
                 QrScanner { text in
-                    if let target = Invites.parseScanned(text) {
+                    if let target = Invites.scanned(text) {
                         model.openInvite(target)
                     } else {
                         invalid = true

@@ -59,6 +59,45 @@ final class InviteTests: XCTestCase {
         XCTAssertNil(Invites.parseAppLink(URL(string: "https://go-link.org:8443/g/\(invite)")!))
     }
 
+    private let key = "K" + String(repeating: "e", count: 40) + "_-" // 43 characters
+
+    func testGroupInvitationKeys() {
+        // A QR code or a pasted link: exactly #k=<43 base64url characters>.
+        XCTAssertEqual(Invitation(target: .link(invite), key: key), Invites.scanned("https://go-link.org/g/\(invite)#k=\(key)"))
+        XCTAssertEqual(Invitation(target: .link(invite), key: key), Invites.typed(" https://go-link.org/g/\(invite)/#k=\(key)\n"))
+        XCTAssertEqual(Invitation(target: .link(invite)), Invites.scanned("https://go-link.org/g/\(invite)"))
+        XCTAssertEqual(Invitation(target: .code("123456789")), Invites.typed("123 456 789"))
+        XCTAssertFalse(Invitation(target: .link(invite)).isGroup)
+        // A key of the wrong length, another value or a query is not a group invitation.
+        XCTAssertNil(Invites.scanned("https://go-link.org/g/\(invite)#k=\(key.dropLast())"))
+        XCTAssertNil(Invites.scanned("https://go-link.org/g/\(invite)#k=\(key)A"))
+        XCTAssertNil(Invites.scanned("https://go-link.org/g/\(invite)#k=\(key)&x=1"))
+        XCTAssertNil(Invites.scanned("https://go-link.org/g/\(invite)?k=\(key)"))
+        XCTAssertNil(Invites.scanned("https://evil.example/g/\(invite)#k=\(key)"))
+        XCTAssertNil(Invites.typed("https://go-link.org/g/\(invite)#k=\(key.dropLast())!"))
+
+        // The fragment of a Universal Link: k among other values, or nothing.
+        XCTAssertEqual(key, Invites.groupKey(fragment: "k=\(key)"))
+        XCTAssertEqual(key, Invites.groupKey(fragment: "#k=\(key)"))
+        XCTAssertEqual(key, Invites.groupKey(fragment: "a=1&k=\(key)&b=2"))
+        XCTAssertEqual("", Invites.groupKey(fragment: "k=\(key.dropLast())"))
+        XCTAssertEqual("", Invites.groupKey(fragment: "k=\(key)x"))
+        XCTAssertEqual("", Invites.groupKey(fragment: "kk=\(key)"))
+        XCTAssertEqual("", Invites.groupKey(fragment: "pin=123456"))
+        XCTAssertEqual("", Invites.groupKey(fragment: ""))
+
+        let url = URL(string: "https://go-link.org/g/\(invite)#k=\(key)")!
+        XCTAssertEqual(Invitation(target: .link(invite), key: key), Invites.appLink(url))
+        XCTAssertEqual(Invitation(target: .link(invite), key: key), Invites.appLink(URL(string: "https://go-link.org/g/\(invite)?x=1#x=2&k=\(key)")!))
+        // No fragment, a short key, or a key in the query: a one-person invitation.
+        XCTAssertEqual(Invitation(target: .link(invite)), Invites.appLink(URL(string: "https://go-link.org/g/\(invite)")!))
+        XCTAssertEqual(Invitation(target: .link(invite)), Invites.appLink(URL(string: "https://go-link.org/g/\(invite)#k=short")!))
+        XCTAssertEqual(Invitation(target: .link(invite)), Invites.appLink(URL(string: "https://go-link.org/g/\(invite)?k=\(key)")!))
+        XCTAssertNil(Invites.appLink(URL(string: "https://evil.example/g/\(invite)#k=\(key)")!))
+        // The key never shows in a description (logs).
+        XCTAssertFalse(String(describing: Invitation(target: .link(invite), key: key)).contains(key))
+    }
+
     func testPins() {
         XCTAssertTrue(Invites.isPin("012345"))
         XCTAssertFalse(Invites.isPin("12345"))

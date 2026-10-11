@@ -63,4 +63,20 @@ enum LiveStatsReader {
         }
         return out
     }
+
+    /**
+     * Each voice slot's level now (slot 1-4 -> 0 to 1, linear), from the
+     * inbound audio of the voice tracks: who speaks lights up, without
+     * touching the audio itself (the website reads the same level from
+     * RTCRtpReceiver's synchronization sources).
+     */
+    static func voiceLevels(_ report: RTCStatisticsReport, labels: [String: String]) -> [Int: Double] {
+        var out: [Int: Double] = [:]
+        for s in report.statistics.values where s.type == "inbound-rtp" && (s.values["kind"] as? String) == "audio" {
+            guard let label = (s.values["trackIdentifier"] as? String).flatMap({ labels[$0] }),
+                  let slot = RtcSignals.voicePort(label) else { continue }
+            out[slot] = (s.values["audioLevel"] as? NSNumber)?.doubleValue ?? 0
+        }
+        return out
+    }
 }

@@ -57,6 +57,51 @@ final class RoomStateTests: XCTestCase {
         XCTAssertEqual(StreamStatsView(fps: nil, aspect: nil), RoomMessages.parseStreamStats(obj(#"{"type":"stream_stats","aspect":9}"#)))
     }
 
+    func testHandsVoiceSlotsAndHostFields() {
+        let s = RoomMessages.parseRoomState(obj("""
+        {"type":"room_state","max_players":2,
+        "seats":[{"name":"Ana","you":false,"peer":"p-ana"},{"name":"Bo","you":false}],
+        "queue":[{"position":1,"name":"Cy","you":false,"peer":"p-cy"}],
+        "spectators":[{"name":"Di","you":true,"hand":true,"hand_at":"2026-10-11T10:00:00Z"},{"name":"Ed","you":false}],
+        "you":{"name":"Di","hand":true,"hand_again":"2026-10-11T10:01:00.123456789-03:00","held":true},
+        "spectators_hear":true,"spectator_saver":true,
+        "voice_slots":[{"name":"Ana","port":1,"you":false},null,{"name":"Cy","port":0},{"name":"Zed","port":3}]}
+        """))!
+        XCTAssertEqual("p-ana", s.seats[0]?.peer)
+        XCTAssertEqual("", s.seats[1]?.peer)
+        XCTAssertEqual(QueueEntry(position: 1, name: "Cy", you: false, peer: "p-cy"), s.queue[0])
+        XCTAssertEqual([Spectator(name: "Di", you: true, hand: true), Spectator(name: "Ed", you: false)], s.spectators)
+        XCTAssertTrue(s.you.hand)
+        XCTAssertTrue(s.you.held)
+        // 13:01:00.123 UTC.
+        XCTAssertEqual(1_791_723_660_123, s.you.handAgain)
+        XCTAssertEqual(.spectator, s.me)
+        XCTAssertFalse(s.talker)
+        XCTAssertTrue(s.spectatorsHear && s.spectatorSaver)
+        // Always four slots; a port outside the seats counts as the queue.
+        XCTAssertEqual([
+            VoiceSlot(name: "Ana", port: 1, you: false), nil,
+            VoiceSlot(name: "Cy", port: 0, you: false), VoiceSlot(name: "Zed", port: 0, you: false),
+        ], s.voiceSlots)
+
+        let old = RoomMessages.parseRoomState(obj(#"{"type":"room_state","you":{"queue_positions":[1],"hand_again":"soon"}}"#))!
+        XCTAssertEqual([nil, nil, nil, nil], old.voiceSlots)
+        XCTAssertFalse(old.you.hand || old.you.held || old.spectatorsHear || old.spectatorSaver)
+        XCTAssertEqual(0, old.you.handAgain)
+        XCTAssertTrue(old.talker) // the queue talks
+    }
+
+    func testHandAndPromotionChatEvents() {
+        let cases: [(String, ChatEvent)] = [
+            ("let_queue", .letQueue), ("play_now", .playNow), ("first_in_queue", .firstInQueue),
+            ("removed", .removed), ("hand_later", .handLater), ("sent_to_queue", .sentToQueue), ("sent_to_watch", .sentToWatch),
+        ]
+        for (wire, event) in cases {
+            let line = RoomMessages.parseChat(obj(#"{"type":"chat","system":"x","event":"\#(wire)","args":{"name":"Host","name2":"Di","port":2},"ts":1}"#))
+            XCTAssertEqual(.system(text: "x", ts: 1, event: event, args: ChatArgs(name: "Host", port: 2, name2: "Di", port2: 0)), line, wire)
+        }
+    }
+
     func testPauseRequestFields() {
         let s = RoomMessages.parseRoomState(obj(#"{"type":"room_state","host_online":false,"you":{"pause_asked":{"expires_at":"2026-09-29T10:00:30Z"}}}"#))!
         XCTAssertFalse(s.hostOnline)

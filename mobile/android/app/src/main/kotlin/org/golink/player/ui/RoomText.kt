@@ -36,7 +36,14 @@ fun systemText(res: Resources, line: ChatLine.System): String {
         ChatEvent.LEFT_SEAT -> res.getString(R.string.ev_left, n, p)
         ChatEvent.SEAT_FREE -> res.getString(R.string.ev_free, p)
         ChatEvent.TOOK_SEAT -> res.getString(R.string.ev_took, n, p)
+        ChatEvent.SENT_TO_QUEUE -> res.getString(R.string.ev_sent_to_queue, n, n2, p)
+        ChatEvent.SENT_TO_WATCH -> res.getString(R.string.ev_sent_to_watch, n, n2, p)
+        ChatEvent.LET_QUEUE -> res.getString(R.string.ev_let_queue, n, n2)
+        ChatEvent.PLAY_NOW -> res.getString(R.string.ev_play_now, n, n2, p)
+        ChatEvent.FIRST_IN_QUEUE -> res.getString(R.string.ev_first_in_queue, n)
+        ChatEvent.REMOVED -> res.getString(R.string.ev_removed, n, n2)
         ChatEvent.PAUSE_DECLINED -> res.getString(R.string.ev_pause_declined)
+        ChatEvent.HAND_LATER -> res.getString(R.string.hand_later)
         null -> line.text
     }
 }
@@ -48,6 +55,34 @@ fun pinRefusal(res: Resources, r: DeviceSignal.PinResult): String = when (r.reas
     "locked" -> res.getQuantityString(R.plurals.pin_locked, maxOf(1, (r.retryAfter + 59) / 60), maxOf(1, (r.retryAfter + 59) / 60))
     else -> res.getQuantityString(R.plurals.pin_wrong, r.left, r.left)
 }
+
+/**
+ * A request the device refused, by its error code (the website's hand
+ * notes); null for codes this app does not explain. handAgain is when the
+ * next raised hand is allowed (ms since the epoch, 0 = unknown).
+ */
+fun refusalText(res: Resources, code: String, handAgain: Long, now: Long = System.currentTimeMillis()): String? = when (code) {
+    "hand_too_soon" -> {
+        val s = ((handAgain - now + 999) / 1000).toInt()
+        if (handAgain > 0 && s in 1..60) res.getString(R.string.hand_again, s) else res.getString(R.string.hand_too_soon)
+    }
+    "hand_no_host" -> res.getString(R.string.hand_no_host)
+    "queue_ask_host" -> res.getString(R.string.hand_ask_host)
+    else -> null
+}
+
+/** Why a group invitation's knock ended (the website's knock.ended texts). */
+fun knockEndText(res: Resources, reason: String): String = res.getString(
+    when (reason) {
+        "declined" -> R.string.knock_end_declined
+        "full" -> R.string.knock_end_full
+        "expired" -> R.string.knock_end_expired
+        "busy" -> R.string.knock_end_busy
+        "blocked" -> R.string.knock_end_blocked
+        "locked" -> R.string.knock_end_locked
+        else -> R.string.knock_end_wrong
+    },
+)
 
 /** 1 -> "1st"... in the reader's language, for the queue. */
 fun ordinal(res: Resources, n: Int): String = res.getString(R.string.ordinal, n)

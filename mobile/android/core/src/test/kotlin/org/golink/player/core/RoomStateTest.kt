@@ -88,4 +88,66 @@ class RoomStateTest {
         val declined = RoomMessages.parseChat(parseObject("""{"type":"chat","system":"The host declined","event":"pause_declined","ts":3}""")!!)
         assertEquals(ChatLine.System("The host declined", 3.0, ChatEvent.PAUSE_DECLINED), declined)
     }
+
+    @Test
+    fun handsVoiceSlotsAndSpectators() {
+        val s = RoomMessages.parseRoomState(
+            parseObject(
+                """{"type":"room_state","max_players":2,
+                "seats":[{"name":"Ana","peer":"p-ana"},{"name":"Bo"}],
+                "queue":[{"position":1,"name":"Cy","you":false,"peer":"p-cy"}],
+                "spectators":[{"name":"Di","you":true,"hand":true},{"name":"Ed","hand":"yes"}],
+                "you":{"name":"Di","spectator":true,"hand":true,"hand_again":"2026-10-11T10:00:30Z","held":true},
+                "spectators_hear":true,"spectator_saver":true,
+                "voice_slots":[{"name":"Bo","port":2,"you":false},null,{"name":"Cy","port":0},{"name":"Zed","port":7,"you":true},{"name":"extra","port":1}]}""",
+            )!!,
+        )!!
+        assertEquals(SeatView(1, "Ana", 0, false, "p-ana"), s.seats[0])
+        assertEquals(QueueEntry(1, "Cy", false, "p-cy"), s.queue[0])
+        assertEquals(listOf(Spectator("Di", true, "", true), Spectator("Ed", false, "", false)), s.spectators)
+        assertTrue(s.you.hand && s.you.held)
+        assertEquals(java.time.Instant.parse("2026-10-11T10:00:30Z").toEpochMilli(), s.you.handAgain)
+        assertTrue(s.spectatorsHear && s.spectatorSaver)
+        // Four slots; a port outside the room's seats counts as the queue (0).
+        assertEquals(listOf(VoiceSlot("Bo", 2, false), null, VoiceSlot("Cy", 0, false), VoiceSlot("Zed", 0, true)), s.voiceSlots)
+        assertEquals(Me.Spectator, s.me)
+        assertFalse(s.canTalk)
+
+        // Older devices send none of it.
+        val old = RoomMessages.parseRoomState(parseObject("""{"type":"room_state","you":{"queue_positions":[1],"hand_again":"soon"}}""")!!)!!
+        assertEquals(List<VoiceSlot?>(4) { null }, old.voiceSlots)
+        assertFalse(old.spectatorsHear || old.spectatorSaver || old.you.hand || old.you.held)
+        assertEquals(0L, old.you.handAgain)
+        assertTrue(old.canTalk) // the queue talks too
+    }
+
+    @Test
+    fun silencingFollowsThePersonAcrossSlots() {
+        val slots = listOf(VoiceSlot("Bo", 2, false), null, VoiceSlot("Cy", 0, false), VoiceSlot("Ana", 1, false))
+        assertEquals(setOf(1, 3), VoiceSlots.silencedSlots(slots, setOf("Bo", "Cy")))
+        // Bo moves to another slot: the silence moves with him.
+        val later = listOf(VoiceSlot("Cy", 0, false), null, null, VoiceSlot("Bo", 2, false))
+        assertEquals(setOf(1, 4), VoiceSlots.silencedSlots(later, setOf("Bo", "Cy")))
+        assertEquals(emptySet<Int>(), VoiceSlots.silencedSlots(later, emptySet()))
+    }
+
+    @Test
+    fun handAndHostChatEventsAndRefusals() {
+        val events = mapOf(
+            "let_queue" to ChatEvent.LET_QUEUE,
+            "play_now" to ChatEvent.PLAY_NOW,
+            "first_in_queue" to ChatEvent.FIRST_IN_QUEUE,
+            "removed" to ChatEvent.REMOVED,
+            "hand_later" to ChatEvent.HAND_LATER,
+            "sent_to_queue" to ChatEvent.SENT_TO_QUEUE,
+            "sent_to_watch" to ChatEvent.SENT_TO_WATCH,
+        )
+        for ((wire, event) in events) {
+            val line = RoomMessages.parseChat(parseObject("""{"type":"chat","system":"x","event":"$wire","args":{"name":"Host","name2":"Di","port":2},"ts":1}""")!!)
+            assertEquals(ChatLine.System("x", 1.0, event, ChatArgs("Host", 2, "Di", 0)), line)
+        }
+        assertEquals("queue_ask_host", RoomMessages.parseRefusal(parseObject("""{"type":"error","code":"queue_ask_host","error":"ask"}""")!!))
+        assertNull(RoomMessages.parseRefusal(parseObject("""{"type":"error","error":"no code"}""")!!))
+        assertNull(RoomMessages.parseRefusal(parseObject("""{"type":"chat","code":"x"}""")!!))
+    }
 }

@@ -34,8 +34,11 @@ interface MediaListener {
 
     fun onGameAudio(track: AudioTrack)
 
-    /** The voice of the player at a port (1-4), forwarded by the device. */
-    fun onVoice(port: Int, track: AudioTrack)
+    /**
+     * A voice slot (1-4): the forwarded voice of whoever speaks now
+     * (room_state.voice_slots says who), not a seat.
+     */
+    fun onVoice(slot: Int, track: AudioTrack)
 
     /** The connection is closing: its tracks go away. Called on the closing thread. */
     fun onClosed()
@@ -45,7 +48,7 @@ interface MediaListener {
  * The app's side of the WebRTC link with the device, the Android
  * counterpart of the web's HostStream (frontend/packages/shared/src/stream.ts):
  * it answers the device's offer, receives the game's video and sound and
- * the other players' voices, and speaks the "control" and "input" channels.
+ * the voices, and speaks the "control" and "input" channels.
  */
 class AndroidRtcPeer(
     private val engine: WebRtcEngine,
@@ -254,9 +257,9 @@ class AndroidRtcPeer(
                     media.onVideo(track)
                 }
                 is AudioTrack -> {
-                    val port = RtcSignals.voicePort(id)
-                    trackLabels[track.id()] = if (port != null) "voice-p$port" else "game"
-                    if (port != null) media.onVoice(port, track) else media.onGameAudio(track)
+                    val slot = RtcSignals.voiceSlot(id)
+                    trackLabels[track.id()] = if (slot != null) "voice-p$slot" else "game"
+                    if (slot != null) media.onVoice(slot, track) else media.onGameAudio(track)
                 }
             }
         }

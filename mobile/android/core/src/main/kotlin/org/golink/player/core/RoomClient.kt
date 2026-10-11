@@ -55,6 +55,15 @@ enum class RoomPhase {
     /** The device asks for the invitation's PIN (or is checking one). */
     PIN,
 
+    /** A group invitation's knock: the host decides whether this person comes in. */
+    WAITING,
+
+    /** The group invitation did not let this person in (RoomUi.knockEnd says why). Final. */
+    REFUSED,
+
+    /** The host took this guest out of the room: only a new invitation brings them back. Final. */
+    REMOVED,
+
     /** Admitted: the WebRTC connection is being set up. */
     CONNECTING,
 
@@ -88,7 +97,17 @@ data class RoomUi(
     val typing: List<TypingView> = emptyList(),
     val stats: StreamStatsView = StreamStatsView(null, null),
     val controlOpen: Boolean = false,
+    /**
+     * Why a group invitation's knock ended (phase REFUSED): declined,
+     * full, expired, busy, wrong, blocked or locked.
+     */
+    val knockEnd: String = "",
+    /** The last request the device refused, by its error code. */
+    val refused: Refusal? = null,
 )
+
+/** A refused request: code (hand_too_soon, queue_ask_host...), n counts them so a repeat shows again. */
+data class Refusal(val code: String, val n: Int)
 
 /**
  * One room visit: joins through an invitation, passes the PIN gate,
@@ -101,6 +120,10 @@ data class RoomUi(
  * person typed. The return token from pin_result is used only to get back
  * in automatically after the connection drops during this visit.
  *
+ * A group invitation (a link with #k=<key>) sends its key and the
+ * person's name instead of a PIN, then waits while the host decides
+ * (pin_result "waiting"). The key stays in memory only.
+ *
  * Every method must be called on scope's dispatcher.
  */
 class RoomClient(
@@ -110,6 +133,8 @@ class RoomClient(
     private val passes: RoomPasses,
     private val peers: RtcPeerFactory,
     private val scope: CoroutineScope,
+    /** The name the host sees when knocking with a group invitation's key. */
+    private val knockName: String = "",
 ) {
     private val _ui = MutableStateFlow(RoomUi())
     val ui: StateFlow<RoomUi> = _ui.asStateFlow()
@@ -117,6 +142,14 @@ class RoomClient(
     private var pinToSend: String? = typedPin.takeIf { Invites.isPin(it) }
     private var sentToken = false
     private var admittedOnce = false
+
+    // A group invitation: its key is sent once per join, with the name.
+    private val groupKey = (target as? InviteTarget.Link)?.key ?: ""
+    private var knockSent = false
+    private var knocking = false
+
+    // Stopped for good (taken out by the host, or a knock that ended): no more tries.
+    private var halted = false
 
     private var joinedOn = "" // peer_id of the signaling connection that joined
     private var hostPeerId = ""
@@ -142,7 +175,7 @@ class RoomClient(
         offListener = signal.addListener(::onEnvelope)
         stateJob = scope.launch {
             signal.state.collect { s ->
-                if (closed) return@collect
+                if (closed || halted) return@collect
                 if (s == ConnectionState.OPEN) {
                     if (joinedOn != signal.peerId && !joining) join()
                 } else if (joinedOn.isNotEmpty()) {
@@ -169,15 +202,30 @@ class RoomClient(
 
     /** Gets back in (new signaling connection, same visit): used after a failure. */
     fun reconnect() {
-        if (closed) return
+        if (closed || halted) return
         joinedOn = ""
         dropPeer()
         _ui.update { it.copy(phase = RoomPhase.JOINING, reconnecting = true, controlOpen = false) }
         signal.reset()
     }
 
+    /** Stops for good with a final phase: no more joins, the media goes away. */
+    private fun halt(update: (RoomUi) -> RoomUi) {
+        halted = true
+        input.releaseAll()
+        dropPeer()
+        hostPeerId = ""
+        offListener?.invoke()
+        offListener = null
+        stateJob?.cancel()
+        signal.close()
+        _ui.update { update(it).copy(controlOpen = false) }
+    }
+
     private fun join() {
         joining = true
+        knockSent = false
+        knocking = false
         val peerAtJoin = signal.peerId
         backlog = mutableListOf()
         hostPeerId = ""
@@ -253,6 +301,14 @@ class RoomClient(
             sendSignal(RtcSignals.token(token))
             return
         }
+        if (groupKey.isNotEmpty() && !knockSent) {
+            // The group invitation: the key and a name the host recognises.
+            knockSent = true
+            knocking = true
+            _ui.update { it.copy(phase = RoomPhase.WAITING, pin = PinView(needed = true, busy = true)) }
+            sendSignal(RtcSignals.key(groupKey, knockName))
+            return
+        }
         val pin = pinToSend
         if (pin != null) {
             pinToSend = null // an invitation's PIN works once
@@ -265,11 +321,28 @@ class RoomClient(
 
     private fun onPinResult(r: DeviceSignal.PinResult) {
         val roomId = _ui.value.roomId
+        if (r.reason == "removed") {
+            // Taken out by the host: the token now always answers "removed"
+            // (never a wrong PIN), so it is kept and nothing else is tried.
+            halt { it.copy(phase = RoomPhase.REMOVED, pin = PinView()) }
+            return
+        }
         if (r.ok) {
             admittedOnce = true
             sentToken = false
+            knocking = false
             if (r.token.isNotEmpty() && roomId.isNotEmpty()) passes.save(roomId, r.token)
             _ui.update { it.copy(phase = RoomPhase.CONNECTING, pin = PinView(), reconnecting = false) }
+            return
+        }
+        if (knocking) {
+            if (r.reason == "waiting") {
+                _ui.update { it.copy(phase = RoomPhase.WAITING, pin = PinView(needed = true, busy = true, last = r)) }
+                return
+            }
+            // The group invitation did not let this person in: say why.
+            knocking = false
+            halt { it.copy(phase = RoomPhase.REFUSED, knockEnd = r.reason.ifEmpty { "wrong" }, pin = PinView()) }
             return
         }
         if (sentToken) {
@@ -379,6 +452,7 @@ class RoomClient(
         RoomMessages.parseRoomState(m)?.let { s -> _ui.update { it.copy(room = s) }; return }
         RoomMessages.parseChat(m)?.let { line -> _ui.update { it.copy(chat = (it.chat + line).takeLast(MAX_CHAT_LINES)) }; return }
         RoomMessages.parseTyping(m)?.let { who -> _ui.update { it.copy(typing = who) }; return }
+        RoomMessages.parseRefusal(m)?.let { code -> _ui.update { it.copy(refused = Refusal(code, (it.refused?.n ?: 0) + 1)) }; return }
         RoomMessages.parseStreamStats(m)?.let { st ->
             // The last valid "video" stays (like the website) until a new one arrives.
             _ui.update { it.copy(stats = StreamStatsView(st.fps ?: it.stats.fps, st.aspect ?: it.stats.aspect, st.video ?: it.stats.video)) }
@@ -427,7 +501,14 @@ class RoomClient(
 
     fun spectate() = sendControl(buildJsonObject { put("type", "spectate") })
 
+    /**
+     * Back to the queue from watching. Someone the host moved to watching
+     * (you.held) gets the error queue_ask_host instead: they raise a hand.
+     */
     fun joinQueue() = sendControl(buildJsonObject { put("type", "queue") })
+
+    /** A spectator raises (or lowers) a hand to ask the host to play. */
+    fun raiseHand(on: Boolean) = sendControl(buildJsonObject { put("type", "hand"); put("on", on) })
 
     /**
      * Only the host pauses and resumes a game: a guest asks for a pause
