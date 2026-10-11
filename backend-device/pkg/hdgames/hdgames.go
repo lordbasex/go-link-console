@@ -16,6 +16,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/lordbasex/go-link/backend-device/pkg/glhd"
@@ -28,29 +30,58 @@ type File struct {
 	SHA256 string
 }
 
-// Game is a starter game: its package name (name.glhd), title and files
-// by screen size (720p, 1080p).
+// Game is a starter game: its package name (name.glhd), title, version
+// (its manifest's) and files by screen size (720p, 1080p).
 type Game struct {
-	Name  string
-	Title string
-	Files map[string]File
+	Name    string
+	Title   string
+	Version string
+	Files   map[string]File
 }
 
 // release is where go-link HD's engine publishes the starter games.
-const release = "https://github.com/lordbasex/golink-hd/releases/download/antidoto-v0.1.0/"
+const release = "https://github.com/lordbasex/golink-hd/releases/download/antidoto-v0.1.1/"
 
 // Starter are the games a device downloads on its first link, and that
 // go-link HD's page can download again.
 var Starter = []Game{{
-	Name:  "antidoto",
-	Title: "ANTÍDOTO",
+	Name:    "antidoto",
+	Title:   "ANTÍDOTO",
+	Version: "0.1.1",
 	Files: map[string]File{
-		"720p": {URL: release + "antidoto-720p.glhd", Size: 117389971,
-			SHA256: "6ea3b39e5bb53c5eaa439da73186d5ef6fa851d28e4549b9724750cc75b04ffe"},
-		"1080p": {URL: release + "antidoto-1080p.glhd", Size: 173033830,
-			SHA256: "ea118cee408c96b41f53cca4861ca5e2dae8151201439e3ce4e81a5db91bf4c0"},
+		"720p": {URL: release + "antidoto-720p.glhd", Size: 117426392,
+			SHA256: "aab91aff3d6960575867805cb84f41b9ad3e116165c4a24d2dc114adb3eb3afc"},
+		"1080p": {URL: release + "antidoto-1080p.glhd", Size: 173130796,
+			SHA256: "fe97b1be1a19c9a6787567c500cfe7b4f72183a799ed5ab018070c186451fa2b"},
 	},
 }}
+
+// Older reports whether an installed package's version (its manifest's,
+// "0.1.0") comes before the game's: a newer one can be downloaded. An
+// unknown version counts as older, an equal or newer one does not.
+func Older(installed, version string) bool {
+	if version == "" {
+		return false
+	}
+	a, b := strings.Split(installed, "."), strings.Split(version, ".")
+	for i := 0; i < max(len(a), len(b)); i++ {
+		x, y := 0, 0
+		if i < len(a) {
+			n, err := strconv.Atoi(a[i])
+			if err != nil {
+				return true
+			}
+			x = n
+		}
+		if i < len(b) {
+			y, _ = strconv.Atoi(b[i])
+		}
+		if x != y {
+			return x < y
+		}
+	}
+	return false
+}
 
 // Find returns the starter game of a name.
 func Find(name string) (Game, bool) {

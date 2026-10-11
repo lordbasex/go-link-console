@@ -303,6 +303,9 @@ export interface StarterGame {
   installed: boolean;
   /** The installed package's screen size. */
   size?: string;
+  /** The installed package's version, and the newer one that can be downloaded (absent when up to date). */
+  version?: string;
+  update?: string;
   /** The size being downloaded, with its progress in bytes. */
   downloading?: string;
   done: number;
@@ -319,7 +322,7 @@ function parseHD(v: unknown): DeviceHD | undefined {
         const r = g as Record<string, unknown>;
         const name = text(r.name, 40);
         if (!name) return [];
-        return [{ name, title: text(r.title, 80) ?? name, installed: r.installed === true, size: text(r.size, 10), downloading: text(r.downloading, 10), done: bytesOf(r.done), total: bytesOf(r.total), error: text(r.error, 200) }];
+        return [{ name, title: text(r.title, 80) ?? name, installed: r.installed === true, size: text(r.size, 10), version: text(r.version, 20), update: text(r.update, 20), downloading: text(r.downloading, 10), done: bytesOf(r.done), total: bytesOf(r.total), error: text(r.error, 200) }];
       })
     : [];
   return { roomSize: h.room_size === "1080p" ? "1080p" : "720p", codec: h.codec === "vp8" ? "vp8" : "auto", starter };

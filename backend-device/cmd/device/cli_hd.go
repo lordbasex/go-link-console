@@ -122,6 +122,9 @@ func cmdHDGames(args []string) error {
 			if g.Size != "" {
 				state += " (" + g.Size + ")"
 			}
+			if g.Update != "" {
+				state += ", version " + g.Update + " available"
+			}
 		}
 		fmt.Fprintf(tw, "%s\t%s\t%s\n", g.Name, g.Title, state)
 	}

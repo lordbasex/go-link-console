@@ -85,7 +85,10 @@ func (h *HDGamesService) Publish() {
 		if p := h.cfg.Library.HDPackage(g.Name); p != "" {
 			sg.Installed = true
 			if m, err := glhd.Read(p); err == nil {
-				sg.Size = m.Resolution
+				sg.Size, sg.Version = m.Resolution, m.Version
+			}
+			if hdgames.Older(sg.Version, g.Version) {
+				sg.Update = g.Version
 			}
 		}
 		if j := h.jobs[g.Name]; j != nil {
