@@ -3,21 +3,21 @@
 import type { LegalTexts } from "./legal-en";
 
 export const legalEs: LegalTexts = {
-  updated: "Versión del 28 de septiembre de 2026",
+  updated: "Versión del 12 de octubre de 2026",
   prevails: "Esta página es una traducción. Si difiere de la versión en inglés, prevalece la versión en inglés.",
   contact: "Consultas, pedidos y reportes: lord.basex@gmail.com",
   terms: {
     title: "Términos de uso",
     intro:
-      "go-link es software gratuito, de código abierto, independiente y sin fines de lucro. Un anfitrión ejecuta la app de go-link en su propia computadora, con sus propios archivos de juegos, e invita a amigos que juegan desde el navegador. El sitio web y el servidor de señalización del proyecto solo presentan al anfitrión y a los invitados entre sí. Al vincular un dispositivo, unirte a una partida o usar go-link de cualquier otra forma, aceptas estos términos. Si no los aceptas, no uses go-link.",
+      "go-link Console es software gratuito, de código abierto, independiente y sin fines de lucro. Un anfitrión ejecuta la app de go-link Console en su propia computadora, con sus propios archivos de juegos, e invita a amigos que juegan desde el navegador. El sitio web y el servidor de señalización del proyecto solo presentan al anfitrión y a los invitados entre sí. Al vincular un dispositivo, unirte a una partida o usar go-link Console de cualquier otra forma, aceptas estos términos. Si no los aceptas, no uses go-link Console.",
     sections: [
       {
         id: "roms",
         title: "ROMs y contenido con derechos de autor: política de contenido cero",
         body: [],
         list: [
-          "go-link no aloja, incluye, distribuye, vende, enlaza ni descarga ROMs, imágenes de juegos, arte, carátulas ni archivos de BIOS, y no nombra ni señala ningún sitio que los ofrezca.",
-          "go-link es una herramienta de software y un motor de transmisión. Cada archivo de juego queda en la computadora del anfitrión; ningún servidor de go-link lo recibe, lo guarda ni lo retransmite.",
+          "go-link Console no aloja, incluye, distribuye, vende, enlaza ni descarga ROMs, imágenes de juegos, arte, carátulas ni archivos de BIOS, y no nombra ni señala ningún sitio que los ofrezca.",
+          "go-link Console es una herramienta de software y un motor de transmisión. Cada archivo de juego queda en la computadora del anfitrión; ningún servidor de go-link Console lo recibe, lo guarda ni lo retransmite.",
           "El anfitrión es el único responsable de los archivos que carga. Solo puede usar archivos que tenga derecho legal a usar, como copias de seguridad de placas arcade o software de su propiedad. La reproducción o transmisión no autorizada de material protegido es responsabilidad exclusiva del anfitrión que la realiza.",
           "Transmitir un juego a invitados puede considerarse una comunicación pública de ese juego según las leyes de tu país. El anfitrión es responsable de asegurarse de que puede hacerlo.",
         ],
@@ -25,7 +25,7 @@ export const legalEs: LegalTexts = {
       {
         id: "use",
         title: "Uso aceptable",
-        body: ["No puedes usar go-link, su sitio, su servidor de señalización ni su relay para:"],
+        body: ["No puedes usar go-link Console, su sitio, su servidor de señalización ni su relay para:"],
         list: [
           "transmitir, compartir o enviar contenido ilegal, que infrinja derechos, pornográfico, difamatorio, acosador, de odio, amenazante o malicioso, por video, voz o chat;",
           "acosar, suplantar o dañar a otras personas, o recopilar sus datos sin su consentimiento;",
@@ -45,7 +45,7 @@ export const legalEs: LegalTexts = {
         id: "age",
         title: "Edad",
         body: [
-          "Debes tener al menos 13 años, o la edad mínima que exija tu país para usar servicios en línea sin el consentimiento de tus padres. Las personas menores solo pueden usar go-link con un padre, madre o tutor que acepte estos términos.",
+          "Debes tener al menos 13 años, o la edad mínima que exija tu país para usar servicios en línea sin el consentimiento de tus padres. Las personas menores solo pueden usar go-link Console con un padre, madre o tutor que acepte estos términos.",
         ],
         list: [],
       },
@@ -53,7 +53,7 @@ export const legalEs: LegalTexts = {
         id: "warranty",
         title: "Sin garantía",
         body: [
-          "go-link, el sitio, el servidor de señalización y el relay se ofrecen \"tal cual\" y \"según disponibilidad\", sin garantías de ningún tipo, expresas o implícitas, incluidas las de comerciabilidad, idoneidad para un fin determinado, disponibilidad y no infracción. El servicio puede cambiar, fallar, perder conexiones, tener latencia o detenerse en cualquier momento, sin aviso.",
+          "go-link Console, el sitio, el servidor de señalización y el relay se ofrecen \"tal cual\" y \"según disponibilidad\", sin garantías de ningún tipo, expresas o implícitas, incluidas las de comerciabilidad, idoneidad para un fin determinado, disponibilidad y no infracción. El servicio puede cambiar, fallar, perder conexiones, tener latencia o detenerse en cualquier momento, sin aviso.",
         ],
         list: [],
       },
@@ -61,7 +61,7 @@ export const legalEs: LegalTexts = {
         id: "liability",
         title: "Limitación de responsabilidad",
         body: [
-          "En la máxima medida que permita la ley, los autores y colaboradores de go-link no son responsables de ningún daño directo, indirecto, incidental, especial, consecuente o punitivo, ni de pérdidas de datos, juegos, partidas guardadas o ganancias, derivados del uso o de la imposibilidad de usar go-link o sus servicios, ni del contenido que anfitriones o invitados carguen, transmitan o envíen.",
+          "En la máxima medida que permita la ley, los autores y colaboradores de go-link Console no son responsables de ningún daño directo, indirecto, incidental, especial, consecuente o punitivo, ni de pérdidas de datos, juegos, partidas guardadas o ganancias, derivados del uso o de la imposibilidad de usar go-link Console o sus servicios, ni del contenido que anfitriones o invitados carguen, transmitan o envíen.",
         ],
         list: [],
       },
@@ -69,7 +69,7 @@ export const legalEs: LegalTexts = {
         id: "indemnity",
         title: "Indemnidad",
         body: [
-          "Si tu uso de go-link incumple estos términos o la ley, por ejemplo al transmitir archivos que no tenías derecho a usar, aceptas mantener indemnes a los autores y colaboradores de go-link frente a cualquier reclamo que surja de ello.",
+          "Si tu uso de go-link Console incumple estos términos o la ley, por ejemplo al transmitir archivos que no tenías derecho a usar, aceptas mantener indemnes a los autores y colaboradores de go-link Console frente a cualquier reclamo que surja de ello.",
         ],
         list: [],
       },
@@ -78,9 +78,9 @@ export const legalEs: LegalTexts = {
         title: "Licencias",
         body: [],
         list: [
-          "El código fuente propio de go-link se publica bajo la licencia MIT.",
-          "Los componentes de terceros incluidos en la app y el sitio de go-link conservan sus propias licencias, listadas en THIRD_PARTY_NOTICES.md e incluidas en cada versión.",
-          "El núcleo del emulador no es parte de go-link: la app descarga mame2003-plus del buildbot de libretro cuando el anfitrión lo pide. mame2003-plus está bajo la licencia no comercial de MAME, así que usar go-link con ese núcleo es solo para uso no comercial: no se permite ninguna distribución comercial ni monetización de go-link junto con ese núcleo.",
+          "El código fuente propio de go-link Console se publica bajo la licencia MIT.",
+          "Los componentes de terceros incluidos en la app y el sitio de go-link Console conservan sus propias licencias, listadas en THIRD_PARTY_NOTICES.md e incluidas en cada versión.",
+          "El núcleo del emulador no es parte de go-link Console: la app descarga mame2003-plus del buildbot de libretro cuando el anfitrión lo pide. mame2003-plus está bajo la licencia no comercial de MAME, así que usar go-link Console con ese núcleo es solo para uso no comercial: no se permite ninguna distribución comercial ni monetización de go-link Console junto con ese núcleo.",
         ],
       },
       {
@@ -88,15 +88,15 @@ export const legalEs: LegalTexts = {
         title: "Marcas",
         body: [],
         list: [
-          "MAME® es una marca registrada de Gregory Ember. go-link no está afiliado, respaldado ni patrocinado por MAMEdev, el equipo de MAME ni libretro. El nombre MAME solo se usa para describir con qué es compatible go-link, y no se usa el logo de MAME.",
-          "Los nombres de empresas, títulos de juegos, logos y personajes que los juegos puedan mostrar son marcas y propiedad de sus respectivos dueños. go-link es independiente y no declara ninguna afiliación ni respaldo de ninguno de ellos.",
+          "MAME® es una marca registrada de Gregory Ember. go-link Console no está afiliado, respaldado ni patrocinado por MAMEdev, el equipo de MAME ni libretro. El nombre MAME solo se usa para describir con qué es compatible go-link Console, y no se usa el logo de MAME.",
+          "Los nombres de empresas, títulos de juegos, logos y personajes que los juegos puedan mostrar son marcas y propiedad de sus respectivos dueños. go-link Console es independiente y no declara ninguna afiliación ni respaldo de ninguno de ellos.",
         ],
       },
       {
         id: "reports",
         title: "Reportes y cambios",
         body: [
-          "go-link no aloja juegos ni contenido de usuarios, así que no puede quitarlos. Para reportar abusos de los servidores del proyecto, o cualquier otra cosa sobre estos términos, escribe a lord.basex@gmail.com.",
+          "go-link Console no aloja juegos ni contenido de usuarios, así que no puede quitarlos. Para reportar abusos de los servidores del proyecto, o cualquier otra cosa sobre estos términos, escribe a lord.basex@gmail.com.",
           "Estos términos pueden cambiar. La fecha de la versión está arriba de esta página, y el sitio te pide aceptar una versión nueva antes de volver a vincular un dispositivo o unirte a una partida.",
         ],
         list: [],
@@ -106,7 +106,7 @@ export const legalEs: LegalTexts = {
   privacy: {
     title: "Política de privacidad",
     intro:
-      "go-link está pensado para recopilar lo mínimo posible. No tiene cuentas ni publicidad, y las tipografías del sitio las sirve el propio sitio. Las salas (play.go-link.org), el dispositivo y la app Player no tienen cookies, analítica ni rastreadores de terceros. Solo si aceptas el aviso de cookies, Google Analytics cuenta las visitas a este sitio (console.go-link.org) con sus cookies; esos datos van a Google, bajo su propia política de privacidad, y puedes cambiar tu elección cuando quieras en \"Configurar cookies\".",
+      "go-link Console está pensado para recopilar lo mínimo posible. No tiene cuentas ni publicidad, y las tipografías del sitio las sirve el propio sitio. Las salas (play.go-link.org), el dispositivo y la app Player no tienen cookies, analítica ni rastreadores de terceros. Solo si aceptas el aviso de cookies, Google Analytics cuenta las visitas a este sitio (console.go-link.org) con sus cookies; esos datos van a Google, bajo su propia política de privacidad, y puedes cambiar tu elección cuando quieras en \"Configurar cookies\".",
     sections: [
       {
         id: "p2p",
@@ -169,8 +169,8 @@ export const legalEs: LegalTexts = {
         id: "rights",
         title: "Tus derechos y los servidores propios",
         body: [
-          "Como go-link no tiene cuentas ni guarda datos personales en sus servidores más allá de lo descrito aquí, la mayoría de los pedidos se resuelven borrando los datos de tu navegador o pidiéndole al anfitrión que borre su historial. Para cualquier consulta o pedido sobre tus datos, escribe a lord.basex@gmail.com.",
-          "Cualquier persona puede usar su propio servidor de señalización. Si usas uno (el sitio lo muestra), su operador, y no el proyecto go-link, es responsable de él.",
+          "Como go-link Console no tiene cuentas ni guarda datos personales en sus servidores más allá de lo descrito aquí, la mayoría de los pedidos se resuelven borrando los datos de tu navegador o pidiéndole al anfitrión que borre su historial. Para cualquier consulta o pedido sobre tus datos, escribe a lord.basex@gmail.com.",
+          "Cualquier persona puede usar su propio servidor de señalización. Si usas uno (el sitio lo muestra), su operador, y no el proyecto go-link Console, es responsable de él.",
         ],
         list: [],
       },
@@ -195,11 +195,11 @@ export const legalEs: LegalTexts = {
     license: "Licencia MIT",
     notices: "Licencias de terceros",
     legalDoc: "Texto legal completo",
-    rights: "go-link. Código publicado bajo la licencia MIT.",
+    rights: "go-link Console. Código publicado bajo la licencia MIT.",
     trademark:
-      "MAME® es una marca registrada de Gregory Ember. go-link no está afiliado ni respaldado por MAMEdev ni libretro. Los nombres y logos de los juegos pertenecen a sus dueños.",
+      "MAME® es una marca registrada de Gregory Ember. go-link Console no está afiliado ni respaldado por MAMEdev ni libretro. Los nombres y logos de los juegos pertenecen a sus dueños.",
     version: "Versión del sitio",
-    github: "go-link en GitHub",
-    noRoms: "go-link no aloja, incluye ni descarga ninguna ROM, BIOS ni imagen de juego.",
+    github: "go-link Console en GitHub",
+    noRoms: "go-link Console no aloja, incluye ni descarga ninguna ROM, BIOS ni imagen de juego.",
   },
 };

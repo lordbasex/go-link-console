@@ -4,6 +4,8 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-10-11
+
 ### Added
 
 - **The landing in go-link Desk's look:** mono eyebrows; the ANTÍDOTO screen (unchanged, with **Watch the trailer**) in a laptop with the Player app on a phone in front of it and tags for the two players; notes under the buttons; the guest's three steps as cards with the app's screenshots; the room and the device told in rows of real screenshots with bullets (all the features, once); the path of a game drawn to scale; wide sunken bands and a last call. The site's footer follows on every page: mono headings, the language buttons and the version.
@@ -19,6 +21,8 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 
 ### Changed
 
+- **The terms of use and the privacy policy name go-link Console** (version 2026-10-11) and list play.go-link.org, where the rooms are; nothing else in them changed. Everyone accepts them once more when they next link a device or join a room, in the website and in the Player apps.
+- **Every emulator core fix is upstream:** libretro merged the last two pull requests on 2026-10-11, the input ports' latched values (`0019`, #2053) and X-Men's sound chips and EEPROM count (`0015`, `0020`, `0021`, #2054), so the official mame2003-plus core from the buildbot resumes those games as well as the patched one did.
 - **github.com/lordbasex/go-link is now the go-link.org index** (the project ecosystem), so GitHub no longer redirects the old name here. Its release `v0.4.0` has no files and points to this repository's 0.4.0, so a device running 0.3.x still sees the update and where to download it.
 
 ## [0.4.0] - 2026-10-11

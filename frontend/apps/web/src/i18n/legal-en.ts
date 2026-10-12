@@ -44,21 +44,21 @@ export interface LegalTexts {
 }
 
 export const legalEn: LegalTexts = {
-  updated: "Version of September 28, 2026",
+  updated: "Version of October 12, 2026",
   prevails: "This page is a translation. If it differs from the English version, the English version prevails.",
   contact: "Questions, requests and reports: lord.basex@gmail.com",
   terms: {
     title: "Terms of use",
     intro:
-      "go-link is free, open-source, independent and non-profit software. A host runs the go-link app on their own computer, with their own game files, and invites friends who play from a browser. The project's website and signaling server only introduce the host and the guests to each other. By linking a device, joining a game or otherwise using go-link, you accept these terms. If you do not accept them, do not use go-link.",
+      "go-link Console is free, open-source, independent and non-profit software. A host runs the go-link Console app on their own computer, with their own game files, and invites friends who play from a browser. The project's website and signaling server only introduce the host and the guests to each other. By linking a device, joining a game or otherwise using go-link Console, you accept these terms. If you do not accept them, do not use go-link Console.",
     sections: [
       {
         id: "roms",
         title: "ROMs and copyrighted content: zero-content policy",
         body: [],
         list: [
-          "go-link does not host, include, distribute, sell, link to or download ROMs, game images, artwork, thumbnails or system BIOS files, and it does not name or point to any site that offers them.",
-          "go-link is a software utility and a streaming engine. Every game file stays on the host's own computer; no go-link server receives, stores or relays it.",
+          "go-link Console does not host, include, distribute, sell, link to or download ROMs, game images, artwork, thumbnails or system BIOS files, and it does not name or point to any site that offers them.",
+          "go-link Console is a software utility and a streaming engine. Every game file stays on the host's own computer; no go-link Console server receives, stores or relays it.",
           "The host is solely responsible for the files they load. Hosts may only use files they have the legal right to use, such as backups of arcade boards or software they own. Unauthorized reproduction or streaming of copyrighted material is the exclusive responsibility of the host who does it.",
           "Streaming a game to guests may be a public performance or communication of that game under the laws of your country. The host is responsible for making sure they are allowed to do it.",
         ],
@@ -66,7 +66,7 @@ export const legalEn: LegalTexts = {
       {
         id: "use",
         title: "Acceptable use",
-        body: ["You may not use go-link, its website, its signaling server or its relay to:"],
+        body: ["You may not use go-link Console, its website, its signaling server or its relay to:"],
         list: [
           "stream, share or send content that is illegal, infringing, pornographic, defamatory, harassing, hateful, threatening or malicious, through video, voice or chat;",
           "harass, impersonate or harm other people, or collect their data without their consent;",
@@ -86,7 +86,7 @@ export const legalEn: LegalTexts = {
         id: "age",
         title: "Age",
         body: [
-          "You must be at least 13 years old, or the minimum age required in your country to use online services without a parent's consent. Younger people may only use go-link with a parent or guardian who accepts these terms.",
+          "You must be at least 13 years old, or the minimum age required in your country to use online services without a parent's consent. Younger people may only use go-link Console with a parent or guardian who accepts these terms.",
         ],
         list: [],
       },
@@ -94,7 +94,7 @@ export const legalEn: LegalTexts = {
         id: "warranty",
         title: "No warranty",
         body: [
-          'go-link, the website, the signaling server and the relay are provided "as is" and "as available", without warranties of any kind, express or implied, including merchantability, fitness for a particular purpose, availability and non-infringement. The service may change, fail, lose connections, have latency or stop at any time, without notice.',
+          'go-link Console, the website, the signaling server and the relay are provided "as is" and "as available", without warranties of any kind, express or implied, including merchantability, fitness for a particular purpose, availability and non-infringement. The service may change, fail, lose connections, have latency or stop at any time, without notice.',
         ],
         list: [],
       },
@@ -102,7 +102,7 @@ export const legalEn: LegalTexts = {
         id: "liability",
         title: "Limitation of liability",
         body: [
-          "To the maximum extent permitted by law, the authors and contributors of go-link are not liable for any direct, indirect, incidental, special, consequential or punitive damages, or for any loss of data, games, saves or profit, arising from the use of, or inability to use, go-link or its services, or from content that hosts or guests load, stream or send.",
+          "To the maximum extent permitted by law, the authors and contributors of go-link Console are not liable for any direct, indirect, incidental, special, consequential or punitive damages, or for any loss of data, games, saves or profit, arising from the use of, or inability to use, go-link Console or its services, or from content that hosts or guests load, stream or send.",
         ],
         list: [],
       },
@@ -110,7 +110,7 @@ export const legalEn: LegalTexts = {
         id: "indemnity",
         title: "Indemnity",
         body: [
-          "If your use of go-link breaks these terms or the law, for example by streaming files you had no right to use, you agree to hold the authors and contributors of go-link harmless from any claim that results from it.",
+          "If your use of go-link Console breaks these terms or the law, for example by streaming files you had no right to use, you agree to hold the authors and contributors of go-link Console harmless from any claim that results from it.",
         ],
         list: [],
       },
@@ -119,9 +119,9 @@ export const legalEn: LegalTexts = {
         title: "Licenses",
         body: [],
         list: [
-          "go-link's own source code is released under the MIT license.",
-          "The third-party components included in go-link's app and website keep their own licenses, listed in THIRD_PARTY_NOTICES.md and shipped with every release.",
-          "The emulator core is not part of go-link: the app downloads mame2003-plus from the libretro buildbot at the host's request. mame2003-plus is under the MAME non-commercial license, so using go-link with that core is for non-commercial use only: any commercial distribution or monetization of go-link together with that core is not allowed.",
+          "go-link Console's own source code is released under the MIT license.",
+          "The third-party components included in go-link Console's app and website keep their own licenses, listed in THIRD_PARTY_NOTICES.md and shipped with every release.",
+          "The emulator core is not part of go-link Console: the app downloads mame2003-plus from the libretro buildbot at the host's request. mame2003-plus is under the MAME non-commercial license, so using go-link Console with that core is for non-commercial use only: any commercial distribution or monetization of go-link Console together with that core is not allowed.",
         ],
       },
       {
@@ -129,15 +129,15 @@ export const legalEn: LegalTexts = {
         title: "Trademarks",
         body: [],
         list: [
-          "MAME® is a registered trademark of Gregory Ember. go-link is not affiliated with, endorsed by or sponsored by MAMEdev, the MAME team or libretro. The name MAME is only used to describe what go-link is compatible with, and the MAME logo is not used.",
-          "Company names, game titles, logos and characters that games may show are trademarks and property of their respective owners. go-link is independent and does not claim any affiliation with, or endorsement by, any of them.",
+          "MAME® is a registered trademark of Gregory Ember. go-link Console is not affiliated with, endorsed by or sponsored by MAMEdev, the MAME team or libretro. The name MAME is only used to describe what go-link Console is compatible with, and the MAME logo is not used.",
+          "Company names, game titles, logos and characters that games may show are trademarks and property of their respective owners. go-link Console is independent and does not claim any affiliation with, or endorsement by, any of them.",
         ],
       },
       {
         id: "reports",
         title: "Reports and changes",
         body: [
-          "go-link hosts no games or user content, so it cannot remove them. To report abuse of the project's servers, or anything else about these terms, write to lord.basex@gmail.com.",
+          "go-link Console hosts no games or user content, so it cannot remove them. To report abuse of the project's servers, or anything else about these terms, write to lord.basex@gmail.com.",
           "These terms may change. The version date is at the top of this page, and the website asks you to accept a new version before linking a device or joining a game again.",
         ],
         list: [],
@@ -147,7 +147,7 @@ export const legalEn: LegalTexts = {
   privacy: {
     title: "Privacy policy",
     intro:
-      "go-link is designed to collect as little as possible. It has no accounts and no advertising, and the website's fonts are served by the website itself. The rooms (play.go-link.org), the device and the Player app have no cookies, no analytics and no third-party trackers. Only if you accept the cookie notice, Google Analytics counts visits to this website (console.go-link.org) with its cookies; that data goes to Google, under its own privacy policy, and you can change your choice at any time in \"Cookie settings\".",
+      "go-link Console is designed to collect as little as possible. It has no accounts and no advertising, and the website's fonts are served by the website itself. The rooms (play.go-link.org), the device and the Player app have no cookies, no analytics and no third-party trackers. Only if you accept the cookie notice, Google Analytics counts visits to this website (console.go-link.org) with its cookies; that data goes to Google, under its own privacy policy, and you can change your choice at any time in \"Cookie settings\".",
     sections: [
       {
         id: "p2p",
@@ -210,8 +210,8 @@ export const legalEn: LegalTexts = {
         id: "rights",
         title: "Your rights and your own servers",
         body: [
-          "Because go-link keeps no accounts and no personal data on its servers beyond what is described here, most requests are solved by clearing your browser's data or asking the host to clear their history. For any question or request about your data, write to lord.basex@gmail.com.",
-          "Anyone can run their own signaling server. When you use one (the website shows it), its operator, not the go-link project, is responsible for it.",
+          "Because go-link Console keeps no accounts and no personal data on its servers beyond what is described here, most requests are solved by clearing your browser's data or asking the host to clear their history. For any question or request about your data, write to lord.basex@gmail.com.",
+          "Anyone can run their own signaling server. When you use one (the website shows it), its operator, not the go-link Console project, is responsible for it.",
         ],
         list: [],
       },
@@ -236,11 +236,11 @@ export const legalEn: LegalTexts = {
     license: "MIT license",
     notices: "Third-party licenses",
     legalDoc: "Full legal text",
-    rights: "go-link. Code released under the MIT license.",
+    rights: "go-link Console. Code released under the MIT license.",
     trademark:
-      "MAME® is a registered trademark of Gregory Ember. go-link is not affiliated with or endorsed by MAMEdev or libretro. Game names and logos belong to their owners.",
+      "MAME® is a registered trademark of Gregory Ember. go-link Console is not affiliated with or endorsed by MAMEdev or libretro. Game names and logos belong to their owners.",
     version: "Website version",
-    github: "go-link on GitHub",
-    noRoms: "go-link does not host, include or download any ROM, BIOS or game image.",
+    github: "go-link Console on GitHub",
+    noRoms: "go-link Console does not host, include or download any ROM, BIOS or game image.",
   },
 };
