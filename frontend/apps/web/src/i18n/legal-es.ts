@@ -3,7 +3,7 @@
 import type { LegalTexts } from "./legal-en";
 
 export const legalEs: LegalTexts = {
-  updated: "Versión del 11 de octubre de 2026",
+  updated: "Versión del 12 de octubre de 2026",
   prevails: "Esta página es una traducción. Si difiere de la versión en inglés, prevalece la versión en inglés.",
   contact: "Consultas, pedidos y reportes: lord.basex@gmail.com",
   terms: {

@@ -44,7 +44,7 @@ export interface LegalTexts {
 }
 
 export const legalEn: LegalTexts = {
-  updated: "Version of October 11, 2026",
+  updated: "Version of October 12, 2026",
   prevails: "This page is a translation. If it differs from the English version, the English version prevails.",
   contact: "Questions, requests and reports: lord.basex@gmail.com",
   terms: {
