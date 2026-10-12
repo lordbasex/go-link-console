@@ -1529,15 +1529,32 @@ button.capsule-avatar:hover, button.capsule-avatar[aria-expanded="true"] { trans
 .legal-text h2 { margin: 0 0 8px; font-family: var(--font-title); font-size: 20px; }
 .legal-text p, .legal-text li { margin: 0 0 8px; line-height: 1.65; color: var(--color-text-2); }
 .legal-text ul { margin: 0; padding-left: 20px; }
-.site-footer { margin-top: 48px; border-top: 1px solid var(--color-divider); background: var(--color-surface); }
-.site-footer-inner { max-width: 1200px; margin: 0 auto; padding: 36px 40px 24px; display: grid; grid-template-columns: 2fr repeat(3, 1fr); gap: 32px; }
-.site-footer-brand p { margin: 0; max-width: 320px; line-height: 1.55; }
+.site-footer { margin-top: 48px; border-top: 1px solid var(--color-border); background: var(--color-surface-sunken); }
+.site-footer-inner { max-width: 1180px; margin: 0 auto; padding: 56px 40px 28px; display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr)); gap: 36px; }
+.site-footer-brand p { margin: 0; max-width: 30em; line-height: 1.6; font-size: 15px; color: var(--color-text-2); }
 .site-footer-col { display: flex; flex-direction: column; gap: 10px; }
-.site-footer-col a { color: var(--color-text-2); text-decoration: none; font-size: 14px; }
+.site-footer-col a { color: var(--color-text-muted); text-decoration: none; font-size: 15px; }
 .site-footer-col a:hover { color: var(--color-accent-text); }
-.site-footer-title { margin: 0 0 4px; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted); }
-.site-footer-bottom { max-width: 1200px; margin: 0 auto; padding: 16px 40px 28px; border-top: 1px solid var(--color-divider); display: flex; flex-direction: column; gap: 6px; }
+.site-footer-title { margin: 0 0 6px; font: 600 12px/1 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-text-muted); }
+.site-footer-bottom { max-width: 1180px; margin: 0 auto; padding: 22px 40px calc(28px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--color-border); display: flex; flex-direction: column; gap: 6px; }
 .site-footer-bottom p { margin: 0; line-height: 1.5; }
+.site-footer-row { display: flex; gap: 12px 24px; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-top: 8px; }
+.site-footer-link { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.site-footer-link:hover { color: var(--color-accent-text); }
+.site-footer-langs { display: flex; gap: 6px; }
+.site-footer-langs button { font: 600 12px/1 var(--font-mono); color: var(--color-text-muted); background: transparent; border: 1px solid var(--color-border); border-radius: 8px; padding: 7px 9px; cursor: pointer; }
+.site-footer-langs button[aria-pressed="true"] { color: var(--color-on-accent); background: var(--color-accent); border-color: var(--color-accent); }
+
+/* the cookie notice (console.go-link.org's public pages only, see analytics.ts) */
+.consent { position: fixed; z-index: 60; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); width: min(560px, calc(100% - 40px)); display: grid; gap: 14px; background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border-strong); border-left: 3px solid var(--color-accent); border-radius: 16px; padding: 18px 20px; box-shadow: 0 24px 60px var(--shadow-strong); }
+.consent-text { display: grid; gap: 6px; }
+.consent-text strong { font: 700 18px/1.2 var(--font-title); }
+.consent-text p { margin: 0; font-size: 15px; line-height: 1.55; color: var(--color-text-2); }
+.consent-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+@media (max-width: 560px) {
+  .consent { right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: calc(100% - 32px); }
+  .consent-actions .button { flex: 1; }
+}
 @media (max-width: 800px) {
   .site-footer-inner { grid-template-columns: 1fr 1fr; padding: 28px 16px 20px; }
   .site-footer-brand { grid-column: 1 / -1; }

@@ -1,12 +1,13 @@
 // Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com>
 import { useEffect, useRef, useState } from "react";
 import { t } from "../../i18n";
-import { CloseIcon, GamepadIcon, PlayIcon } from "../Icons";
+import { CloseIcon, PlayIcon } from "../Icons";
+import { Shot } from "./Shot";
 
 // The landing's arcade screen: a short silent loop of two players in
 // ANTÍDOTO (go-link HD's free starter game), and its trailer with sound in
-// a dialog. Under the screen, the two players who control it from far
-// apart, joined by a live link. The videos live in public/media (made with go-link HD's
+// a dialog. The screen sits in a laptop, with the Player app on a phone in
+// front of it, and tags for the two players who control it from far apart. The videos live in public/media (made with go-link HD's
 // hdrun from a two-player bot run, see docs/web.md).
 const LOOP = "/media/antidoto-loop.mp4";
 const POSTER = "/media/antidoto-poster.jpg";
@@ -62,53 +63,43 @@ export function GameScene() {
     else void v.play?.()?.catch(() => undefined);
   }, [open]);
   return (
-    <figure className="lp-scene">
-      <div className="lp-screen">
-        <video
-          ref={loop}
-          className="lp-video"
-          poster={POSTER}
-          muted
-          loop
-          playsInline
-          autoPlay={!reducedMotion()}
-          preload="metadata"
-          aria-label={t.landing.sceneLabel}
-          src={LOOP}
-        />
-        <button type="button" className="lp-trailer-open" onClick={() => setOpen(true)}>
-          <span className="lp-trailer-play" aria-hidden="true">
-            <PlayIcon size={22} />
-          </span>
-          <span className="lp-trailer-label">{t.landing.trailerOpen}</span>
-        </button>
+    <figure className="ld-stage">
+      <div className="ld-laptop">
+        <div className="ld-bezel">
+          <div className="lp-screen">
+            <video
+              ref={loop}
+              className="lp-video"
+              poster={POSTER}
+              muted
+              loop
+              playsInline
+              autoPlay={!reducedMotion()}
+              preload="metadata"
+              aria-label={t.landing.sceneLabel}
+              src={LOOP}
+            />
+            <button type="button" className="lp-trailer-open" onClick={() => setOpen(true)}>
+              <span className="lp-trailer-play" aria-hidden="true">
+                <PlayIcon size={22} />
+              </span>
+              <span className="lp-trailer-label">{t.landing.trailerOpen}</span>
+            </button>
+          </div>
+        </div>
+        <div className="ld-base" aria-hidden="true" />
       </div>
-
-      <figcaption className="lp-players">
-        <span className="lp-player">
-          <span className="lp-player-badge is-p1">P1</span>
-          <GamepadIcon size={18} />
-          <span className="lp-voice" aria-hidden="true">
-            <i />
-            <i />
-            <i />
-          </span>
-          <span className="small muted">{t.landing.p1Place}</span>
+      <div className="ld-phone ld-phone-hero">
+        <Shot name="app-room" alt={t.playerApp.roomAlt} eager />
+      </div>
+      <figcaption className="ld-tags">
+        <span className="ld-tag ld-tag-a">
+          <b className="is-p1">P1</b> · {t.landing.p1Place}
         </span>
-        <span className="lp-link" aria-hidden="true">
-          <span className="lp-link-line" />
-          <span className="lp-link-chip">{t.landing.linkChip}</span>
+        <span className="ld-tag ld-tag-b">
+          <b className="is-p2">P2</b> · {t.landing.p2Place}
         </span>
-        <span className="lp-player">
-          <span className="small muted">{t.landing.p2Place}</span>
-          <span className="lp-voice is-late" aria-hidden="true">
-            <i />
-            <i />
-            <i />
-          </span>
-          <GamepadIcon size={18} />
-          <span className="lp-player-badge is-p2">P2</span>
-        </span>
+        <span className="ld-tag ld-tag-c">{t.landing.linkChip}</span>
       </figcaption>
       {open && <TrailerDialog onClose={() => setOpen(false)} />}
     </figure>

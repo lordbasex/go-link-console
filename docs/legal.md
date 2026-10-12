@@ -58,7 +58,7 @@ These terms may change. The version date is at the top; the website asks you to 
 
 ## 3. Privacy policy
 
-go-link is designed to collect as little as possible. It has no accounts, no cookies, no analytics, no advertising and no third-party trackers. The website's fonts are served by the website itself.
+go-link is designed to collect as little as possible. It has no accounts and no advertising, and the website's fonts are served by the website itself. The rooms (play.go-link.org), the device and the Player app have no cookies, no analytics and no third-party trackers. Only if the visitor accepts the cookie notice, Google Analytics 4 counts visits to the website (console.go-link.org) with its cookies; that data goes to Google under its own privacy policy, and the choice can be changed at any time in **Cookie settings**.
 
 ### 3.1 Games, voice and chat travel peer to peer
 

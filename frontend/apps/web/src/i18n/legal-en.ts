@@ -147,7 +147,7 @@ export const legalEn: LegalTexts = {
   privacy: {
     title: "Privacy policy",
     intro:
-      "go-link is designed to collect as little as possible. It has no accounts, no cookies, no analytics, no advertising and no third-party trackers, and the website's fonts are served by the website itself.",
+      "go-link is designed to collect as little as possible. It has no accounts and no advertising, and the website's fonts are served by the website itself. The rooms (play.go-link.org), the device and the Player app have no cookies, no analytics and no third-party trackers. Only if you accept the cookie notice, Google Analytics counts visits to this website (console.go-link.org) with its cookies; that data goes to Google, under its own privacy policy, and you can change your choice at any time in \"Cookie settings\".",
     sections: [
       {
         id: "p2p",
@@ -182,7 +182,7 @@ export const legalEn: LegalTexts = {
         id: "browser",
         title: "What your browser keeps",
         body: [
-          "The website stores preferences and keys in your browser's local storage, never in cookies and never on our servers: language, theme, the signaling server you chose, the link with your app, return passes for games you joined, the local panel key, view and sound settings, and the date you accepted these terms. The skin editor and Willy Maker keep your skins and games the same way, in local storage and in the browser's own database (IndexedDB), and they never leave your browser unless you download them. Clearing this site's data in your browser removes all of it.",
+          "The website stores preferences and keys in your browser's local storage, never in cookies and never on our servers (the only cookies are Google Analytics', and only if you accept them): language, theme, the signaling server you chose, the link with your app, return passes for games you joined, the local panel key, view and sound settings, and the date you accepted these terms. The skin editor and Willy Maker keep your skins and games the same way, in local storage and in the browser's own database (IndexedDB), and they never leave your browser unless you download them. Clearing this site's data in your browser removes all of it.",
         ],
         list: [],
       },

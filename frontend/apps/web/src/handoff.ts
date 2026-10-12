@@ -28,7 +28,7 @@ export const IMPORT_PARAM = "import";
 const SECRETS = ["go-link.device-link", "go-link.room-passes"];
 
 /** Keys of the landing's own pages (or of no page at all): they stay where they are. */
-const STAYS = ["go-link.wm.", "go-link.skin-editor", "go-link.landing-sound", "go-link.panel-token", "go-link.handoff"];
+const STAYS = ["go-link.wm.", "go-link.skin-editor", "go-link.landing-sound", "go-link.panel-token", "go-link.handoff", "go-link.consent"];
 
 const KEY = /^go-link\.[a-z0-9-]+(\.[a-z0-9-]+)*$/;
 const MAX_KEY = 64;

@@ -9,7 +9,7 @@ import { PLAY_URL, SITE_URL } from "../ports";
 
 test("each site sends the other's pages there", async ({ page }) => {
   await page.goto(`${SITE_URL}/`);
-  await expect(page.locator(".lp-hero")).toBeVisible();
+  await expect(page.locator(".ld-hero")).toBeVisible();
   await page.locator("nav.main-nav").getByRole("link", { name: "Rooms" }).click();
   await expect(page).toHaveURL(`${PLAY_URL}/rooms`);
 

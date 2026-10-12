@@ -12,6 +12,7 @@ import "@fontsource/ibm-plex-sans/600.css";
 import "@fontsource/jetbrains-mono/500.css";
 import "@go-link/shared/tokens.css";
 import "./styles/global.css";
+import { ANALYTICS_SITE, guardHistory } from "./analytics";
 import { App } from "./App";
 import { DEFAULT_SIGNAL_URL, DEMO_DATA } from "./config";
 import { SignalProvider } from "./signal/SignalProvider";
@@ -33,6 +34,10 @@ try {
 
 // The startup intro's coin sound and tap to skip.
 installIntro();
+
+// Before anything navigates and before Google's script could load (only
+// console.go-link.org asks for it, see analytics.ts).
+if (ANALYTICS_SITE) guardHistory();
 
 /** Re-renders the whole tree when the language changes. Nothing remounts,
  * so connections and a running game survive the switch. */
