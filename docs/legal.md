@@ -1,29 +1,29 @@
 # Legal: terms of use, privacy, copyright and licenses
 
-Version **2026-10-07**. This English text is the reference; the website shows it in English, Spanish and Portuguese, and if a translation differs, this version prevails. The same texts are published at [console.go-link.org/terms](https://console.go-link.org/terms) and [console.go-link.org/privacy](https://console.go-link.org/privacy).
+Version **2026-10-11**. This English text is the reference; the website shows it in English, Spanish and Portuguese, and if a translation differs, this version prevails. The same texts are published at [console.go-link.org/terms](https://console.go-link.org/terms) and [console.go-link.org/privacy](https://console.go-link.org/privacy).
 
 This document is not legal advice. It describes how the project works and the conditions under which it is offered.
 
-## 1. What go-link is
+## 1. What go-link Console is
 
-go-link is free, open-source software. A person (the **host**) runs the go-link app (the **device**) on their own computer, with their own game files, and invites friends (**guests**) who play from a web browser. The project also runs a website (console.go-link.org) and a signaling server (signal.go-link.org) that only introduce the host and the guests to each other.
+go-link Console is free, open-source software. A person (the **host**) runs the go-link Console app (the **device**) on their own computer, with their own game files, and invites friends (**guests**) who play from a web browser. The project also runs a website (console.go-link.org, with the rooms at play.go-link.org) and a signaling server (signal.go-link.org) that only introduce the host and the guests to each other.
 
-go-link is independent and non-profit. It has no accounts, no payments, no advertising and asks for no donations.
+go-link Console is independent and non-profit. It has no accounts, no payments, no advertising and asks for no donations.
 
 ## 2. Terms of use
 
-By linking a device, joining a game or otherwise using go-link, you accept these terms. If you do not accept them, do not use go-link.
+By linking a device, joining a game or otherwise using go-link Console, you accept these terms. If you do not accept them, do not use go-link Console.
 
 ### 2.1 ROMs and copyrighted content: zero-content policy
 
-- go-link does **not** host, include, distribute, sell, link to or download ROMs, game images, artwork, thumbnails or system BIOS files, and it does not name or point to any site that offers them.
-- go-link is a software utility and a streaming engine. Every game file stays on the host's own computer; no go-link server receives, stores or relays it.
+- go-link Console does **not** host, include, distribute, sell, link to or download ROMs, game images, artwork, thumbnails or system BIOS files, and it does not name or point to any site that offers them.
+- go-link Console is a software utility and a streaming engine. Every game file stays on the host's own computer; no go-link Console server receives, stores or relays it.
 - **The host is solely responsible** for the files they load. Hosts may only use files they have the legal right to use, for example backups of arcade boards or software they own, or files whose rights holder allows it. Unauthorized reproduction or streaming of copyrighted material is the exclusive responsibility of the host who does it.
 - Streaming a game to guests may be a public performance or communication of that game under the laws of your country. The host is responsible for making sure they are allowed to do it.
 
 ### 2.2 Acceptable use
 
-You may not use go-link, its website, its signaling server or its relay to:
+You may not use go-link Console, its website, its signaling server or its relay to:
 
 - stream, share or send content that is illegal, infringing, pornographic, defamatory, harassing, hateful, threatening or malicious, through video, voice or chat;
 - harass, impersonate or harm other people, or collect their data without their consent;
@@ -34,23 +34,23 @@ The project may block connections that break these rules. Hosts are responsible 
 
 ### 2.3 Age
 
-You must be at least 13 years old, or the minimum age required in your country to use online services without a parent's consent, to use go-link. Younger people may only use it with a parent or guardian who accepts these terms.
+You must be at least 13 years old, or the minimum age required in your country to use online services without a parent's consent, to use go-link Console. Younger people may only use it with a parent or guardian who accepts these terms.
 
 ### 2.4 No warranty
 
-go-link, the website, the signaling server and the relay are provided **"as is" and "as available"**, without warranties of any kind, express or implied, including merchantability, fitness for a particular purpose, availability and non-infringement. The service may change, fail, lose connections, have latency or stop at any time, without notice.
+go-link Console, the website, the signaling server and the relay are provided **"as is" and "as available"**, without warranties of any kind, express or implied, including merchantability, fitness for a particular purpose, availability and non-infringement. The service may change, fail, lose connections, have latency or stop at any time, without notice.
 
 ### 2.5 Limitation of liability
 
-To the maximum extent permitted by law, the authors and contributors of go-link are not liable for any direct, indirect, incidental, special, consequential or punitive damages, or for any loss of data, games, saves or profit, arising from the use of, or inability to use, go-link or its services, or from content that hosts or guests load, stream or send.
+To the maximum extent permitted by law, the authors and contributors of go-link Console are not liable for any direct, indirect, incidental, special, consequential or punitive damages, or for any loss of data, games, saves or profit, arising from the use of, or inability to use, go-link Console or its services, or from content that hosts or guests load, stream or send.
 
 ### 2.6 Indemnity
 
-If your use of go-link breaks these terms or the law (for example, by streaming files you had no right to use), you agree to hold the authors and contributors of go-link harmless from any claim that results from it.
+If your use of go-link Console breaks these terms or the law (for example, by streaming files you had no right to use), you agree to hold the authors and contributors of go-link Console harmless from any claim that results from it.
 
 ### 2.7 Reports
 
-go-link hosts no games or user content, so it cannot remove them. To report abuse of the project's servers, or anything else about these terms, write to lord.basex@gmail.com.
+go-link Console hosts no games or user content, so it cannot remove them. To report abuse of the project's servers, or anything else about these terms, write to lord.basex@gmail.com.
 
 ### 2.8 Changes
 
@@ -58,7 +58,7 @@ These terms may change. The version date is at the top; the website asks you to 
 
 ## 3. Privacy policy
 
-go-link is designed to collect as little as possible. It has no accounts, no cookies, no analytics, no advertising and no third-party trackers. The website's fonts are served by the website itself.
+go-link Console is designed to collect as little as possible. It has no accounts, no cookies, no analytics, no advertising and no third-party trackers. The website's fonts are served by the website itself.
 
 ### 3.1 Games, voice and chat travel peer to peer
 
@@ -100,23 +100,23 @@ In a peer-to-peer connection the host's device and the guests see each other's n
 
 ### 3.6 Your rights
 
-Because go-link keeps no accounts and no personal data on its servers beyond what is described above, most requests are solved by clearing your browser data or asking the host to clear their history. For any question or request about your data, write to lord.basex@gmail.com.
+Because go-link Console keeps no accounts and no personal data on its servers beyond what is described above, most requests are solved by clearing your browser data or asking the host to clear their history. For any question or request about your data, write to lord.basex@gmail.com.
 
 ### 3.7 Self-hosted servers
 
-Anyone can run their own signaling server. When you use one (the website shows it), its operator, not the go-link project, is responsible for it.
+Anyone can run their own signaling server. When you use one (the website shows it), its operator, not the go-link Console project, is responsible for it.
 
 ## 4. Licenses
 
-- **go-link's own source code** is released under the [MIT license](../LICENSE).
-- **Third-party components** included in go-link's binaries and website (Go modules, libvpx, libopus, fonts, npm packages) keep their own licenses, reproduced in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) and shipped with every release.
-- **The emulator core is not part of go-link.** The device downloads mame2003-plus from the libretro buildbot at the host's request. mame2003-plus is under the MAME non-commercial license: it may not be sold or used for commercial purposes. Using go-link together with mame2003-plus is therefore **for non-commercial use only**; any commercial distribution or monetization of go-link with that core is not allowed by the core's license.
+- **go-link Console's own source code** is released under the [MIT license](../LICENSE).
+- **Third-party components** included in go-link Console's binaries and website (Go modules, libvpx, libopus, fonts, npm packages) keep their own licenses, reproduced in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) and shipped with every release.
+- **The emulator core is not part of go-link Console.** The device downloads mame2003-plus from the libretro buildbot at the host's request. mame2003-plus is under the MAME non-commercial license: it may not be sold or used for commercial purposes. Using go-link Console together with mame2003-plus is therefore **for non-commercial use only**; any commercial distribution or monetization of go-link Console with that core is not allowed by the core's license.
 - The optional patches in `cores/mame2003-plus/` modify mame2003-plus and fall under its license.
 
 ## 5. Trademarks
 
-- MAME® is a registered trademark of Gregory Ember. go-link is not affiliated with, endorsed by or sponsored by MAMEdev, the MAME team or libretro. The name MAME is only used to describe what go-link is compatible with; go-link does not use the MAME logo.
-- Company names, game titles, logos and characters that games may show are trademarks and property of their respective owners. go-link is independent and does not claim any affiliation with, or endorsement by, any of them.
+- MAME® is a registered trademark of Gregory Ember. go-link Console is not affiliated with, endorsed by or sponsored by MAMEdev, the MAME team or libretro. The name MAME is only used to describe what go-link Console is compatible with; go-link Console does not use the MAME logo.
+- Company names, game titles, logos and characters that games may show are trademarks and property of their respective owners. go-link Console is independent and does not claim any affiliation with, or endorsement by, any of them.
 
 ## 6. Contact
 

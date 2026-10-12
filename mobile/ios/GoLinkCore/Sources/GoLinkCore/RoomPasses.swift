@@ -81,7 +81,7 @@ public final class RoomPasses {
 /** The terms of use every player accepts before joining (docs/legal.md). */
 public enum Terms {
     /** Must equal TERMS_VERSION in frontend/apps/web/src/legal.ts (a test checks it). */
-    public static let version = "2026-10-07"
+    public static let version = "2026-10-11"
     public static let termsURL = "https://console.go-link.org/terms"
     public static let privacyURL = "https://console.go-link.org/privacy"
     public static let storeKey = "go-link.terms"

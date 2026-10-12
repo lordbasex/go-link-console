@@ -436,7 +436,7 @@ describe("legal", () => {
     renderApp("/terms");
     expect(await screen.findByRole("heading", { level: 1, name: "Terms of use" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /zero-content policy/ })).toBeInTheDocument();
-    expect(screen.getByText(/MAME® is a registered trademark of Gregory Ember\. go-link is not affiliated with, endorsed/)).toBeInTheDocument();
+    expect(screen.getByText(/MAME® is a registered trademark of Gregory Ember\. go-link Console is not affiliated with, endorsed/)).toBeInTheDocument();
     const footer = screen.getByRole("contentinfo");
     expect(within(footer).getByRole("link", { name: "Privacy policy" })).toHaveAttribute("href", "/privacy");
     expect(within(footer).getByRole("link", { name: "Third-party licenses" })).toHaveAttribute(

@@ -57,7 +57,7 @@ class RoomPasses(private val store: KeyValueStore) {
 /** The terms of use every player accepts before joining (docs/legal.md). */
 object Terms {
     /** Must equal TERMS_VERSION in frontend/apps/web/src/legal.ts (a test checks it). */
-    const val VERSION = "2026-10-07"
+    const val VERSION = "2026-10-11"
     const val TERMS_URL = "https://console.go-link.org/terms"
     const val PRIVACY_URL = "https://console.go-link.org/privacy"
     const val STORE_KEY = "go-link.terms"
