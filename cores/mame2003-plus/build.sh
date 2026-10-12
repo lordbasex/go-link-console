@@ -33,6 +33,8 @@ git -C "$work" remote add origin "$repo"
 git -C "$work" fetch -q --depth 1 origin "$commit"
 git -C "$work" checkout -q FETCH_HEAD
 
+# every patch is upstream since 2026-10-11, so the folder may be empty
+shopt -s nullglob
 for p in "$here"/patches/*.patch; do
 	echo "applying $(basename "$p")"
 	if ! git -C "$work" apply --whitespace=nowarn "$p"; then
