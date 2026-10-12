@@ -106,7 +106,7 @@ export const legalEs: LegalTexts = {
   privacy: {
     title: "Política de privacidad",
     intro:
-      "go-link Console está pensado para recopilar lo mínimo posible. No tiene cuentas, cookies, analítica, publicidad ni rastreadores de terceros, y las tipografías del sitio las sirve el propio sitio.",
+      "go-link Console está pensado para recopilar lo mínimo posible. No tiene cuentas ni publicidad, y las tipografías del sitio las sirve el propio sitio. Las salas (play.go-link.org), el dispositivo y la app Player no tienen cookies, analítica ni rastreadores de terceros. Solo si aceptas el aviso de cookies, Google Analytics cuenta las visitas a este sitio (console.go-link.org) con sus cookies; esos datos van a Google, bajo su propia política de privacidad, y puedes cambiar tu elección cuando quieras en \"Configurar cookies\".",
     sections: [
       {
         id: "p2p",
@@ -141,7 +141,7 @@ export const legalEs: LegalTexts = {
         id: "browser",
         title: "Qué guarda tu navegador",
         body: [
-          "El sitio guarda preferencias y claves en el almacenamiento local de tu navegador, nunca en cookies ni en nuestros servidores: idioma, tema, el servidor de señalización que elegiste, el vínculo con tu app, los pases para volver a partidas a las que entraste, la clave del panel local, ajustes de vista y sonido, y la fecha en que aceptaste estos términos. El editor de skins y Willy Maker guardan tus skins y tus juegos de la misma forma, en el almacenamiento local y en la base de datos propia del navegador (IndexedDB), y nunca salen de tu navegador salvo que los descargues. Al borrar los datos de este sitio en tu navegador, se elimina todo.",
+          "El sitio guarda preferencias y claves en el almacenamiento local de tu navegador, nunca en cookies ni en nuestros servidores (las únicas cookies son las de Google Analytics, y solo si las aceptas): idioma, tema, el servidor de señalización que elegiste, el vínculo con tu app, los pases para volver a partidas a las que entraste, la clave del panel local, ajustes de vista y sonido, y la fecha en que aceptaste estos términos. El editor de skins y Willy Maker guardan tus skins y tus juegos de la misma forma, en el almacenamiento local y en la base de datos propia del navegador (IndexedDB), y nunca salen de tu navegador salvo que los descargues. Al borrar los datos de este sitio en tu navegador, se elimina todo.",
         ],
         list: [],
       },

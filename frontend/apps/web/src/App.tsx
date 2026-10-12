@@ -16,6 +16,8 @@ import { HAS_PLAY, HAS_SITE, ROLE, servesPath } from "./role";
 import { prefetchThumbnails } from "./components/device/useThumbnail";
 import { LegalPage } from "./pages/LegalPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { ANALYTICS_SITE, analyticsLoaded, isPublicPath, startAnalytics, useConsent } from "./analytics";
+import { CookieConsent } from "./components/CookieConsent";
 import { DestroyLink } from "./destroyLauncher";
 // The lobby comes with the first load; the other pages download when
 // opened, so a guest joining a room does not get the device dashboard.
@@ -157,6 +159,17 @@ export function App() {
   const { panel, savedLink, hostLink } = useSignal();
   // The device's local panel asks for its token before anything else.
   const needsToken = panel && !savedLink && !hostLink;
+  // console.go-link.org's public pages carry the cookie notice and, with
+  // consent, Google Analytics (analytics.ts); nothing else ever does.
+  const { pathname } = useLocation();
+  const { consent } = useConsent();
+  const counted = ANALYTICS_SITE && !panel && isPublicPath(pathname);
+  useEffect(() => {
+    if (counted && consent === "granted") startAnalytics();
+  }, [counted, consent]);
+  // Google's script is in this page: a page that is not public waits for
+  // the full page load guardHistory started instead of rendering next to it.
+  if (ANALYTICS_SITE && !counted && analyticsLoaded()) return null;
   return (
     <>
       <CustomServerBanner />
@@ -233,6 +246,7 @@ export function App() {
       </Suspense>
       </main>
       <ServerDialog />
+      {counted && <CookieConsent />}
     </>
   );
 }
