@@ -13,11 +13,11 @@ import { Shot } from "./Shot";
 export function PlayerApp() {
   const a = t.playerApp;
   return (
-    <section className="lp-section lp-band lp-app" aria-labelledby="lp-app">
+    <section className="ld-section lp-app" aria-labelledby="lp-app">
       <div className="lp-app-split">
         <div className="lp-app-text">
-          <span className="eyebrow eyebrow-accent">{a.eyebrow}</span>
-          <h2 id="lp-app" className="lp-h2">
+          <p className="ld-eyebrow">{a.eyebrow}</p>
+          <h2 id="lp-app" className="ld-h2">
             {a.title}
           </h2>
           <p className="lp-lead">{a.text}</p>

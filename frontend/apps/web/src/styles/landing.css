@@ -1,0 +1,137 @@
+/* Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com> */
+/* The landing page (console.go-link.org/) in the look of go-link Desk's:
+   mono eyebrows, the arcade screen in a laptop with the Player app on a
+   phone in front of it, cards with real screenshots, rows of pictures with
+   bullets, the path of a game drawn to scale and wide sunken bands. Colors
+   come from tokens.css, so the light theme follows. Loaded with the page. */
+
+.ld { gap: 0; padding: 0 40px; max-width: 1260px; font-size: 17px; line-height: 1.6; }
+.ld h1, .ld h2, .ld h3 { font-family: var(--font-title); text-wrap: balance; line-height: 1.08; margin: 0; letter-spacing: -0.01em; color: var(--color-text); }
+.ld-eyebrow { margin: 0; font: 600 13px/1.3 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-accent-text); }
+.ld-muted { margin: 0; color: var(--color-text-2); }
+.ld-h2 { font-size: clamp(30px, 4.2vw, 48px); }
+
+/* buttons */
+.ld-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.ld-actions.is-centered { justify-content: center; }
+.ld-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; font: 600 15px/1 var(--font-text); border-radius: 12px; padding: 0 18px; text-decoration: none; border: 1px solid transparent; cursor: pointer; white-space: nowrap; }
+.ld .ld-btn-primary { background: var(--color-accent); color: var(--color-on-accent); }
+.ld .ld-btn-primary:hover { background: var(--color-accent-hover); }
+.ld .ld-btn-ghost { border-color: var(--color-border); background: var(--color-surface); color: var(--color-text); }
+.ld .ld-btn-ghost:hover { border-color: var(--color-border-strong); }
+
+/* hero */
+.ld-hero { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 48px; align-items: center; padding-block: 56px 72px; }
+.ld-hero::before { content: ""; position: absolute; top: -20px; right: 0; width: 75%; height: 520px; background: radial-gradient(closest-side, color-mix(in srgb, var(--color-accent) 18%, transparent), transparent); pointer-events: none; z-index: -1; }
+.ld-hero-text { display: grid; gap: 0; }
+.ld .ld-title { font-size: clamp(40px, 5.6vw, 68px); margin-top: 14px; }
+.ld-title em { display: block; font-style: normal; color: var(--color-accent-text); }
+.ld-lead { font-size: 19px; color: var(--color-text-2); max-width: 34em; margin: 22px 0 28px; }
+.ld-notes { list-style: none; padding: 0; margin: 18px 0 0; font-size: 14px; color: var(--color-text-muted); display: flex; gap: 8px 16px; flex-wrap: wrap; }
+.ld-notes li::before { content: "●"; color: var(--color-ok-text); font-size: 9px; margin-right: 7px; vertical-align: 2px; }
+.ld-platforms { margin: 12px 0 0; font-size: 13px; color: var(--color-text-faint); }
+
+/* the stage: the arcade screen in a laptop, the app on a phone, tags */
+.ld-stage { position: relative; margin: 0; aspect-ratio: 16 / 11.5; max-width: 100%; }
+.ld-laptop { position: absolute; inset: 4% 4% 10% 0; }
+.ld-bezel { position: absolute; inset: 0 6% 7% 6%; background: var(--color-video); border-radius: 14px 14px 4px 4px; padding: 2.2%; box-shadow: 0 30px 80px var(--shadow-strong); border: 1px solid var(--color-border-strong); display: flex; align-items: center; }
+.ld-bezel .lp-screen { width: 100%; border: 0; border-radius: 6px; box-shadow: none; }
+.ld-base { position: absolute; left: 0; right: 0; bottom: 3%; height: 4%; background: linear-gradient(var(--color-border-strong), var(--color-surface-2)); border-radius: 0 0 18px 18px; }
+.ld-phone { position: absolute; background: var(--color-video); border-radius: 28px; padding: 7px; border: 1px solid var(--color-border-strong); box-shadow: 0 30px 70px var(--shadow-strong); }
+.ld-phone img { display: block; width: 100%; height: auto; border-radius: 22px; }
+.ld-phone-hero { width: 24%; right: 0; bottom: 0; }
+.ld-tags { position: absolute; inset: 0; pointer-events: none; }
+.ld-tag { position: absolute; font: 600 12px/1 var(--font-mono); letter-spacing: 0.06em; background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text-2); padding: 8px 10px; border-radius: 999px; box-shadow: 0 10px 30px var(--shadow-strong); white-space: nowrap; }
+.ld-tag b { font-weight: 700; }
+.ld-tag b.is-p1 { color: var(--color-p1); }
+.ld-tag b.is-p2 { color: var(--color-p2); }
+.ld-tag-a { left: 2%; top: 1%; }
+.ld-tag-b { left: 8%; bottom: 11%; }
+.ld-tag-c { right: 27%; top: 1%; color: var(--color-ok-text); border-color: color-mix(in srgb, var(--color-ok) 45%, var(--color-border)); }
+
+/* sections */
+.ld-section { position: relative; padding-block: 72px; }
+.ld-sunken { background: var(--color-surface-sunken); box-shadow: 0 0 0 100vmax var(--color-surface-sunken); clip-path: inset(0 -100vmax); }
+.ld-head { display: grid; gap: 14px; max-width: 780px; margin-bottom: 40px; }
+.ld-head h2 { font-size: clamp(30px, 4.2vw, 48px); }
+.ld-head p:not(.ld-eyebrow) { margin: 0; color: var(--color-text-2); }
+.ld-head-row { max-width: none; display: flex; align-items: end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.ld-head-row > div { display: grid; gap: 14px; max-width: 780px; }
+.ld-chip { display: inline-block; font: 600 11px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; border-radius: 999px; padding: 7px 10px; border: 1px solid currentColor; }
+.ld-chip-info { color: var(--color-voice); }
+.ld-textlink { font: inherit; color: var(--color-accent-text); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+
+/* the guest's three steps: cards with the app's real screenshots */
+.ld-ways { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.ld-way { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; }
+.ld-shot { background: color-mix(in srgb, var(--color-surface-sunken) 60%, var(--color-bg)); height: 360px; display: flex; justify-content: center; padding: 22px 22px 0; overflow: hidden; }
+.ld-shot img { width: auto; max-width: 70%; height: auto; align-self: flex-start; border-radius: 22px 22px 0 0; border: 6px solid var(--color-video); border-bottom: 0; box-shadow: 0 16px 40px var(--shadow-strong); }
+.ld-way-body { padding: 18px 20px 22px; display: grid; gap: 8px; align-content: start; }
+.ld-way h3 { font-size: 22px; }
+.ld-way p { margin: 0; font-size: 15px; color: var(--color-text-2); }
+.ld-step-num { justify-self: start; font: 700 13px/1 var(--font-mono); color: var(--color-on-accent); background: var(--color-accent); border-radius: 8px; padding: 6px 8px; }
+.ld-bar { margin-top: 22px; display: flex; gap: 12px 26px; flex-wrap: wrap; align-items: center; justify-content: space-between; background: var(--color-surface); border: 1px dashed var(--color-border-dashed); border-radius: 14px; padding: 14px 18px; }
+.ld-bar .lp-app-downloads { gap: 0; }
+.ld-bar-note { margin: 0; font-size: 14px; color: var(--color-text-2); }
+
+/* rows of pictures with bullets */
+.ld-feature { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 56px; align-items: center; padding-block: 28px; }
+.ld-flip .ld-media { order: 2; }
+.ld-media { position: relative; margin-bottom: 32px; }
+.ld-media > img { display: block; width: 100%; height: auto; border-radius: 18px; border: 6px solid var(--color-video); box-shadow: 0 24px 60px var(--shadow-strong); }
+.ld-phone-tall { width: 24%; right: -4%; bottom: -12%; }
+.ld-feature-text { display: grid; gap: 14px; }
+.ld-feature h3 { font-size: clamp(26px, 3vw, 36px); }
+.ld-bullets { list-style: none; padding: 0; margin: 4px 0 0; display: grid; gap: 12px; }
+.ld-bullets li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; color: var(--color-text-2); font-size: 16px; }
+.ld-bullets li::before { content: ""; width: 10px; height: 10px; margin-top: 8px; border-radius: 3px; background: var(--color-accent); }
+.ld-bullets b { color: var(--color-text); font-weight: 600; }
+
+/* the Player app keeps its own layout; its heading follows the others */
+.ld .lp-app .lp-app-text { gap: 18px; }
+
+/* the path of a game, drawn to scale */
+.ld-path { overflow-x: auto; margin-bottom: 28px; }
+.ld-path svg { min-width: 720px; width: 100%; max-width: 1080px; height: auto; display: block; margin: 0 auto; }
+.ld-svg-box { fill: var(--color-surface); stroke: var(--color-border); }
+.ld-svg-hub { fill: var(--color-bg); stroke: var(--color-border-dashed); stroke-dasharray: 4 4; }
+.ld-svg-title { fill: var(--color-text); font-family: var(--font-title); font-size: 19px; font-weight: 700; }
+.ld-svg-data { fill: var(--color-accent-text); font-family: var(--font-mono); font-size: 13px; }
+.ld-svg-small { fill: var(--color-text-muted); font-family: var(--font-mono); font-size: 12px; }
+.ld-svg-line { stroke: var(--color-accent); stroke-width: 3; }
+.ld-svg-dash { stroke: var(--color-border-dashed); stroke-dasharray: 4 4; }
+
+/* cards */
+.ld-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 22px 24px; display: grid; gap: 8px; }
+.ld-card h3 { font-size: 22px; }
+.ld-card p { margin: 0; font-size: 15px; color: var(--color-text-2); max-width: 70em; }
+.ld-card .ld-fine { font-size: 13px; color: var(--color-text-muted); }
+.ld-k { font: 600 12px/1 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-accent-text); }
+
+/* the last call */
+.ld-final { text-align: center; display: grid; gap: 16px; justify-items: center; padding-block: 88px; }
+.ld-final h2 { font-size: clamp(30px, 4.2vw, 48px); }
+
+@media (max-width: 980px) {
+  .ld { padding: 0 20px; }
+  .ld-hero, .ld-feature { grid-template-columns: minmax(0, 1fr); }
+  .ld-flip .ld-media { order: 0; }
+  .ld-ways { grid-template-columns: minmax(0, 1fr); }
+  .ld-shot { height: 320px; }
+  .ld-phone-tall { right: 0; }
+}
+@media (max-width: 560px) {
+  .ld { padding: 0 16px; }
+  .ld-hero { padding-block: 28px 48px; }
+  .ld-section { padding-block: 52px; }
+  .ld-tag { font-size: 10px; padding: 6px 8px; }
+  .ld-tag-c { display: none; }
+  .ld-actions .ld-btn { flex: 1 1 100%; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ld-phone-hero { animation: ld-float 7s ease-in-out infinite; }
+  @keyframes ld-float { 50% { transform: translateY(-8px); } }
+}
+
+/* the site's footer, as wide as the window under the landing */
+.ld > .site-footer { margin-top: 0; border-top: 0; box-shadow: 0 0 0 100vmax var(--color-surface-sunken); clip-path: inset(0 -100vmax); }

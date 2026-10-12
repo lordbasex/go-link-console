@@ -14,37 +14,35 @@ const STEP_SHOTS: ShotName[] = ["app-home", "app-pin", "app-room"];
 export function GuestPath({ onJoin }: { onJoin: () => void }) {
   const g = t.guestPath;
   return (
-    <section className="lp-section lp-band lp-guest" aria-labelledby="lp-guest">
-      <div className="lp-guest-head">
-        <div className="stack-sm">
-          <span className="eyebrow eyebrow-accent">{g.eyebrow}</span>
-          <h2 id="lp-guest" className="lp-h2">
-            {g.title}
-          </h2>
+    <section className="ld-section ld-sunken ld-guest" aria-labelledby="lp-guest">
+      <header className="ld-head ld-head-row">
+        <div>
+          <p className="ld-eyebrow">{g.eyebrow}</p>
+          <h2 id="lp-guest">{g.title}</h2>
         </div>
-        <span className="lp-chip">{g.only}</span>
-      </div>
-      <ol className="lp-guest-steps">
+        <span className="ld-chip ld-chip-info">{g.only}</span>
+      </header>
+      <ol className="ld-ways">
         {g.steps.map((s, i) => (
-          <li key={s.title} className="lp-guest-step">
-            <h3 className="lp-guest-title">
-              <span className="lp-num" aria-hidden="true">
-                {i + 1}
-              </span>{" "}
-              {s.title}
-            </h3>
-            <p className="muted">{s.text}</p>
-            <div className={`lp-phone${i === STEP_SHOTS.length - 1 ? " is-accent" : ""}`}>
+          <li key={s.title} className="ld-way">
+            <div className="ld-shot">
               <Shot name={STEP_SHOTS[i]!} alt={s.alt} />
+            </div>
+            <div className="ld-way-body">
+              <span className="ld-step-num" aria-hidden="true">
+                {i + 1}
+              </span>
+              <h3>{s.title}</h3>
+              <p>{s.text}</p>
             </div>
           </li>
         ))}
       </ol>
-      <div className="lp-guest-bar">
+      <div className="ld-bar">
         <AppDownloads showMeta={false} />
-        <p className="small muted lp-guest-browser">
+        <p className="ld-bar-note">
           {g.browser}{" "}
-          <button type="button" className="lp-textlink" onClick={onJoin}>
+          <button type="button" className="ld-textlink" onClick={onJoin}>
             {g.browserCta}
           </button>
         </p>

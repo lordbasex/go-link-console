@@ -28,7 +28,7 @@ Details in [signalhub's README](https://github.com/lordbasex/signalhub). In shor
 - Strict Content Security Policy, with `connect-src wss:` to allow self-hosted signaling servers. No inline scripts or styles.
 - The signaling server is kept in `localStorage` and changed only by hand, never from a link.
 - PINs are never put in URLs.
-- No third-party requests: fonts are bundled, and there are no analytics, ads or trackers.
+- No third-party requests where games, keys or PINs are: fonts are bundled, and the rooms' site (play.go-link.org), the device's panel and the pages that carry the device's keys (`/handoff`, `/maker-bridge`) load no analytics, ads or trackers. Only console.go-link.org's public pages may load Google Analytics 4, and only after the visitor accepts the cookie notice; once it is loaded, moving to a page that is not public is a full page load (`src/analytics.ts`), and the server's CSP header there leaves Google out.
 - Text from other users is always rendered as text.
 - SHA-256 and HMAC are implemented in TypeScript (`packages/shared/src/hmac.ts`), because `crypto.subtle` is missing on plain `http` pages such as the local panel.
 

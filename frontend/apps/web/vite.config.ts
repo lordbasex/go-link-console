@@ -32,14 +32,19 @@ function otherSitesFiles(): Plugin {
 
 // Strict Content Security Policy for the production build. connect-src
 // allows any wss: host because users may pick their own signaling server.
+// The landing's site (console.go-link.org) also allows Google Analytics'
+// hosts, used only with the visitor's consent on its public pages
+// (src/analytics.ts); the rooms' site and the device's panel never do.
 // It is not applied in dev: Vite's hot reload needs inline scripts.
+const GA = ROLE === "site" ? " https://*.googletagmanager.com" : "";
+const GA_HITS = ROLE === "site" ? " https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com" : "";
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' 'wasm-unsafe-eval'",
+  `script-src 'self' 'wasm-unsafe-eval'${GA}`,
   "style-src 'self'",
   "font-src 'self'",
-  "img-src 'self' data: blob:",
-  "connect-src 'self' wss:",
+  `img-src 'self' data: blob:${GA_HITS}`,
+  `connect-src 'self' wss:${GA_HITS}`,
   "media-src 'self' blob:",
   "base-uri 'none'",
   "form-action 'self'",
