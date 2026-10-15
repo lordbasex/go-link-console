@@ -4,6 +4,15 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 
 ## [Unreleased]
 
+### Fixed
+
+- **The sound of go-link HD games no longer comes and goes** on a computer that cannot draw every frame in time: the worker keeps the game at its speed by the clock and, when it falls behind, runs a frame without its picture (go-link HD's API 4, `golinkhd_frame_skip`), so the sound stays whole and only the picture skips a frame now and then. TELETRABAJO ran at 35 to 50 frames a second on an Intel Mac, so its sound came short.
+- **TELETRABAJO's main character sits properly** (go-link HD 0.3.1): on the chairs, the sofa, the beanbag and the bed's edge with the thighs on the seat and the feet on the floor, crouches with the feet on the floor at the washing machine, and holds a mug, a can, a bowl or a controller with both hands together.
+
+### Changed
+
+- A 720p or bigger picture of a go-link HD game is converted for the video encoder on up to four cores: 0.8 ms a frame instead of 5.2 at 720p.
+
 ## [0.4.3] - 2026-10-15
 
 ### Added

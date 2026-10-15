@@ -54,6 +54,7 @@ int ghd_open(ghd_t *g, const char *path, char *err, size_t errlen) {
 	*(void **)(&g->set_resolution) = lib_sym(g->handle, "golinkhd_set_resolution"); /* optional */
 	*(void **)(&g->keep_save) = lib_sym(g->handle, "golinkhd_keep_save");           /* optional */
 	*(void **)(&g->keep_load) = lib_sym(g->handle, "golinkhd_keep_load");
+	*(void **)(&g->frame_skip) = lib_sym(g->handle, "golinkhd_frame_skip");         /* optional */
 	memset(&cfg, 0, sizeof(cfg));
 	cfg.api_version = 2; /* the oldest API this host needs: newer functions are looked up and optional */
 	g->engine = g->create(&cfg, &why);
@@ -80,6 +81,12 @@ void ghd_info(ghd_t *g, golinkhd_info *out) { g->get_info(g->engine, out); }
 void ghd_set_language(ghd_t *g, const char *lang) { g->set_language(g->engine, lang); }
 void ghd_set_music(ghd_t *g, int on) { g->set_music(g->engine, on); }
 void ghd_frame(ghd_t *g, const golinkhd_pad *pads, int32_t count, golinkhd_frame_out *out) { g->frame(g->engine, pads, count, out); }
+int ghd_frame_skip(ghd_t *g, const golinkhd_pad *pads, int32_t count, golinkhd_frame_out *out) {
+	if (!g->frame_skip)
+		return 0;
+	g->frame_skip(g->engine, pads, count, out);
+	return 1;
+}
 void ghd_restart(ghd_t *g) { g->restart(g->engine); }
 int ghd_set_resolution(ghd_t *g, int32_t lines) {
 	if (!g->set_resolution)

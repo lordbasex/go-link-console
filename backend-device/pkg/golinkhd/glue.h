@@ -26,6 +26,7 @@ typedef struct {
 	void (*set_resolution)(golinkhd_engine *, int32_t); /* API 2; NULL on an older engine */
 	size_t (*keep_save)(golinkhd_engine *, uint8_t *, size_t);     /* API 3; NULL on an older engine */
 	int (*keep_load)(golinkhd_engine *, const uint8_t *, size_t); /* API 3 */
+	void (*frame_skip)(golinkhd_engine *, const golinkhd_pad *, int32_t, golinkhd_frame_out *); /* API 4; NULL on an older engine */
 	golinkhd_engine *engine;
 } ghd_t;
 
@@ -37,6 +38,7 @@ void ghd_info(ghd_t *g, golinkhd_info *out);
 void ghd_set_language(ghd_t *g, const char *lang);
 void ghd_set_music(ghd_t *g, int on);
 void ghd_frame(ghd_t *g, const golinkhd_pad *pads, int32_t count, golinkhd_frame_out *out);
+int ghd_frame_skip(ghd_t *g, const golinkhd_pad *pads, int32_t count, golinkhd_frame_out *out);
 void ghd_restart(ghd_t *g);
 int ghd_set_resolution(ghd_t *g, int32_t lines);
 size_t ghd_state_size(ghd_t *g);
