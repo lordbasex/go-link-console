@@ -1,24 +1,59 @@
 // Copyright (c) 2026 Federico Pereira <lord.basex@gmail.com>
 import { useEffect, useRef, useState } from "react";
-import { t } from "../../i18n";
+import { t, useLang, type Lang } from "../../i18n";
 import { CloseIcon, PlayIcon } from "../Icons";
 import { Shot } from "./Shot";
 
-// The landing's arcade screen: a short silent loop of two players in
-// ANTÍDOTO (go-link HD's free starter game), and its trailer with sound in
-// a dialog. The screen sits in a laptop, with the Player app on a phone in
-// front of it, and tags for the two players who control it from far apart. The videos live in public/media (made with go-link HD's
-// hdrun from a two-player bot run, see docs/web.md).
-const LOOP = "/media/antidoto-loop.mp4";
-const POSTER = "/media/antidoto-poster.jpg";
-const TRAILER = "/media/antidoto-trailer.mp4";
+// The landing's arcade screen: a short silent loop of one of go-link
+// Console's free games (ANTÍDOTO, two players together, or TELETRABAJO:
+// CÁMARA APAGADA, a day working from home), picked with the capsules over the
+// screen, and its trailer with sound in a dialog. The screen sits in a
+// laptop, with the Player app on a phone in front of it, and tags for the two
+// players who control it from far apart. The videos live in public/media
+// (made with go-link HD from bot runs, see docs/web.md); TELETRABAJO's speak
+// and show the page's language.
+type GameId = "antidoto" | "remote";
+
+interface SceneGame {
+  name: string;
+  loop: string;
+  poster: string;
+  trailer: string;
+  label: string;
+  title: string;
+  text: string;
+}
+
+function sceneGame(id: GameId, lang: Lang): SceneGame {
+  if (id === "remote")
+    return {
+      name: "TELETRABAJO",
+      loop: `/media/teletrabajo-loop-${lang}.mp4`,
+      poster: `/media/teletrabajo-poster-${lang}.jpg`,
+      trailer: `/media/teletrabajo-trailer-${lang}.mp4`,
+      label: t.landing.remoteSceneLabel,
+      title: t.landing.remoteTrailerTitle,
+      text: t.landing.remoteTrailerText,
+    };
+  return {
+    name: "ANTÍDOTO",
+    loop: "/media/antidoto-loop.mp4",
+    poster: "/media/antidoto-poster.jpg",
+    trailer: "/media/antidoto-trailer.mp4",
+    label: t.landing.sceneLabel,
+    title: t.landing.trailerTitle,
+    text: t.landing.trailerText,
+  };
+}
+
+const GAMES: readonly GameId[] = ["antidoto", "remote"];
 
 function reducedMotion(): boolean {
   return typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 /** The trailer with sound, over the page; Escape or a click outside closes it. */
-function TrailerDialog({ onClose }: { onClose: () => void }) {
+function TrailerDialog({ game, onClose }: { game: SceneGame; onClose: () => void }) {
   const close = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     close.current?.focus();
@@ -31,7 +66,7 @@ function TrailerDialog({ onClose }: { onClose: () => void }) {
       <div className="dialog lp-trailer" role="dialog" aria-modal="true" aria-labelledby="lp-trailer-title">
         <div className="lp-trailer-head">
           <h2 id="lp-trailer-title" className="dialog-title">
-            {t.landing.trailerTitle}
+            {game.title}
           </h2>
           <button
             ref={close}
@@ -44,15 +79,18 @@ function TrailerDialog({ onClose }: { onClose: () => void }) {
             <CloseIcon />
           </button>
         </div>
-        <video className="lp-trailer-video" src={TRAILER} poster={POSTER} controls autoPlay playsInline preload="auto" />
-        <p className="small muted">{t.landing.trailerText}</p>
+        <video className="lp-trailer-video" src={game.trailer} poster={game.poster} controls autoPlay playsInline preload="auto" />
+        <p className="small muted">{game.text}</p>
       </div>
     </div>
   );
 }
 
 export function GameScene() {
+  const lang = useLang();
+  const [id, setId] = useState<GameId>("antidoto");
   const [open, setOpen] = useState(false);
+  const game = sceneGame(id, lang);
   const loop = useRef<HTMLVideoElement>(null);
   // the loop rests while the trailer plays, and never moves by itself for
   // people who asked for less motion
@@ -61,7 +99,7 @@ export function GameScene() {
     if (!v) return;
     if (open || reducedMotion()) v.pause();
     else void v.play?.()?.catch(() => undefined);
-  }, [open]);
+  }, [open, game.loop]);
   return (
     <figure className="ld-stage">
       <div className="ld-laptop">
@@ -70,15 +108,23 @@ export function GameScene() {
             <video
               ref={loop}
               className="lp-video"
-              poster={POSTER}
+              key={game.loop}
+              poster={game.poster}
               muted
               loop
               playsInline
               autoPlay={!reducedMotion()}
               preload="metadata"
-              aria-label={t.landing.sceneLabel}
-              src={LOOP}
+              aria-label={game.label}
+              src={game.loop}
             />
+            <div className="lp-games" role="group" aria-label={t.landing.gamesLabel}>
+              {GAMES.map((g) => (
+                <button key={g} type="button" aria-pressed={g === id} className={g === id ? "is-on" : undefined} onClick={() => setId(g)}>
+                  {sceneGame(g, lang).name}
+                </button>
+              ))}
+            </div>
             <button type="button" className="lp-trailer-open" onClick={() => setOpen(true)}>
               <span className="lp-trailer-play" aria-hidden="true">
                 <PlayIcon size={22} />
@@ -101,7 +147,7 @@ export function GameScene() {
         </span>
         <span className="ld-tag ld-tag-c">{t.landing.linkChip}</span>
       </figcaption>
-      {open && <TrailerDialog onClose={() => setOpen(false)} />}
+      {open && <TrailerDialog game={game} onClose={() => setOpen(false)} />}
     </figure>
   );
 }

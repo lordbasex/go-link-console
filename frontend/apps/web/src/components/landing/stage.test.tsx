@@ -27,6 +27,20 @@ describe("the landing in Desk's look", () => {
     expect(screen.getByRole("dialog", { name: en.landing.trailerTitle })).toBeInTheDocument();
   });
 
+  it("switches the screen to TELETRABAJO, with its loop and trailer in the page's language", async () => {
+    setLang("es");
+    const { container } = renderApp("/");
+    await screen.findByRole("heading", { level: 1 });
+    await userEvent.click(screen.getByRole("button", { name: "TELETRABAJO" }));
+    expect(screen.getByRole("button", { name: "TELETRABAJO" })).toHaveAttribute("aria-pressed", "true");
+    const video = container.querySelector(".lp-screen video.lp-video")!;
+    expect(video).toHaveAttribute("src", "/media/teletrabajo-loop-es.mp4");
+    expect(video).toHaveAttribute("poster", "/media/teletrabajo-poster-es.jpg");
+    await userEvent.click(screen.getByRole("button", { name: es.landing.trailerOpen }));
+    const dialog = screen.getByRole("dialog", { name: es.landing.remoteTrailerTitle });
+    expect(dialog.querySelector("video")).toHaveAttribute("src", "/media/teletrabajo-trailer-es.mp4");
+  });
+
   it("tells the room and the device in real screenshots, with every feature once", async () => {
     renderApp("/");
     expect(await screen.findByRole("heading", { level: 3, name: en.landing.roomTitle })).toBeInTheDocument();
@@ -38,7 +52,7 @@ describe("the landing in Desk's look", () => {
   it("has the new texts in every language", () => {
     for (const m of [en, es, pt]) {
       expect(m.landing.notes).toHaveLength(4);
-      for (const k of ["roomTitle", "roomLead", "deviceTitle", "deviceLead", "flowData"] as const) expect(m.landing[k]).not.toBe("");
+      for (const k of ["roomTitle", "roomLead", "deviceTitle", "deviceLead", "flowData", "gamesLabel", "remoteSceneLabel", "remoteTrailerTitle", "remoteTrailerText"] as const) expect(m.landing[k]).not.toBe("");
       for (const k of ["title", "text", "reject", "accept", "settings", "language"] as const) expect(m.consent[k]).not.toBe("");
     }
   });

@@ -3012,11 +3012,17 @@ body .video-stage.has-touchpad.is-console .picture-layer { inset: auto; left: va
 .game-art.is-wide > .game-art-back { position: absolute; inset: 0; transform: scale(1.25); filter: blur(12px) brightness(0.6) saturate(1.2); }
 .game-art.is-wide > .game-art-main { position: relative; object-fit: contain; }
 
-/* The landing's ANTÍDOTO loop and its trailer (GameScene). */
+/* The landing's free games: a loop, the capsules that pick the game and its trailer (GameScene). */
 .lp-video { display: block; width: 100%; height: 100%; object-fit: cover; }
 .lp-trailer-open { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 2; display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 18px 0 4px; border-radius: 999px; border: 1px solid rgb(255 255 255 / 0.25); background: rgb(12 14 20 / 0.72); color: #ffffff; font: 600 14px var(--font-text); cursor: pointer; backdrop-filter: blur(6px); transition: background 0.15s, transform 0.15s; }
 .lp-trailer-open:hover { background: rgb(12 14 20 / 0.88); transform: translateX(-50%) scale(1.04); }
 .lp-trailer-open:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.lp-games { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 2; display: flex; gap: 4px; padding: 3px; border-radius: 999px; border: 1px solid rgb(255 255 255 / 0.2); background: rgb(12 14 20 / 0.66); backdrop-filter: blur(6px); }
+.lp-games button { position: relative; height: 30px; padding: 0 14px; border: none; border-radius: 999px; background: transparent; color: rgb(255 255 255 / 0.72); font: 700 12px var(--font-text); letter-spacing: 0.04em; white-space: nowrap; cursor: pointer; }
+.lp-games button.is-on { background: #ffffff; color: #0c0e14; }
+.lp-games button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+@media (pointer: coarse) { .lp-games button::before { content: ""; position: absolute; inset: -7px -2px; } }
+@media (max-width: 700px) { .lp-games { top: 6px; padding: 2px; } .lp-games button { height: 22px; padding: 0 9px; font-size: 10px; } }
 .lp-trailer-play { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: var(--color-accent); color: var(--color-bg); }
 .lp-trailer { width: min(960px, calc(100vw - 32px)); max-width: none; display: flex; flex-direction: column; gap: 12px; }
 .lp-trailer-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
