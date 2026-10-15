@@ -39,8 +39,8 @@ type Game struct {
 	Files   map[string]File
 }
 
-// release is where go-link HD's engine publishes the starter games.
-const release = "https://github.com/lordbasex/golink-hd/releases/download/antidoto-v0.1.1/"
+// releases is where go-link HD's engine publishes the starter games, each in a release of its own.
+const releases = "https://github.com/lordbasex/golink-hd/releases/download/"
 
 // Starter are the games a device downloads on its first link, and that
 // go-link HD's page can download again.
@@ -49,10 +49,20 @@ var Starter = []Game{{
 	Title:   "ANTÍDOTO",
 	Version: "0.1.1",
 	Files: map[string]File{
-		"720p": {URL: release + "antidoto-720p.glhd", Size: 117426392,
+		"720p": {URL: releases + "antidoto-v0.1.1/antidoto-720p.glhd", Size: 117426392,
 			SHA256: "aab91aff3d6960575867805cb84f41b9ad3e116165c4a24d2dc114adb3eb3afc"},
-		"1080p": {URL: release + "antidoto-1080p.glhd", Size: 173130796,
+		"1080p": {URL: releases + "antidoto-v0.1.1/antidoto-1080p.glhd", Size: 173130796,
 			SHA256: "fe97b1be1a19c9a6787567c500cfe7b4f72183a799ed5ab018070c186451fa2b"},
+	},
+}, {
+	Name:    "teletrabajo",
+	Title:   "TELETRABAJO: CÁMARA APAGADA",
+	Version: "0.5.0",
+	Files: map[string]File{
+		"720p": {URL: releases + "teletrabajo-v0.5.0/teletrabajo-720p.glhd", Size: 53715212,
+			SHA256: "6d42bf154e9e2b7851b30ff1ac4478114e3faee2e0d3b681725eb07f279bdddf"},
+		"1080p": {URL: releases + "teletrabajo-v0.5.0/teletrabajo-1080p.glhd", Size: 53800331,
+			SHA256: "609c76c5b78b46aff4f446738b963f99e056b8cbfe634ddae939b5bf5afc566f"},
 	},
 }}
 

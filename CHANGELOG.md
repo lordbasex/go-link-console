@@ -6,7 +6,8 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 
 ### Added
 
-- **go-link HD's 3D games:** a package of a game coded in the engine (`"game"`, TELETRABAJO: CÁMARA APAGADA) is listed and played, its buttons named Use and Run, drawn at 720p at most; what a game keeps between sessions (its record, the main character chosen) is saved for each game next to MAME's hiscores and given back when it starts again (the engine's API 3). The Windows engine is built with its 3D games.
+- **go-link HD's 3D games:** a package of a game coded in the engine (`"game"`, TELETRABAJO: CÁMARA APAGADA) is listed and played, its buttons named Use and Run, (at 1080p the engine draws its 3D at 720p and enlarges it); what a game keeps between sessions (its record, the main character chosen) is saved for each game next to MAME's hiscores and given back when it starts again (the engine's API 3). The Windows engine is built with its 3D games.
+- **TELETRABAJO: CÁMARA APAGADA is a free starter game** next to ANTÍDOTO, in 720p and 1080p. Starter games are now offered once each (`starter_offered` in device.json), so a device that already got ANTÍDOTO also gets a game published later.
 
 ## [0.4.1] - 2026-10-11
 

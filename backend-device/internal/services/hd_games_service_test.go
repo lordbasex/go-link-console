@@ -14,6 +14,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -121,7 +122,7 @@ func TestStarterGamesAreOfferedOnce(t *testing.T) {
 	saved := make(chan struct{}, 2)
 	h := NewHDGamesService(HDGamesConfig{
 		Library: lib, Status: st, Settings: settings, Games: []hdgames.Game{g},
-		SaveOffered: func() error { saved <- struct{}{}; return nil },
+		SaveOffered: func(names []string) error { saved <- struct{}{}; return nil },
 		OpenRoom: func(rom string) error {
 			mu.Lock()
 			rooms = append(rooms, rom)
@@ -162,6 +163,40 @@ func TestStarterGamesAreOfferedOnce(t *testing.T) {
 	}
 }
 
+// A game published after a device offered the others is offered too, once.
+func TestStarterGamesAddedLaterAreOffered(t *testing.T) {
+	g, hits := starterGame(t)
+	st := NewStatusService(deviceID, "test", "ws://x", "")
+	lib := NewLibraryService(t.TempDir(), st, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	lib.SetCore(t.TempDir(), "")
+	engine := filepath.Join(t.TempDir(), "libgolinkhd")
+	_ = os.WriteFile(engine, []byte("engine"), 0o644)
+	lib.SetHDCore(engine)
+	lib.UseHDDir(t.TempDir())
+	settings := NewSettingsService(lib, models.ThumbnailSettings{}, t.TempDir(), nil)
+	saved := make(chan []string, 2)
+	old := hdgames.Game{Name: "old", Title: "Old"}
+	h := NewHDGamesService(HDGamesConfig{
+		Library: lib, Status: st, Settings: settings, Games: []hdgames.Game{old, g},
+		OfferedGames: []string{"old"},
+		SaveOffered:  func(names []string) error { saved <- names; return nil },
+	})
+	h.OfferStarter(context.Background())
+	select {
+	case names := <-saved:
+		if strings.Join(names, ",") != "old,demo" {
+			t.Fatalf("saved %v", names)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("the new game was not offered")
+	}
+	h.OfferStarter(context.Background()) // nothing left to offer
+	time.Sleep(50 * time.Millisecond)
+	if hits.Load() != 1 || len(saved) != 0 {
+		t.Fatalf("hits %d, saves left %d", hits.Load(), len(saved))
+	}
+}
+
 func TestStarterGamesWaitForTheEngine(t *testing.T) {
 	g, hits := starterGame(t)
 	st := NewStatusService(deviceID, "test", "ws://x", "")
@@ -171,7 +206,7 @@ func TestStarterGamesWaitForTheEngine(t *testing.T) {
 	lib.UseHDDir(t.TempDir())
 	settings := NewSettingsService(lib, models.ThumbnailSettings{}, t.TempDir(), nil)
 	h := NewHDGamesService(HDGamesConfig{Library: lib, Status: st, Settings: settings, Games: []hdgames.Game{g}})
-	if h.offer(context.Background()) || hits.Load() != 0 {
+	if done := h.offer(context.Background(), []hdgames.Game{g}); len(done) != 0 || hits.Load() != 0 {
 		t.Fatal("offered without the engine")
 	}
 	// The host can still download one by hand, in either size.
