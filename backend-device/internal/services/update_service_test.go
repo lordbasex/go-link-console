@@ -17,6 +17,7 @@ func TestUpdateServiceFindsANewerRelease(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`[
 			{"tag_name":"v0.3.0","html_url":"https://example.com/v0.3.0","draft":true},
+			{"tag_name":"v0.2.9","html_url":"https://example.com/v0.2.9","prerelease":true},
 			{"tag_name":"v0.2.1","html_url":"https://example.com/v0.2.1","draft":false},
 			{"tag_name":"v0.1.0","html_url":"https://example.com/v0.1.0","draft":false},
 			{"tag_name":"nightly","html_url":"https://example.com/nightly","draft":false}
@@ -31,7 +32,7 @@ func TestUpdateServiceFindsANewerRelease(t *testing.T) {
 		return info.Latest
 	}
 	if got := check("v0.1.0"); got != "v0.2.1" {
-		t.Fatalf("from v0.1.0: %q (drafts and non-versions are skipped)", got)
+		t.Fatalf("from v0.1.0: %q (drafts, pre-releases and non-versions are skipped)", got)
 	}
 	if got := check("v0.2.1"); got != "" {
 		t.Fatalf("up to date: %q", got)

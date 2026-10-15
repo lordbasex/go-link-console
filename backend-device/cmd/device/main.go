@@ -31,6 +31,7 @@ import (
 	"github.com/lordbasex/go-link-console/backend-device/internal/panel"
 	"github.com/lordbasex/go-link-console/backend-device/internal/services"
 	"github.com/lordbasex/go-link-console/backend-device/internal/telemetry"
+	"github.com/lordbasex/go-link-console/backend-device/internal/updater"
 	"github.com/lordbasex/go-link-console/backend-device/pkg/encoder"
 	"github.com/lordbasex/go-link-console/backend-device/pkg/input"
 	"github.com/lordbasex/go-link-console/backend-device/pkg/instancelock"
@@ -854,14 +855,20 @@ func run() error {
 		stream.SendToLinks(services.NewDeviceStatusMessage(st))
 	})
 	go metrics.Run(ctx)
-	// A newer release shows in the window and on the linked website.
-	go services.NewUpdateService(services.UpdateConfig{
+	// A newer release shows in the window (which installs it) and on the
+	// linked website; what an update left behind goes now.
+	updater.Cleanup()
+	autoUpdate := new(atomic.Bool)
+	autoUpdate.Store(!cfg.NoUpdateCheck)
+	updates := services.NewUpdateService(services.UpdateConfig{
 		Current: version,
 		Logger:  logger,
 		OnUpdate: func(u models.UpdateInfo) {
 			status.SetUpdate(&u)
 		},
-	}).Run(ctx)
+		Enabled: autoUpdate.Load,
+	})
+	go updates.Run(ctx)
 	// What is being streamed, for the window (once a second).
 	go func() {
 		t := time.NewTicker(time.Second)
@@ -926,6 +933,15 @@ func run() error {
 		language: cfg.Language,
 		setLanguage: func(id string) error {
 			return updateConfig(store, &cfg, func(c *models.Config) { c.Language = id })
+		},
+		updates:    updates,
+		autoUpdate: autoUpdate.Load(),
+		setAutoUpdate: func(on bool) error {
+			if err := updateConfig(store, &cfg, func(c *models.Config) { c.NoUpdateCheck = !on }); err != nil {
+				return err
+			}
+			autoUpdate.Store(on)
+			return nil
 		},
 		quit:     cancel,
 		headless: *headless,

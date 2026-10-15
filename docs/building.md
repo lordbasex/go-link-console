@@ -93,6 +93,7 @@ On macOS the device ships as one universal **`go-link-console.app`** (Intel and 
 | `go-link-console-v0.1.0-docker.oci.tar.gz` (skipped with `DOCKER=0`) | The Docker image (amd64 and arm64), for `docker load` without internet; it loads as `go-link-console:v0.1.0`. Publishing the release also runs `.github/workflows/docker.yml`, which pushes the same image to `ghcr.io/lordbasex/go-link-console` (`:v0.1.0` and `:latest`) |
 | `go-link-console-v0.1.0-android.apk` (skipped with `ANDROID=0`) | **go-link Console Player** for Android, signed with the release key (`ANDROID_SIGNING`, see [mobile.md](mobile.md)) |
 | `SHA256SUMS` | To verify the downloads |
+| `SHA256SUMS.sig` | The update key's Ed25519 signature of `SHA256SUMS`: the device installs an update only with it (see [device.md](device.md#updates)) |
 
 The release also writes `frontend/apps/web/src/release.json` (version and download sizes) for the website's downloads; commit it with `Casks/go-link-console.rb` and deploy the website.
 
@@ -105,6 +106,8 @@ It also updates `Casks/go-link-console.rb` (Homebrew: `brew install --cask go-li
 1. Install the "Developer ID Application: Name (TEAMID)" certificate in the keychain.
 2. Store the notarization credentials once: `xcrun notarytool store-credentials "go-link-notary" --apple-id you@example.com --team-id TEAMID --password <app-specific-password>`.
 3. `VERSION=0.1.0 CODESIGN_IDENTITY="Developer ID Application: Name (TEAMID)" NOTARY_PROFILE=go-link-notary make release`
+
+**The update key** signs `SHA256SUMS` into `SHA256SUMS.sig` (`backend-device/build/signsums`). It is `UPDATE_KEY`, by default `~/.go-link-signing/console-update-ed25519.key` (0600, never in a repository or CI); its public half is `publicKey` in `backend-device/internal/updater/updater.go`. A signed release without the key stops; a development release goes out unsigned, and devices update from it by hand. The key was made once with `go run ./build/signsums -gen <file>` (inside `backend-device/`), which refuses to overwrite one: a new key leaves every installed version unable to update by itself, so keep a backup of it with the signing files.
 
 The app is then signed with the hardened runtime and `backend-device/build/macos/entitlements.plist` (`disable-library-validation`, because the device loads the libretro core, which is downloaded separately and not signed by us). Notarization is done twice (`build/macos/notarize.sh`): first the app, whose ticket is stapled inside `go-link-console.app` (the copy in /Applications then opens without asking Apple's servers, offline too), then the `.dmg` made with that app, signed, notarized and stapled. The release is no longer a pre-release.
 

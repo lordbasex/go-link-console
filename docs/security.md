@@ -21,6 +21,7 @@ Details in [signalhub's README](https://github.com/lordbasex/signalhub). In shor
 - **Thumbnails:** size limits on files and pixels before decoding.
 - `device.json`, `history.json` and the recordings (`rec/`) are `0600`. `device.lock` prevents two devices at once.
 - Recordings are served only to linked browsers that proved their link, only on their `files` channel and only by recording id (`<room id>/<file>.webm`, checked against a strict pattern): never a path. The device serves no recording to room guests.
+- **Updates:** the device installs an update only when the release's `SHA256SUMS` carries the update key's Ed25519 signature and the downloaded file has the hash it lists. The private key is on the release computer only, never in the repository or CI, so someone who takes over the GitHub account or the release's files cannot push an update to the devices. On macOS the new app must also carry a valid signature by the running app's developer team. An archive for Windows or Linux may only hold plain files at its top (no folders, no paths that leave it). A file that fails a check is deleted and nothing is installed, and nothing is installed without the host choosing **Update**. **Residual risk:** the release computer itself, and a release key that leaks would need a new key in a new version (devices trust the key their version carries).
 
 ## Website
 

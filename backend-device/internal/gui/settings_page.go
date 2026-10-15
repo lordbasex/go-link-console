@@ -62,6 +62,7 @@ type settingsPage struct {
 	cat      int
 	kind     *segmented
 	language *segmented
+	autoUp   *widget.Check
 	dir      *widget.Label
 	thumbErr *widget.Label
 	choose   *widget.Button
@@ -181,9 +182,33 @@ func (p *settingsPage) generalCards() fyne.CanvasObject {
 			p.language.SetSelected(labels[i])
 		}
 	}
+	p.autoUp = widget.NewCheck(L("Check for updates automatically"), func(on bool) {
+		if p.u.opts.SetAutoUpdate == nil || on == p.u.opts.AutoUpdate {
+			return
+		}
+		if err := p.u.opts.SetAutoUpdate(on); err != nil {
+			p.u.showError(err)
+			p.autoUp.SetChecked(p.u.opts.AutoUpdate)
+			return
+		}
+		p.u.opts.AutoUpdate = on
+	})
+	p.autoUp.SetChecked(p.u.opts.AutoUpdate)
+	check := widget.NewButtonWithIcon(L("Check for Updates…"), icon("download", white), func() { p.u.upd.ask() })
+	uhelp := wrapped(L("Every 6 hours go-link asks GitHub whether a newer version is out, and offers it. An update is installed only when its download carries go-link Console's signature."))
+	uhelp.Importance = widget.LowImportance
+	uhelp.SizeName = theme.SizeNameCaptionText
+	if p.u.opts.Updates == nil {
+		p.autoUp.Disable()
+	}
 	return vstack(glass(container.NewVBox(
 		settingTitle(L("Language"), L("The language of this window. Automatic follows your computer. The website has its own language switch.")),
 		container.NewHBox(p.language.content),
+	)), glass(container.NewVBox(
+		settingTitle(L("Updates"), Lf("This is go-link Console %s.", bare(p.u.opts.Version))),
+		p.autoUp,
+		container.NewHBox(check),
+		uhelp,
 	)))
 }
 

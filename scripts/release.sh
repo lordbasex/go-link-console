@@ -15,6 +15,10 @@
 #   VERSION=0.1.0 CODESIGN_IDENTITY="Developer ID Application: Name (TEAMID)" \
 #     NOTARY_PROFILE=go-link-notary ./scripts/release.sh
 #
+# SHA256SUMS is signed with the update key (UPDATE_KEY, default
+# ~/.go-link-signing/console-update-ed25519.key) into SHA256SUMS.sig, which
+# the app checks before it installs an update.
+#
 # Other knobs: REPO=owner/name (default lordbasex/go-link-console), SKIP_BUILD=1
 # (pack what is already in dist/device), DOCKER=0 (skip the Docker image, built by default as
 # an OCI archive), ANDROID=0 (skip the signed Android APK, built by default:
@@ -117,6 +121,20 @@ cp "$ROOT/THIRD_PARTY_NOTICES.md" "$OUT/THIRD_PARTY_NOTICES.md"
 
 echo "▶ SHA256SUMS"
 (cd "$OUT" && shasum -a 256 -- * > SHA256SUMS && cat SHA256SUMS)
+
+# The app installs an update only when SHA256SUMS carries the update key's
+# signature (backend-device/internal/updater). The key never leaves this
+# computer; a signed release always has it.
+UPDATE_KEY="${UPDATE_KEY:-$HOME/.go-link-signing/console-update-ed25519.key}"
+if [[ -f "$UPDATE_KEY" ]]; then
+  echo "▶ SHA256SUMS.sig (the update key)"
+  (cd "$ROOT/backend-device" && go run ./build/signsums -key "$UPDATE_KEY" "$OUT/SHA256SUMS")
+elif [[ "$DEV" == "0" ]]; then
+  echo "✗ no update key at $UPDATE_KEY: the apps would refuse this release as an update"
+  exit 1
+else
+  echo "  (no update key: SHA256SUMS is not signed, so the apps update from this release by hand)"
+fi
 
 echo "▶ Website downloads (frontend/apps/web/src/release.json)"
 "$ROOT/scripts/release-info.sh" "$OUT"
