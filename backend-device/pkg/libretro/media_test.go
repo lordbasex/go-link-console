@@ -3,6 +3,7 @@
 package libretro
 
 import (
+	"bytes"
 	"math"
 	"testing"
 )
@@ -245,4 +246,44 @@ func BenchmarkToI420Scaled3(b *testing.B) {
 // BenchmarkUpscaleThenToI420 is the separate path the fused one replaces.
 func BenchmarkUpscaleThenToI420(b *testing.B) {
 	benchFrame(b, func(dst []byte, f Frame) { ToI420(dst, upscale2(f)) }, 2)
+}
+
+// toI420Reference is ToI420 pixel by pixel through rgbOf, as it was before
+// the XRGB8888 fast path.
+func toI420Reference(dst []byte, f Frame) {
+	w, h := f.Width, f.Height
+	cw := (w + 1) / 2
+	yPlane, uPlane, vPlane := dst[:w*h], dst[w*h:w*h+cw*((h+1)/2)], dst[w*h+cw*((h+1)/2):]
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			r, g, b := rgbOf(f, x, y)
+			yPlane[y*w+x] = lumaOf(r, g, b)
+			if x%2 == 0 && y%2 == 0 {
+				uPlane[(y/2)*cw+x/2] = byte(cbOf(r, g, b))
+				vPlane[(y/2)*cw+x/2] = byte(crOf(r, g, b))
+			}
+		}
+	}
+}
+
+func TestToI420XRGBMatchesPixelByPixel(t *testing.T) {
+	for _, size := range [][2]int{{1, 1}, {3, 5}, {384, 224}, {641, 361}, {1280, 720}} {
+		f := randomFrame(FormatXRGB8888, size[0], size[1], 7) // rows with padding
+		got, want := make([]byte, FrameSizeI420(size[0], size[1])), make([]byte, FrameSizeI420(size[0], size[1]))
+		ToI420(got, f)
+		toI420Reference(want, f)
+		if !bytes.Equal(got, want) {
+			t.Fatalf("%dx%d: the fast conversion differs from the reference", size[0], size[1])
+		}
+	}
+}
+
+func BenchmarkToI420XRGB720p(b *testing.B) {
+	f := randomFrame(FormatXRGB8888, 1280, 720, 42)
+	dst := make([]byte, FrameSizeI420(1280, 720))
+	b.SetBytes(int64(len(dst)))
+	b.ResetTimer()
+	for range b.N {
+		ToI420(dst, f)
+	}
 }

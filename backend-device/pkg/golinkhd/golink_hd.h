@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-#define GOLINKHD_API_VERSION 3
+#define GOLINKHD_API_VERSION 4
 #define GOLINKHD_KEEP_MAX 256 /* API 3: the most a game keeps between sessions (golinkhd_keep_save) */
 
 #if defined(_WIN32) && defined(GOLINKHD_BUILD_SHARED)
@@ -143,6 +143,14 @@ GOLINKHD_API void golinkhd_set_resolution(golinkhd_engine *e, int32_t lines);
 
 /* One frame: the controllers of ports 1..count (the rest are idle), then the picture and sound. */
 GOLINKHD_API void golinkhd_frame(golinkhd_engine *e, const golinkhd_pad *pads, int32_t count, golinkhd_frame_out *out);
+/*
+ * API 4: one frame like golinkhd_frame without drawing its picture
+ * (out->pixels is the last one drawn): the game and its sound go on at their
+ * speed while a slow computer shows fewer pictures, instead of the sound
+ * running short. The game is the same either way (the picture never changes
+ * it).
+ */
+GOLINKHD_API void golinkhd_frame_skip(golinkhd_engine *e, const golinkhd_pad *pads, int32_t count, golinkhd_frame_out *out);
 /* The game from its start (the loaded package or demo). */
 GOLINKHD_API void golinkhd_restart(golinkhd_engine *e);
 

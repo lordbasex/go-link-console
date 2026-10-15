@@ -160,8 +160,9 @@ func emulate(cfg emulateConfig, in io.Reader, out io.Writer, log *slog.Logger) e
 	cmds.video.Store(uint32(cfg.Video))
 	go cmds.read(in, log)
 
-	ticker := time.NewTicker(game.FrameDuration())
-	defer ticker.Stop()
+	pace := newPacer(game.FrameDuration(), time.Now())
+	timer := time.NewTimer(0)
+	defer timer.Stop()
 	shown := false // a frame went out since the game started
 	for {
 		select {
@@ -173,19 +174,29 @@ func emulate(cfg emulateConfig, in io.Reader, out io.Writer, log *slog.Logger) e
 				return err
 			}
 			continue
-		case <-ticker.C:
+		case <-timer.C:
 		}
+		now := time.Now()
 		// The parent repeats the last picture while the game is paused. A
 		// game paused before its first frame (a room saved paused comes back
 		// paused as soon as it is ready) runs that one frame, so it shows
 		// where it stopped instead of a black screen.
 		if cmds.paused.Load() && shown {
+			pace.rest(now)
+			timer.Reset(pace.wait(now))
 			continue
 		}
 		shown = true
 		game.SetPads(cmds.pads())
 		game.SetVideoMode(emuproc.VideoMode(cmds.video.Load()))
-		game.Run()
+		// Behind the clock, a go-link HD game runs this frame without its
+		// picture: its sound keeps coming at the game's speed (see pacer).
+		if pace.frame(now, game.CanSkip()) {
+			game.RunSkip()
+		} else {
+			game.Run()
+		}
+		timer.Reset(pace.wait(time.Now()))
 		if writeErr == nil {
 			writeErr = w.Flush()
 		}

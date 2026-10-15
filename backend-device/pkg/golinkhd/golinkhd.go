@@ -158,6 +158,29 @@ func (e *Engine) SetResolution(lines int) bool {
 
 // Frame runs one frame with the players' pads (ports 1 to len(pads)).
 func (e *Engine) Frame(pads []Pad) Frame {
+	e.setPads(pads)
+	var out C.golinkhd_frame_out
+	C.ghd_frame(e.g, &e.pads[0], C.int32_t(MaxPlayers), &out)
+	return frameOf(&out)
+}
+
+// FrameSkip runs one frame like Frame without drawing its picture (Pixels
+// is the last one drawn): the game and its sound go on at their speed while
+// a slow computer shows fewer pictures. False, and nothing run, on an engine
+// older than API 4.
+func (e *Engine) FrameSkip(pads []Pad) (Frame, bool) {
+	e.setPads(pads)
+	var out C.golinkhd_frame_out
+	if C.ghd_frame_skip(e.g, &e.pads[0], C.int32_t(MaxPlayers), &out) == 0 {
+		return Frame{}, false
+	}
+	return frameOf(&out), true
+}
+
+// CanSkip says whether the engine has FrameSkip (API 4).
+func (e *Engine) CanSkip() bool { return e.g.frame_skip != nil }
+
+func (e *Engine) setPads(pads []Pad) {
 	n := min(len(pads), MaxPlayers)
 	for i := range e.pads {
 		e.pads[i] = C.golinkhd_pad{}
@@ -166,8 +189,9 @@ func (e *Engine) Frame(pads []Pad) Frame {
 			e.pads[i] = C.golinkhd_pad{buttons: C.uint32_t(p.Buttons), lx: C.int32_t(p.LX), ly: C.int32_t(p.LY), rx: C.int32_t(p.RX), ry: C.int32_t(p.RY)}
 		}
 	}
-	var out C.golinkhd_frame_out
-	C.ghd_frame(e.g, &e.pads[0], C.int32_t(MaxPlayers), &out)
+}
+
+func frameOf(out *C.golinkhd_frame_out) Frame {
 	f := Frame{Width: int(out.width), Height: int(out.height), Pitch: int(out.pitch)}
 	if out.pixels != nil {
 		f.Pixels = unsafe.Slice((*uint32)(unsafe.Pointer(out.pixels)), f.Pitch*f.Height)

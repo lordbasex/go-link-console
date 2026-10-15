@@ -85,6 +85,7 @@ type GameCore struct {
 	keepPath string           // where the HD game's kept bytes live (its record), "" for none
 	kept     []byte           // what is on disk there
 	keepT    int              // frames since the last look at them
+	skipped  time.Duration    // the time of the frames run without a picture since the last one
 }
 
 // keepEvery is how often a go-link HD game's kept bytes are looked at (10 seconds at 60 fps).
@@ -283,10 +284,25 @@ func (g *GameCore) SetPads(pads [4]input.Pad) { g.pads = pads }
 // Run emulates one frame; Video and Audio are called during it.
 func (g *GameCore) Run() {
 	if g.hd != nil {
-		g.runNative()
+		g.runNative(false)
 		return
 	}
 	g.core.Run()
+}
+
+// CanSkip says whether RunSkip saves the picture's work: go-link HD's
+// engine from API 4 on (a libretro core always draws).
+func (g *GameCore) CanSkip() bool { return g.hd != nil && g.hd.CanSkip() }
+
+// RunSkip emulates one frame without its picture, when the computer is
+// behind: only Audio is called, and the next picture lasts this frame too.
+// Without CanSkip it is Run.
+func (g *GameCore) RunSkip() {
+	if !g.CanSkip() {
+		g.Run()
+		return
+	}
+	g.runNative(true)
 }
 
 // LastFrame returns the last picture (nil before the first one). The
@@ -475,8 +491,9 @@ var hdButtons = []struct {
 	{input.L2, golinkhd.L2}, {input.R2, golinkhd.R2}, {input.L3, golinkhd.L3}, {input.R3, golinkhd.R3},
 }
 
-// runNative runs one frame of go-link HD's engine and hands out its picture and sound.
-func (g *GameCore) runNative() {
+// runNative runs one frame of go-link HD's engine and hands out its picture
+// (unless skip) and sound.
+func (g *GameCore) runNative(skip bool) {
 	var pads [4]golinkhd.Pad
 	for i, p := range g.pads {
 		for _, m := range hdButtons {
@@ -488,11 +505,19 @@ func (g *GameCore) runNative() {
 		pads[i].LX, pads[i].LY = int32(p.Axes[0])*258, int32(p.Axes[1])*258
 		pads[i].RX, pads[i].RY = int32(p.Axes[2])*258, int32(p.Axes[3])*258
 	}
-	out := g.hd.Frame(pads[:])
+	var out golinkhd.Frame
+	if skip {
+		out, skip = g.hd.FrameSkip(pads[:])
+	}
+	if !skip {
+		out = g.hd.Frame(pads[:])
+	}
 	if g.keepT++; g.keepT >= keepEvery {
 		g.saveKept()
 	}
-	if len(out.Pixels) > 0 {
+	if skip {
+		g.skipped += g.frameDur
+	} else if len(out.Pixels) > 0 {
 		f := libretro.Frame{
 			Data:   unsafe.Slice((*byte)(unsafe.Pointer(&out.Pixels[0])), len(out.Pixels)*4),
 			Width:  out.Width,
@@ -505,8 +530,9 @@ func (g *GameCore) runNative() {
 		}
 		g.convert(f)
 		if g.cfg.Video != nil {
-			g.cfg.Video(g.frame, g.fw, g.fh, g.frameDur)
+			g.cfg.Video(g.frame, g.fw, g.fh, g.frameDur+g.skipped)
 		}
+		g.skipped = 0
 	}
 	if len(out.Audio) > 0 && g.cfg.Audio != nil {
 		g.cfg.Audio(g.resample.Process(out.Audio))

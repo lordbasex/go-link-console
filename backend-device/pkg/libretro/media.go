@@ -2,6 +2,11 @@
 
 package libretro
 
+import (
+	"runtime"
+	"sync"
+)
+
 // FrameSizeI420 returns the byte length of a packed I420 frame.
 func FrameSizeI420(w, h int) int {
 	cw, ch := (w+1)/2, (h+1)/2
@@ -44,6 +49,10 @@ func ToRGB(dst []byte, f Frame) {
 // taken from the top-left pixel of each 2x2 block, which is enough for
 // the flat colors of arcade games and keeps the conversion cheap.
 func ToI420(dst []byte, f Frame) {
+	if f.Format == FormatXRGB8888 {
+		toI420XRGB(dst, f)
+		return
+	}
 	w, h := f.Width, f.Height
 	cw := (w + 1) / 2
 	yPlane := dst[:w*h]
@@ -58,6 +67,61 @@ func ToI420(dst []byte, f Frame) {
 				i := (y/2)*cw + x/2
 				uPlane[i] = byte((-38*r-74*g+112*b+128)>>8 + 128)
 				vPlane[i] = byte((112*r-94*g-18*b+128)>>8 + 128)
+			}
+		}
+	}
+}
+
+// parallelPixels is the size from which toI420XRGB splits a frame between
+// cores (a go-link HD picture of 720p or more: about 1 ms instead of 5).
+const parallelPixels = 640 * 360
+
+// toI420XRGB is ToI420 of an XRGB8888 frame, bit for bit, reading each row
+// straight and splitting a big frame's rows between up to four cores.
+func toI420XRGB(dst []byte, f Frame) {
+	pairs := (f.Height + 1) / 2
+	parts := 1
+	if f.Width*f.Height >= parallelPixels {
+		parts = min(runtime.NumCPU(), 4, pairs)
+	}
+	if parts <= 1 {
+		xrgbRows(dst, f, 0, pairs)
+		return
+	}
+	var wg sync.WaitGroup
+	for k := range parts {
+		wg.Add(1)
+		go func(p0, p1 int) {
+			defer wg.Done()
+			xrgbRows(dst, f, p0, p1)
+		}(pairs*k/parts, pairs*(k+1)/parts)
+	}
+	wg.Wait()
+}
+
+// xrgbRows converts the row pairs p0..p1-1 (rows 2p and 2p+1, chroma from
+// row 2p) of an XRGB8888 frame.
+func xrgbRows(dst []byte, f Frame, p0, p1 int) {
+	w, h := f.Width, f.Height
+	cw, ch := (w+1)/2, (h+1)/2
+	yPlane, uPlane, vPlane := dst[:w*h], dst[w*h:w*h+cw*ch], dst[w*h+cw*ch:]
+	for p := p0; p < p1; p++ {
+		for y := 2 * p; y < min(2*p+2, h); y++ {
+			src := f.Data[y*f.Pitch : y*f.Pitch+w*4]
+			out := yPlane[y*w : y*w+w]
+			for x := range out {
+				o := x * 4
+				b, g, r := int(src[o]), int(src[o+1]), int(src[o+2])
+				out[x] = byte((66*r+129*g+25*b+128)>>8 + 16)
+			}
+			if y == 2*p {
+				u, v := uPlane[p*cw:p*cw+cw], vPlane[p*cw:p*cw+cw]
+				for i := range u {
+					o := i * 8
+					b, g, r := int(src[o]), int(src[o+1]), int(src[o+2])
+					u[i] = byte(cbOf(r, g, b))
+					v[i] = byte(crOf(r, g, b))
+				}
 			}
 		}
 	}
