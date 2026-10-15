@@ -46,6 +46,11 @@ func TestRead(t *testing.T) {
 	if m, err := Read(several); err != nil || len(m.Levels) != 2 {
 		t.Fatalf("several levels: got %+v, %v", m, err)
 	}
+	// a game coded in the engine has no levels
+	coded := writePackage(t, map[string]string{"manifest.json": `{"format": 3, "title": "Remote", "game": "remote", "players": 1}`})
+	if m, err := Read(coded); err != nil || m.Game != "remote" || m.Players != 1 {
+		t.Fatalf("coded game: got %+v, %v", m, err)
+	}
 	for name, c := range map[string]struct {
 		files map[string]string
 		want  string
@@ -78,6 +83,7 @@ func TestLabels(t *testing.T) {
 		"fire and super": {`{"weapon": {"button": "x", "super": {"button": "y"}}}`, "Jump Jump Special Fire"},
 		"super on R":     {`{"weapon": {"button": "x", "super": {}}}`, "Jump Jump Fire Fire"},
 		"fire on Y":      {`{"weapon": {"button": "y"}}`, "Jump Jump Fire Fire"},
+		"coded game":     {`{"game": "remote"}`, "Use Use Run Run"},
 	} {
 		var m Manifest
 		if err := json.Unmarshal([]byte(c.manifest), &m); err != nil {

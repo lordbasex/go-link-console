@@ -62,7 +62,10 @@ type Config struct {
 	HD HDSettings `json:"hd,omitempty"`
 	// StarterGames is set once the free starter games were offered (on the
 	// first link): a game the host deletes is never downloaded again.
-	StarterGames bool `json:"starter_games,omitempty"`
+	// StarterOffered names each game offered, so a game added later is
+	// offered too; with only StarterGames (older devices) ANTÍDOTO was.
+	StarterGames   bool     `json:"starter_games,omitempty"`
+	StarterOffered []string `json:"starter_offered,omitempty"`
 }
 
 // HDSettings are go-link HD's settings. Empty fields mean the defaults.

@@ -33,7 +33,8 @@
 extern "C" {
 #endif
 
-#define GOLINKHD_API_VERSION 2
+#define GOLINKHD_API_VERSION 3
+#define GOLINKHD_KEEP_MAX 256 /* API 3: the most a game keeps between sessions (golinkhd_keep_save) */
 
 #if defined(_WIN32) && defined(GOLINKHD_BUILD_SHARED)
 #define GOLINKHD_API __declspec(dllexport)
@@ -124,7 +125,7 @@ GOLINKHD_API void golinkhd_destroy(golinkhd_engine *e);
 
 /* A game package (.glhd) in memory; 0 and a readable *error when it cannot be played (the engine keeps its demo). */
 GOLINKHD_API int golinkhd_load(golinkhd_engine *e, const uint8_t *package, size_t size, const char **error);
-/* Back to a built-in demo: 0 the platformer, 1 the showcase of every effect. */
+/* Back to a built-in demo: 0 the platformer, 1 the showcase of every effect, 2 the 3D room, 3 the 3D game TELETRABAJO: CÁMARA APAGADA (2 and 3 are the platformer on an engine built without 3D). */
 GOLINKHD_API void golinkhd_load_demo(golinkhd_engine *e, int32_t demo);
 GOLINKHD_API void golinkhd_get_info(golinkhd_engine *e, golinkhd_info *out);
 
@@ -149,6 +150,18 @@ GOLINKHD_API void golinkhd_restart(golinkhd_engine *e);
 GOLINKHD_API size_t golinkhd_state_size(golinkhd_engine *e);
 GOLINKHD_API int golinkhd_state_save(golinkhd_engine *e, uint8_t *out, size_t size);
 GOLINKHD_API int golinkhd_state_load(golinkhd_engine *e, const uint8_t *in, size_t size, const char **error);
+
+/*
+ * API 3: what the game keeps between sessions (its record, the player's
+ * choices), a few bytes the host stores for this game and gives back. A save
+ * writes them into out (at most GOLINKHD_KEEP_MAX) and returns how many, 0
+ * when the game keeps nothing; they change as it is played, so the host asks
+ * again now and then (when a room stops, every few minutes). A load gives
+ * them back after golinkhd_load (and survives golinkhd_restart); 0 when they
+ * are not this game's (the game starts without them).
+ */
+GOLINKHD_API size_t golinkhd_keep_save(golinkhd_engine *e, uint8_t *out, size_t size);
+GOLINKHD_API int golinkhd_keep_load(golinkhd_engine *e, const uint8_t *in, size_t size);
 
 #ifdef __cplusplus
 }

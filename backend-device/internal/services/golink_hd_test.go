@@ -246,3 +246,58 @@ func TestGoLinkHDDrawsAtTheRoomSize(t *testing.T) {
 		t.Fatalf("frames of %dx%d, want 1280x720", w, h)
 	}
 }
+
+// TestGoLinkHDKeepsTheRecord gives a go-link HD game what it kept in an
+// earlier session (TELETRABAJO's record and main character, in SystemDir
+// next to MAME's hiscores) and writes it back when the room closes.
+func TestGoLinkHDKeepsTheRecord(t *testing.T) {
+	src := os.Getenv("GOLINK_HD_LIB")
+	if src == "" {
+		t.Skip("GOLINK_HD_LIB is not set")
+	}
+	// a copy, so the checksum file next to it stays in the test's folder
+	lib, err := os.ReadFile(src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir := t.TempDir()
+	core := filepath.Join(dir, filepath.Base(src))
+	if err := os.WriteFile(core, lib, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	pkg := filepath.Join(dir, "remote.glhd")
+	var buf bytes.Buffer
+	z := zip.NewWriter(&buf)
+	w, _ := z.Create("manifest.json")
+	w.Write([]byte(`{"format": 3, "title": "Remote", "game": "remote", "players": 1}`))
+	z.Close()
+	if err := os.WriteFile(pkg, buf.Bytes(), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	system := filepath.Join(dir, "system")
+	keep := filepath.Join(system, "golink-hd", "remote.keep")
+	open := func() *GameCore {
+		game, err := OpenGameCore(GameCoreConfig{CorePath: core, RomPath: pkg, SystemDir: system, Native: true, Upscale: 1})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return game
+	}
+	// a first session: nothing kept yet, then the game's record (none) on disk when it closes
+	game := open()
+	game.Run()
+	game.Close()
+	if b, err := os.ReadFile(keep); err != nil || !bytes.HasPrefix(b, []byte("RWK1")) {
+		t.Fatalf("kept %q, %v", b, err)
+	}
+	// a record of 1234 with the woman, given back to the next session as it was
+	record := []byte{'R', 'W', 'K', '1', 0xd2, 0x04, 0, 0, 1}
+	if err := writeKept(keep, record); err != nil {
+		t.Fatal(err)
+	}
+	game = open()
+	defer game.Close()
+	if b := game.hd.Keep(); !bytes.Equal(b, record) {
+		t.Fatalf("the game got back %v, want %v", b, record)
+	}
+}

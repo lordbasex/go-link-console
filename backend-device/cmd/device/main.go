@@ -399,13 +399,13 @@ func run() error {
 	// go-link HD's free starter games: downloaded once, when a browser
 	// first links, each with a room to play it.
 	hdGames := services.NewHDGamesService(services.HDGamesConfig{
-		Library:  library,
-		Status:   status,
-		Settings: settings,
-		Logger:   logger,
-		Offered:  cfg.StarterGames,
-		SaveOffered: func() error {
-			return updateConfig(store, &cfg, func(c *models.Config) { c.StarterGames = true })
+		Library:      library,
+		Status:       status,
+		Settings:     settings,
+		Logger:       logger,
+		OfferedGames: offeredGames(cfg),
+		SaveOffered: func(names []string) error {
+			return updateConfig(store, &cfg, func(c *models.Config) { c.StarterGames, c.StarterOffered = true, names })
 		},
 		OpenRoom: func(rom string) error {
 			if games.HasRoomFor(rom) {
@@ -1064,4 +1064,16 @@ func hostTelemetry(status *services.StatusService) func() telemetry.Metrics {
 			"net_down_kbps": float64(u.NetRecvBps) * 8 / 1000,
 		}
 	}
+}
+
+// offeredGames are the starter games a device offered already: the names
+// it keeps, or ANTÍDOTO on a device from before they were kept by name.
+func offeredGames(cfg models.Config) []string {
+	if len(cfg.StarterOffered) > 0 {
+		return cfg.StarterOffered
+	}
+	if cfg.StarterGames {
+		return []string{"antidoto"}
+	}
+	return nil
 }

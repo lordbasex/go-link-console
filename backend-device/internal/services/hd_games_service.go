@@ -27,10 +27,12 @@ type HDGamesConfig struct {
 	Settings *SettingsService
 	Client   *http.Client // nil: a default client
 	Logger   *slog.Logger
-	// Offered tells whether the starter games were offered already, and
-	// SaveOffered records it in device.json.
-	Offered     bool
-	SaveOffered func() error
+	// Offered tells whether every starter game was offered already (the
+	// CLI), OfferedGames names the ones that were, and SaveOffered records
+	// them in device.json.
+	Offered      bool
+	OfferedGames []string
+	SaveOffered  func(names []string) error
 	// OpenRoom makes a game room for a starter game just downloaded
 	// (nil: none, as in the CLI).
 	OpenRoom func(rom string) error
@@ -47,7 +49,8 @@ type HDGamesService struct {
 	cfg HDGamesConfig
 
 	mu       sync.Mutex
-	offered  bool
+	all      bool            // every game counts as offered (the CLI)
+	offered  map[string]bool // the games offered, by name
 	offering bool
 	jobs     map[string]*hdJob // running downloads, by game
 	errs     map[string]string // the last failed download, by game
@@ -67,7 +70,10 @@ func NewHDGamesService(cfg HDGamesConfig) *HDGamesService {
 	if cfg.Games == nil {
 		cfg.Games = hdgames.Starter
 	}
-	h := &HDGamesService{cfg: cfg, offered: cfg.Offered, jobs: map[string]*hdJob{}, errs: map[string]string{}}
+	h := &HDGamesService{cfg: cfg, all: cfg.Offered, offered: map[string]bool{}, jobs: map[string]*hdJob{}, errs: map[string]string{}}
+	for _, n := range cfg.OfferedGames {
+		h.offered[n] = true
+	}
 	// a new screen setting shows at once
 	cfg.Settings.OnChange(h.Publish)
 	h.Publish()
@@ -181,50 +187,68 @@ func (h *HDGamesService) fetch(ctx context.Context, g hdgames.Game, size string)
 // reset): the next link offers them again.
 func (h *HDGamesService) ResetOffered() {
 	h.mu.Lock()
-	h.offered = false
+	h.all = false
+	h.offered = map[string]bool{}
 	h.mu.Unlock()
 }
 
-// OfferStarter runs once per device (until a factory reset): each starter
-// game is downloaded in the size of the HD rooms, unless it is already in
-// a folder, and gets a room to play it. A failure (no network) leaves it
-// for the next time a browser links or the device starts linked.
+// OfferStarter runs once per game and device (until a factory reset):
+// each starter game not offered yet (a game published later too) is
+// downloaded in the size of the HD rooms, unless it is already in a
+// folder, and gets a room to play it. A failure (no network) leaves the
+// rest for the next time a browser links or the device starts linked.
 func (h *HDGamesService) OfferStarter(ctx context.Context) {
 	h.mu.Lock()
-	if h.offered || h.offering {
+	var pending []hdgames.Game
+	if !h.all {
+		for _, g := range h.cfg.Games {
+			if !h.offered[g.Name] {
+				pending = append(pending, g)
+			}
+		}
+	}
+	if len(pending) == 0 || h.offering {
 		h.mu.Unlock()
 		return
 	}
 	h.offering = true
 	h.mu.Unlock()
 	go func() {
-		ok := h.offer(ctx)
+		done := h.offer(ctx, pending)
 		h.mu.Lock()
 		h.offering = false
-		if ok {
-			h.offered = true
+		for _, n := range done {
+			h.offered[n] = true
+		}
+		var names []string
+		for _, g := range h.cfg.Games {
+			if h.offered[g.Name] {
+				names = append(names, g.Name)
+			}
 		}
 		h.mu.Unlock()
-		if ok && h.cfg.SaveOffered != nil {
-			if err := h.cfg.SaveOffered(); err != nil {
+		if len(done) > 0 && h.cfg.SaveOffered != nil {
+			if err := h.cfg.SaveOffered(names); err != nil {
 				h.cfg.Logger.Warn("cannot save that the starter games were offered", "err", err)
 			}
 		}
 	}()
 }
 
-func (h *HDGamesService) offer(ctx context.Context) bool {
+// offer downloads the games and opens their rooms, in order, until one fails; it returns the ones done.
+func (h *HDGamesService) offer(ctx context.Context, games []hdgames.Game) []string {
 	if !h.engineInstalled() {
-		return false // no engine to play them: offer them on a device that has it
+		return nil // no engine to play them: offer them on a device that has it
 	}
 	size := h.cfg.Settings.HD().RoomSize
-	for _, g := range h.cfg.Games {
+	var done []string
+	for _, g := range games {
 		if h.cfg.Library.HDPackage(g.Name) == "" {
 			if _, err := h.start(g.Name, size); err != nil {
-				return false
+				return done
 			}
 			if err := h.fetch(ctx, g, size); err != nil {
-				return false
+				return done
 			}
 		}
 		if h.cfg.OpenRoom != nil {
@@ -232,8 +256,9 @@ func (h *HDGamesService) offer(ctx context.Context) bool {
 				h.cfg.Logger.Warn("cannot open the starter game's room", "game", g.Name, "err", err)
 			}
 		}
+		done = append(done, g.Name)
 	}
-	return true
+	return done
 }
 
 // engineInstalled reports whether go-link HD's engine is on the device.

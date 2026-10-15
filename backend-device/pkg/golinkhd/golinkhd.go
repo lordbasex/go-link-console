@@ -28,6 +28,9 @@ import (
 // APIVersion is the engine API this host was written for.
 const APIVersion = C.GOLINKHD_API_VERSION
 
+// KeepMax is the most a game keeps between sessions (API 3).
+const KeepMax = C.GOLINKHD_KEEP_MAX
+
 // MaxPlayers is the most players a game can take.
 const MaxPlayers = C.GOLINKHD_MAX_PLAYERS
 
@@ -203,6 +206,30 @@ func (e *Engine) LoadState(b []byte) error {
 	}
 	runtime.KeepAlive(b)
 	return nil
+}
+
+// Keep returns what the game keeps between sessions (its record, the
+// player's choices; at most KeepMax bytes), nil when it keeps nothing or the
+// engine is older than API 3. The host stores it for the game and gives it
+// back with SetKept after every Load.
+func (e *Engine) Keep() []byte {
+	buf := make([]byte, KeepMax)
+	n := int(C.ghd_keep_save(e.g, (*C.uint8_t)(unsafe.Pointer(&buf[0])), C.size_t(len(buf))))
+	if n <= 0 || n > len(buf) {
+		return nil
+	}
+	return buf[:n]
+}
+
+// SetKept gives the game back what it kept (Keep) in an earlier session;
+// false when it is not this game's or the engine is older than API 3.
+func (e *Engine) SetKept(b []byte) bool {
+	if len(b) == 0 || len(b) > KeepMax {
+		return false
+	}
+	ok := C.ghd_keep_load(e.g, (*C.uint8_t)(unsafe.Pointer(&b[0])), C.size_t(len(b))) != 0
+	runtime.KeepAlive(b)
+	return ok
 }
 
 // Close stops the engine and unloads the library.
