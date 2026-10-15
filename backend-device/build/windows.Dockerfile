@@ -52,12 +52,12 @@ RUN CGO_ENABLED=1 GOOS=windows GOARCH=$GOARCH CC=$HOST-clang CXX=$HOST-clang++ \
     CGO_LDFLAGS="-static -lpthread" \
     go build -trimpath -ldflags "-s -w -H windowsgui -X main.version=$VERSION" \
       -o /out/go-link-console.exe ./cmd/device
-# go-link HD's engine as golinkhd.dll beside the .exe; only the API is
-# exported (GOLINKHD_BUILD_SHARED marks it dllexport).
+# go-link HD's engine as golinkhd.dll beside the .exe, with its 3D games;
+# only the API is exported (GOLINKHD_BUILD_SHARED marks it dllexport).
 COPY --from=golinkhd / /golinkhd
 RUN if [ -f /golinkhd/Makefile ]; then cd /golinkhd && \
-      $HOST-clang -std=c99 -O2 -DNDEBUG -DGOLINKHD_BUILD_SHARED -Iinclude -Isrc -shared \
-        -o /out/golinkhd.dll src/*.c; fi
+      $HOST-clang -std=c99 -O2 -DNDEBUG -DGOLINKHD_BUILD_SHARED -Iinclude -Isrc -Isrc/3d -shared \
+        -o /out/golinkhd.dll src/*.c src/3d/*.c src/3d/games/remote/*.c; fi
 
 FROM scratch AS export
 COPY --from=build /out/ /

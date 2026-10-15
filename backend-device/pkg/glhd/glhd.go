@@ -51,6 +51,8 @@ type Manifest struct {
 	// 360p (empty), 720p or 1080p.
 	Resolution string `json:"resolution"`
 	Level      string `json:"level"`
+	// Game is a game coded in the engine ("remote"): it has no levels.
+	Game string `json:"game"`
 	// Levels is format 3's game of several levels, in place of Level.
 	Levels []struct {
 		Level string `json:"level"`
@@ -75,9 +77,13 @@ type Manifest struct {
 var Labels = []string{"Jump", "Jump", "Run", "Run"}
 
 // Labels names a package's buttons 1 to 4 (B, A, Y and X on a pad): they
-// jump and run, unless its weapon fires ("Fire") or throws its super
+// jump and run (in a game coded in the engine they use and run), unless its weapon fires ("Fire") or throws its super
 // ("Special") with one of them. With a weapon the run button no longer runs.
 func (m Manifest) Labels() []string {
+	if m.Game != "" {
+		// a game coded in the engine: A and B do things, Y and X run
+		return []string{"Use", "Use", "Run", "Run"}
+	}
 	if m.Weapon == nil {
 		return Labels
 	}
@@ -191,7 +197,7 @@ func Read(path string) (Manifest, error) {
 		return m, errors.New("manifest.json has no format number")
 	case strings.TrimSpace(m.Title) == "":
 		return m, errors.New("manifest.json has no title")
-	case len(m.Levels) == 0 && (m.Level == "" || files[m.Level] == nil):
+	case m.Game == "" && len(m.Levels) == 0 && (m.Level == "" || files[m.Level] == nil):
 		return m, errors.New("the game package has no level")
 	}
 	for _, l := range m.Levels {

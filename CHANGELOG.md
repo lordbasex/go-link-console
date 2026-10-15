@@ -4,6 +4,10 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 
 ## [Unreleased]
 
+### Added
+
+- **go-link HD's 3D games:** a package of a game coded in the engine (`"game"`, TELETRABAJO: CÁMARA APAGADA) is listed and played, its buttons named Use and Run, drawn at 720p at most; what a game keeps between sessions (its record, the main character chosen) is saved for each game next to MAME's hiscores and given back when it starts again (the engine's API 3). The Windows engine is built with its 3D games.
+
 ## [0.4.1] - 2026-10-11
 
 ### Added

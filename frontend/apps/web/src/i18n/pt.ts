@@ -1172,7 +1172,7 @@ export const pt: Messages = {
     ownBadge: "go-link",
     ownBadgeTitle: "Um jogo feito pelo go-link: seu dispositivo verificou cada arquivo deste set",
     ownControls: (players: number, labels: string[]) => `${players} jogadores · ${labels.join(" · ")}`,
-    ownButton: { Jump: "Pulo", Fire: "Tiro", Special: "Especial", Run: "Correr" },
+    ownButton: { Jump: "Pulo", Fire: "Tiro", Special: "Especial", Run: "Correr", Use: "Usar" },
     colGame: "Jogo",
     colSet: "Set",
     colYear: "Ano",

@@ -52,8 +52,10 @@ int ghd_open(ghd_t *g, const char *path, char *err, size_t errlen) {
 	LOAD(state_save, "golinkhd_state_save");
 	LOAD(state_load, "golinkhd_state_load");
 	*(void **)(&g->set_resolution) = lib_sym(g->handle, "golinkhd_set_resolution"); /* optional */
+	*(void **)(&g->keep_save) = lib_sym(g->handle, "golinkhd_keep_save");           /* optional */
+	*(void **)(&g->keep_load) = lib_sym(g->handle, "golinkhd_keep_load");
 	memset(&cfg, 0, sizeof(cfg));
-	cfg.api_version = GOLINKHD_API_VERSION; /* the API this host was written for */
+	cfg.api_version = 2; /* the oldest API this host needs: newer functions are looked up and optional */
 	g->engine = g->create(&cfg, &why);
 	if (!g->engine) {
 		snprintf(err, errlen, "%s", why ? why : "the engine did not start");
@@ -89,3 +91,13 @@ size_t ghd_state_size(ghd_t *g) { return g->state_size(g->engine); }
 int ghd_state_save(ghd_t *g, uint8_t *out, size_t size) { return g->state_save(g->engine, out, size); }
 int ghd_state_load(ghd_t *g, const uint8_t *in, size_t size, const char **err) { return g->state_load(g->engine, in, size, err); }
 const char *ghd_version(ghd_t *g) { return g->version(); }
+size_t ghd_keep_save(ghd_t *g, uint8_t *out, size_t size) {
+	if (!g->keep_save || !g->keep_load)
+		return 0;
+	return g->keep_save(g->engine, out, size);
+}
+int ghd_keep_load(ghd_t *g, const uint8_t *in, size_t size) {
+	if (!g->keep_save || !g->keep_load)
+		return 0;
+	return g->keep_load(g->engine, in, size);
+}

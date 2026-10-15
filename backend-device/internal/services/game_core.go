@@ -3,6 +3,7 @@
 package services
 
 import (
+	"bytes"
 	"errors"
 	"log/slog"
 	"os"
@@ -81,7 +82,13 @@ type GameCore struct {
 	listen   bool
 	cfg      GameCoreConfig
 	hd       *golinkhd.Engine // go-link HD's engine (Native), instead of core
+	keepPath string           // where the HD game's kept bytes live (its record), "" for none
+	kept     []byte           // what is on disk there
+	keepT    int              // frames since the last look at them
 }
+
+// keepEvery is how often a go-link HD game's kept bytes are looked at (10 seconds at 60 fps).
+const keepEvery = 600
 
 // mame2003PlusOptions skip the screens that wait for a key press and ask
 // for 48 kHz audio, which is what WebRTC's Opus uses (no resampling).
@@ -387,6 +394,7 @@ func savesComplete(lines []string) bool {
 // Close unloads the game and the core.
 func (g *GameCore) Close() {
 	if g.hd != nil {
+		g.saveKept()
 		g.hd.Close()
 		return
 	}
@@ -426,7 +434,11 @@ func (g *GameCore) openNative() error {
 		if err == nil {
 			// drawn at the room's size: a package painted for 1080p plays at 720p without enlarging or shrinking frames
 			if g.cfg.Upscale > 0 {
-				eng.SetResolution(g.cfg.Upscale * 360)
+				lines := g.cfg.Upscale * 360
+				if m, err := glhd.Read(g.cfg.RomPath); err == nil && m.Game != "" {
+					lines = min(lines, 720) // a 3D game coded in the engine keeps 60 fps at 720p, not at 1080p
+				}
+				eng.SetResolution(lines)
 			}
 			err = eng.Load(data)
 		}
@@ -440,6 +452,7 @@ func (g *GameCore) openNative() error {
 	}
 	info := eng.Info()
 	g.hd = eng
+	g.loadKept()
 	g.info = libretro.SystemInfo{Name: "go-link HD", Version: info.EngineVersion, Extensions: "glhd"}
 	g.av = libretro.AVInfo{
 		BaseWidth: info.Width, BaseHeight: info.Height, MaxWidth: info.Width, MaxHeight: info.Height,
@@ -480,6 +493,9 @@ func (g *GameCore) runNative() {
 		pads[i].RX, pads[i].RY = int32(p.Axes[2])*258, int32(p.Axes[3])*258
 	}
 	out := g.hd.Frame(pads[:])
+	if g.keepT++; g.keepT >= keepEvery {
+		g.saveKept()
+	}
 	if len(out.Pixels) > 0 {
 		f := libretro.Frame{
 			Data:   unsafe.Slice((*byte)(unsafe.Pointer(&out.Pixels[0])), len(out.Pixels)*4),
@@ -499,6 +515,54 @@ func (g *GameCore) runNative() {
 	if len(out.Audio) > 0 && g.cfg.Audio != nil {
 		g.cfg.Audio(g.resample.Process(out.Audio))
 	}
+}
+
+// loadKept gives a go-link HD game what it kept in earlier sessions (its
+// record, the player's choices): SystemDir/golink-hd/<package>.keep, next to
+// MAME's hiscores.
+func (g *GameCore) loadKept() {
+	if g.cfg.RomPath == "" || g.cfg.SystemDir == "" {
+		return
+	}
+	if _, demo := glhd.DemoIndex(g.cfg.RomPath); demo {
+		return
+	}
+	name := strings.TrimSuffix(filepath.Base(g.cfg.RomPath), filepath.Ext(g.cfg.RomPath))
+	g.keepPath = filepath.Join(g.cfg.SystemDir, "golink-hd", name+".keep")
+	if b, err := os.ReadFile(g.keepPath); err == nil && len(b) <= golinkhd.KeepMax {
+		if g.hd.SetKept(b) {
+			g.kept = b
+		}
+	}
+}
+
+// saveKept writes what the game keeps when it changed.
+func (g *GameCore) saveKept() {
+	g.keepT = 0
+	if g.keepPath == "" {
+		return
+	}
+	b := g.hd.Keep()
+	if b == nil || bytes.Equal(b, g.kept) {
+		return
+	}
+	if err := writeKept(g.keepPath, b); err != nil {
+		g.cfg.Logger.Warn("go-link HD: cannot keep the game's record", "err", err)
+		return
+	}
+	g.kept = b
+}
+
+// writeKept replaces a file whole (a new file renamed over it), so a crash never leaves half of one.
+func writeKept(path string, b []byte) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	tmp := path + ".part"
+	if err := os.WriteFile(tmp, b, 0o644); err != nil {
+		return err
+	}
+	return os.Rename(tmp, path)
 }
 
 func trimNewline(s string) string {
