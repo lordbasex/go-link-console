@@ -24,5 +24,10 @@ type uiOptions struct {
 	// language is the window's language; setLanguage saves a new one.
 	language    string
 	setLanguage func(string) error
-	logger      *slog.Logger
+	// updates finds newer releases; autoUpdate says whether it looks by
+	// itself, and setAutoUpdate saves a new choice.
+	updates       *services.UpdateService
+	autoUpdate    bool
+	setAutoUpdate func(bool) error
+	logger        *slog.Logger
 }

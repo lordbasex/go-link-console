@@ -27,11 +27,14 @@ type UpdateConfig struct {
 	Client   *http.Client
 	Logger   *slog.Logger
 	OnUpdate func(models.UpdateInfo) // called when a newer release shows up
+	// Enabled says whether the periodic check may ask now (Settings); nil
+	// is always.
+	Enabled func() bool
 }
 
 // UpdateService checks now and then whether a newer go-link was released,
-// so the window and the linked browsers can offer the download. It only
-// reads the public releases list; nothing is downloaded or installed.
+// so the window and the linked browsers can offer it. It only reads the
+// public releases list; internal/updater downloads and installs.
 type UpdateService struct{ cfg UpdateConfig }
 
 // NewUpdateService makes the checker; Run starts it.
@@ -68,6 +71,9 @@ func (u *UpdateService) Run(ctx context.Context) {
 		case <-time.After(wait):
 		}
 		wait = u.cfg.Every
+		if u.cfg.Enabled != nil && !u.cfg.Enabled() {
+			continue
+		}
 		info, err := u.Check(ctx)
 		if err != nil {
 			u.cfg.Logger.Debug("cannot check for updates", "err", err)
@@ -84,6 +90,8 @@ type release struct {
 	TagName string `json:"tag_name"`
 	HTMLURL string `json:"html_url"`
 	Draft   bool   `json:"draft"`
+	// A pre-release is for testers: never offered.
+	Prerelease bool `json:"prerelease"`
 }
 
 // Check asks for the releases and returns the newest one when it is newer
@@ -112,7 +120,7 @@ func (u *UpdateService) Check(ctx context.Context) (models.UpdateInfo, error) {
 	var bestV [3]int
 	for _, r := range list {
 		v, ok := parseVersion(r.TagName)
-		if r.Draft || !ok {
+		if r.Draft || r.Prerelease || !ok {
 			continue
 		}
 		if best.TagName == "" || newer(v, bestV) {

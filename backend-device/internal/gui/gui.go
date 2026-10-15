@@ -47,7 +47,13 @@ type Options struct {
 	// computer's), and SetLanguage saves a new choice in device.json.
 	Language    string
 	SetLanguage func(string) error
-	Logger      *slog.Logger
+	// Updates finds newer releases (nil: no update check, as in tests);
+	// AutoUpdate says whether it looks by itself every 6 hours and
+	// SetAutoUpdate saves a new choice in device.json.
+	Updates       *services.UpdateService
+	AutoUpdate    bool
+	SetAutoUpdate func(bool) error
+	Logger        *slog.Logger
 }
 
 // section is one entry of the sidebar, with its own palette. Rows with a
@@ -94,6 +100,8 @@ type ui struct {
 	thumbs     *thumbnailsTab
 	settings   *settingsPage
 	panel      *trayPanel
+	upd        *updates // the update window and the tray's item
+	played     bool     // someone held a seat at the last render
 	trayMenu   *fyne.Menu
 	trayCode   *fyne.MenuItem
 	showing    string // "main" or "onboarding"
@@ -170,6 +178,7 @@ func newUI(a fyne.App, opts Options) *ui {
 	u.win = a.NewWindow("go-link Console")
 	// The gradient reaches the window edges (Fyne pads by default).
 	u.win.SetPadded(false)
+	u.upd = u.newUpdates()
 	u.bg = background(violet)
 	u.build()
 	u.win.SetContent(container.NewStack(u.bg, u.main))
@@ -247,6 +256,7 @@ func (u *ui) relanguage() {
 		u.trayCode.Label = ""
 		u.renderTray(u.last)
 	}
+	u.upd.relanguage()
 }
 
 // show switches the section.
@@ -325,6 +335,15 @@ func (u *ui) render(st models.Status) {
 	u.roms.render(st)
 	u.thumbs.render(st)
 	u.settings.render(st)
+	if st.Update != nil {
+		u.upd.found(*st.Update)
+	}
+	if now := playing(st); u.played && !now {
+		u.played = false
+		u.upd.playEnded()
+	} else {
+		u.played = now
+	}
 	if u.panel != nil {
 		u.panel.render(st)
 	}
@@ -348,7 +367,8 @@ func (u *ui) setupTray() {
 	u.trayCode = fyne.NewMenuItem("", nil)
 	u.trayCode.Disabled = true
 	show := fyne.NewMenuItem(L("Open go-link"), u.showWindow)
-	u.trayMenu = fyne.NewMenu("go-link Console", u.trayCode, fyne.NewMenuItemSeparator(), show)
+	u.upd.trayItem = fyne.NewMenuItem(u.upd.trayLabel(), u.upd.ask)
+	u.trayMenu = fyne.NewMenu("go-link Console", u.trayCode, fyne.NewMenuItemSeparator(), show, u.upd.trayItem)
 	desk.SetSystemTrayMenu(u.trayMenu)
 	desk.SetSystemTrayIcon(trayResource())
 	u.win.SetCloseIntercept(u.win.Hide)

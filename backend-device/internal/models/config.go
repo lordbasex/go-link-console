@@ -52,6 +52,9 @@ type Config struct {
 	// Language of the device window: en, es or pt; empty follows the
 	// computer's language.
 	Language string `json:"language,omitempty"`
+	// NoUpdateCheck turns off the check for newer versions every 6 hours
+	// (Settings › General); Check for Updates… still asks.
+	NoUpdateCheck bool `json:"no_update_check,omitempty"`
 	// TestRoomPicture is the host's default picture style for the test
 	// pattern room (nil: the website's own default).
 	TestRoomPicture *RoomPicture `json:"test_room_picture,omitempty"`

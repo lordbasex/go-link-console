@@ -40,7 +40,6 @@ type overviewPage struct {
 	latency  *statTile
 	action   *roundButton
 	update   *widget.Button
-	updateTo string
 
 	platform *widget.Label
 	cpuModel *widget.Label
@@ -125,11 +124,8 @@ func newOverviewPage(u *ui) *overviewPage {
 		another.Hide()
 		unlink.Hide()
 	}
-	p.update = widget.NewButtonWithIcon("", icon("download", white), func() {
-		if link, err := url.Parse(p.updateTo); err == nil && p.updateTo != "" {
-			_ = u.app.OpenURL(link)
-		}
-	})
+	// A newer version: its window, which installs it.
+	p.update = widget.NewButtonWithIcon("", icon("download", white), func() { u.upd.showAvailable() })
 	p.update.Importance = widget.HighImportance
 	p.update.Hide()
 	actions := container.NewVBox(
@@ -185,8 +181,7 @@ func (p *overviewPage) render(st models.Status) {
 	}
 
 	if st.Update != nil && st.Update.Latest != "" {
-		p.updateTo = st.Update.URL
-		p.update.SetText(Lf("go-link %s is available: download it", st.Update.Latest))
+		p.update.SetText(Lf("Update to go-link Console %s…", bare(st.Update.Latest)))
 		p.update.Show()
 	} else {
 		p.update.Hide()

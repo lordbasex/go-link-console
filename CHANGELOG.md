@@ -4,6 +4,10 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 
 ## [Unreleased]
 
+### Added
+
+- **go-link Console updates itself:** **Check for Updates…** (the tray's menu, Settings › General) and the update window, which opens by itself once per new release (never while someone holds a seat: then when nobody does). **Update** downloads the release's file for this computer, installs it only when its `SHA256SUMS` carries the update key's signature (`SHA256SUMS.sig`, made by `scripts/release.sh` with `build/signsums`) and its hash matches, and opens the new version: on macOS the app must also be signed by the same developer and replaces the bundle; on Windows and Linux the files of the folder the archive was unpacked in are replaced. The device quits as from the menu, so every running game is saved and its room comes back. The Overview's notice is now **Update to go-link Console x.y.z…**. **Settings › General › Check for updates automatically** (device.json `no_update_check`). Pre-releases are no longer offered.
+
 ## [0.4.2] - 2026-10-15
 
 ### Added

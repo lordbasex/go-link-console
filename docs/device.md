@@ -222,7 +222,15 @@ A device **without a window** (Raspberry Pi, server, Docker, or `--headless`) op
 
 ## Updates
 
-A few seconds after starting, and every 6 hours, the device reads go-link Console's public releases list on GitHub. When a newer version than its own is out, the window's Overview and the linked website show it with a link to the release page. Nothing is downloaded or installed by itself, and development builds (without a version tag) never check.
+30 seconds after starting, and every 6 hours, the device reads go-link Console's public releases list on GitHub (`services.UpdateService`; drafts and pre-releases are skipped, development builds without a version tag never check). **Settings › General › Check for updates automatically** turns that off (device.json `no_update_check`); **Check for Updates…** (the tray's menu, Settings › General) still asks. A newer version shows on the linked website with a link to its release page, as **Update to go-link Console x.y.z…** on the window's Overview and in the tray's menu, and in the update window (`internal/gui/update.go`), which opens by itself once per release and never while someone holds a seat in a room (then when nobody does). Its **Update** (`internal/updater`):
+
+1. **Download and check.** It fetches the release's `SHA256SUMS` and `SHA256SUMS.sig`, an Ed25519 signature by the update key, whose public half is in the program and whose private half never leaves the release computer (`scripts/release.sh` signs with `build/signsums`, key `UPDATE_KEY`, default `~/.go-link-signing/console-update-ed25519.key`). Then it fetches the one file this copy needs, checks its hash against the signed list and throws it away otherwise.
+2. **Install, by how this copy was installed:**
+   - **macOS** (`go-link-console-vX-macos-universal.dmg`): the disk image is mounted, the app in it must carry a valid signature by the same developer team as the running app (`codesign`), and it is copied next to the running bundle and swapped in by two renames. A development build (ad hoc signature) or an app in a folder the user may not write is updated by hand.
+   - **Windows and Linux** (`-windows-<arch>.zip`, `-linux-<arch>.tar.gz`): the folder the archive was unpacked in, when it still has the program under its own name and go-link HD's engine next to it, and the user may write it. The new archive is unpacked into a hidden folder beside it (only plain files at its top are accepted), then each file is renamed to `<name>.old` and the new one renamed into its place; a failure puts back what was already swapped. Windows keeps the `.old` files while they run, so the next start removes them (`updater.Cleanup`). Other files in the folder are not touched; settings, games and saves live elsewhere. The window-less build (Raspberry Pi, servers, Docker) has no update window: it is updated by hand or with a new image.
+3. **Open the new version.** The device quits as from the menu (every running game is saved and its room comes back where it was); a shell of its own (PowerShell on Windows) waits for it to exit and opens the new one.
+
+"By hand" opens the release's page instead. `GOLINK_UPDATE_BASE` points the downloads at a test server; the signature is still required. Versions before 0.4.3 do not have this and update by hand once.
 
 ## Players, names and pausing
 
