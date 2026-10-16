@@ -57,12 +57,12 @@ var Starter = []Game{{
 }, {
 	Name:    "teletrabajo",
 	Title:   "TELETRABAJO: CÁMARA APAGADA",
-	Version: "0.5.0",
+	Version: "0.6.0",
 	Files: map[string]File{
-		"720p": {URL: releases + "teletrabajo-v0.5.0/teletrabajo-720p.glhd", Size: 53715212,
-			SHA256: "6d42bf154e9e2b7851b30ff1ac4478114e3faee2e0d3b681725eb07f279bdddf"},
-		"1080p": {URL: releases + "teletrabajo-v0.5.0/teletrabajo-1080p.glhd", Size: 53800331,
-			SHA256: "609c76c5b78b46aff4f446738b963f99e056b8cbfe634ddae939b5bf5afc566f"},
+		"720p": {URL: releases + "teletrabajo-v0.6.0/teletrabajo-720p.glhd", Size: 65478844,
+			SHA256: "305511486062e45fb01d8c0ccab095ab78198749a25ac23e926ed1f761fb9666"},
+		"1080p": {URL: releases + "teletrabajo-v0.6.0/teletrabajo-1080p.glhd", Size: 65563963,
+			SHA256: "237fc64904261de3e8bedc68992c09a8ebc18fae957ed942dc696820b3f026d4"},
 	},
 }}
 
