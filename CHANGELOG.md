@@ -4,6 +4,8 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 
 ## [Unreleased]
 
+## [0.4.4] - 2026-10-15
+
 ### Fixed
 
 - **The sound of go-link HD games no longer comes and goes** on a computer that cannot draw every frame in time: the worker keeps the game at its speed by the clock and, when it falls behind, runs a frame without its picture (go-link HD's API 4, `golinkhd_frame_skip`), so the sound stays whole and only the picture skips a frame now and then. TELETRABAJO ran at 35 to 50 frames a second on an Intel Mac, so its sound came short.
