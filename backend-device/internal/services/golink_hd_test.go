@@ -301,3 +301,41 @@ func TestGoLinkHDKeepsTheRecord(t *testing.T) {
 		t.Fatalf("the game got back %v, want %v", b, record)
 	}
 }
+
+// A go-link HD room gives the engine a time to draw its 3D in (API 5):
+// the detail stays between half the lines and all of them while it plays.
+func TestGoLinkHDGetsADrawBudget(t *testing.T) {
+	src := os.Getenv("GOLINK_HD_LIB")
+	if src == "" {
+		t.Skip("GOLINK_HD_LIB is not set")
+	}
+	data, err := os.ReadFile(src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir := t.TempDir()
+	core := filepath.Join(dir, filepath.Base(src))
+	if err := os.WriteFile(core, data, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	game, err := OpenGameCore(GameCoreConfig{
+		CorePath:  core,
+		SystemDir: filepath.Join(dir, "system"),
+		Native:    true,
+		Video:     func(i420 []byte, fw, fh int, dur time.Duration) {},
+		Audio:     func(pcm []int16) {},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer game.Close()
+	if !game.hd.SetDrawBudget(game.frameDur * hdDrawBudget / 100) {
+		t.Fatal("the engine has no draw budget (API 5)")
+	}
+	for range 60 {
+		game.Run()
+	}
+	if d := game.hd.DrawDetail(); d < 50 || d > 100 || game.detail != d {
+		t.Fatalf("detail %d%%, logged %d%%", d, game.detail)
+	}
+}
