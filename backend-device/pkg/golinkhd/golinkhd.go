@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"runtime"
+	"time"
 	"unsafe"
 )
 
@@ -155,6 +156,20 @@ func (e *Engine) SetMusic(on bool) {
 func (e *Engine) SetResolution(lines int) bool {
 	return C.ghd_set_resolution(e.g, C.int32_t(lines)) != 0
 }
+
+// SetDrawBudget says how long the 3D picture may take to draw: while it
+// takes longer the engine draws it with fewer lines (down to half) and
+// enlarges it, and with all of them once there is time again; 0 always
+// draws every line. Only the picture changes, never the game. False on an
+// engine older than API 5.
+func (e *Engine) SetDrawBudget(d time.Duration) bool {
+	us := min(max(d.Microseconds(), 0), 10_000_000)
+	return C.ghd_set_draw_budget(e.g, C.int32_t(us)) != 0
+}
+
+// DrawDetail is the 3D's lines drawn now, in percent of the picture's (100
+// when all, and always on an engine older than API 5).
+func (e *Engine) DrawDetail() int { return int(C.ghd_draw_detail(e.g)) }
 
 // Frame runs one frame with the players' pads (ports 1 to len(pads)).
 func (e *Engine) Frame(pads []Pad) Frame {

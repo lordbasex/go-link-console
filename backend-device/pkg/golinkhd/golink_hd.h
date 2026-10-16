@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-#define GOLINKHD_API_VERSION 4
+#define GOLINKHD_API_VERSION 5
 #define GOLINKHD_KEEP_MAX 256 /* API 3: the most a game keeps between sessions (golinkhd_keep_save) */
 
 #if defined(_WIN32) && defined(GOLINKHD_BUILD_SHARED)
@@ -151,6 +151,17 @@ GOLINKHD_API void golinkhd_frame(golinkhd_engine *e, const golinkhd_pad *pads, i
  * it).
  */
 GOLINKHD_API void golinkhd_frame_skip(golinkhd_engine *e, const golinkhd_pad *pads, int32_t count, golinkhd_frame_out *out);
+/*
+ * API 5: how long the 3D picture may take to draw, in microseconds (a part
+ * of the frame's time, leaving room for the rest of the host's work). While
+ * it takes longer, the 3D is drawn with fewer lines (7/8, 3/4, 2/3, down to
+ * 1/2) and enlarged to the screen's size, the texts over it still sharp; once
+ * there is time again, with all of them. 0 (the default) always draws every
+ * line. Only the picture changes, never the game.
+ */
+GOLINKHD_API void golinkhd_set_draw_budget(golinkhd_engine *e, int32_t microseconds);
+/* API 5: the 3D's lines drawn now, in percent of the picture's (100 when all). */
+GOLINKHD_API int32_t golinkhd_draw_detail(golinkhd_engine *e);
 /* The game from its start (the loaded package or demo). */
 GOLINKHD_API void golinkhd_restart(golinkhd_engine *e);
 

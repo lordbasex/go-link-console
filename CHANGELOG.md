@@ -4,6 +4,10 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 
 ## [Unreleased]
 
+### Changed
+
+- **go-link HD on a slow computer** (go-link HD API 5): the device gives the engine 60 % of a frame to draw its 3D picture in. While it takes longer, the 3D is drawn with fewer lines (down to half) and enlarged, the texts over it still sharp, and with all of them again once there is time: a softer picture for a moment instead of fewer pictures. TELETRABAJO for 30 seconds on an Intel Mac with two cores busy: 116 frames without their picture before, 37 after. The log says each change.
+
 ## [0.4.5] - 2026-10-15
 
 ### Added

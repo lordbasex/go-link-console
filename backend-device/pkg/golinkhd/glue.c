@@ -55,6 +55,8 @@ int ghd_open(ghd_t *g, const char *path, char *err, size_t errlen) {
 	*(void **)(&g->keep_save) = lib_sym(g->handle, "golinkhd_keep_save");           /* optional */
 	*(void **)(&g->keep_load) = lib_sym(g->handle, "golinkhd_keep_load");
 	*(void **)(&g->frame_skip) = lib_sym(g->handle, "golinkhd_frame_skip");         /* optional */
+	*(void **)(&g->set_draw_budget) = lib_sym(g->handle, "golinkhd_set_draw_budget"); /* optional */
+	*(void **)(&g->draw_detail) = lib_sym(g->handle, "golinkhd_draw_detail");
 	memset(&cfg, 0, sizeof(cfg));
 	cfg.api_version = 2; /* the oldest API this host needs: newer functions are looked up and optional */
 	g->engine = g->create(&cfg, &why);
@@ -94,6 +96,13 @@ int ghd_set_resolution(ghd_t *g, int32_t lines) {
 	g->set_resolution(g->engine, lines);
 	return 1;
 }
+int ghd_set_draw_budget(ghd_t *g, int32_t microseconds) {
+	if (!g->set_draw_budget)
+		return 0;
+	g->set_draw_budget(g->engine, microseconds);
+	return 1;
+}
+int32_t ghd_draw_detail(ghd_t *g) { return g->draw_detail ? g->draw_detail(g->engine) : 100; }
 size_t ghd_state_size(ghd_t *g) { return g->state_size(g->engine); }
 int ghd_state_save(ghd_t *g, uint8_t *out, size_t size) { return g->state_save(g->engine, out, size); }
 int ghd_state_load(ghd_t *g, const uint8_t *in, size_t size, const char **err) { return g->state_load(g->engine, in, size, err); }

@@ -27,6 +27,8 @@ typedef struct {
 	size_t (*keep_save)(golinkhd_engine *, uint8_t *, size_t);     /* API 3; NULL on an older engine */
 	int (*keep_load)(golinkhd_engine *, const uint8_t *, size_t); /* API 3 */
 	void (*frame_skip)(golinkhd_engine *, const golinkhd_pad *, int32_t, golinkhd_frame_out *); /* API 4; NULL on an older engine */
+	void (*set_draw_budget)(golinkhd_engine *, int32_t); /* API 5; NULL on an older engine */
+	int32_t (*draw_detail)(golinkhd_engine *);            /* API 5 */
 	golinkhd_engine *engine;
 } ghd_t;
 
@@ -41,6 +43,8 @@ void ghd_frame(ghd_t *g, const golinkhd_pad *pads, int32_t count, golinkhd_frame
 int ghd_frame_skip(ghd_t *g, const golinkhd_pad *pads, int32_t count, golinkhd_frame_out *out);
 void ghd_restart(ghd_t *g);
 int ghd_set_resolution(ghd_t *g, int32_t lines);
+int ghd_set_draw_budget(ghd_t *g, int32_t microseconds);
+int32_t ghd_draw_detail(ghd_t *g);
 size_t ghd_state_size(ghd_t *g);
 int ghd_state_save(ghd_t *g, uint8_t *out, size_t size);
 int ghd_state_load(ghd_t *g, const uint8_t *in, size_t size, const char **err);

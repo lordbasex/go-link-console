@@ -82,6 +82,7 @@ type GameCore struct {
 	listen   bool
 	cfg      GameCoreConfig
 	hd       *golinkhd.Engine // go-link HD's engine (Native), instead of core
+	detail   int              // the HD 3D's lines drawn, in percent (logged when it changes)
 	keepPath string           // where the HD game's kept bytes live (its record), "" for none
 	kept     []byte           // what is on disk there
 	keepT    int              // frames since the last look at them
@@ -473,10 +474,18 @@ func (g *GameCore) openNative() error {
 	if info.FPS > 0 {
 		g.frameDur = time.Second / time.Duration(info.FPS)
 	}
+	// a slow computer draws the 3D with fewer lines instead of fewer frames
+	eng.SetDrawBudget(g.frameDur * hdDrawBudget / 100)
+	g.detail = eng.DrawDetail()
 	g.resample = libretro.NewResampler(g.av.SampleRate, 48000)
 	g.cfg.Logger.Info("go-link HD", "engine", info.EngineVersion, "game", info.Title, "players", info.Players)
 	return nil
 }
+
+// hdDrawBudget is the part of a frame's time, in percent, go-link HD's 3D
+// picture may take to draw: the rest is for the game, turning the picture
+// into video and the other rooms. Over it the engine draws fewer lines.
+const hdDrawBudget = 60
 
 // hdButtons maps go-link's buttons to go-link HD's, as a RetroPad would:
 // B and A jump, Y and X run, every face button also on its own.
@@ -514,6 +523,10 @@ func (g *GameCore) runNative(skip bool) {
 	}
 	if g.keepT++; g.keepT >= keepEvery {
 		g.saveKept()
+	}
+	if d := g.hd.DrawDetail(); d != g.detail {
+		g.cfg.Logger.Info("go-link HD 3D detail", "percent", d, "was", g.detail)
+		g.detail = d
 	}
 	if skip {
 		g.skipped += g.frameDur
