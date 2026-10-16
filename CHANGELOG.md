@@ -4,6 +4,8 @@ All notable changes to go-link. Newest first. Willy Maker, which has its own sit
 
 ## [Unreleased]
 
+## [0.4.5] - 2026-10-15
+
 ### Added
 
 - **TELETRABAJO: answers to the boss** (go-link HD 0.3.2, TELETRABAJO 0.6.0): at the desk each ask of the boss opens a dialogue with four answers, chosen with up and down and said with A, like the adventures of the 90s. Good, honest, funny or bad answers give or take points and suspicion (a joke only works while the boss is calm), the boss replies to each, some answers skip the call, put it off 10 minutes or lead to another question, and the weekend can be sold, half sold or kept. The day's end shows what the answers gave. Every answer is voiced for both main characters in English, Spanish and Portuguese. The starter game catalog points to the 0.6.0 packages; the guide mentions the answers.
