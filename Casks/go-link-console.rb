@@ -7,8 +7,8 @@
 # One universal app (Intel + Apple silicon). scripts/release.sh rewrites
 # version and sha256 on every release.
 cask "go-link-console" do
-  version "0.4.5"
-  sha256 "6a457d60465ae2f4569b234cec3dbfc8ee26da6a6e6cb1ede6596b05294f7f8c"
+  version "0.4.6"
+  sha256 "5140544ee85507ef95e2f80da677024dd73fc1effa19c6ee66bbb291fbe98652"
 
   url "https://github.com/lordbasex/go-link-console/releases/download/v#{version}/go-link-console-v#{version}-macos-universal.dmg"
   name "go-link Console"

@@ -2504,7 +2504,7 @@ https://datatracker.ietf.org/ipr/1526/
 
 ```
 
-## go-link HD 0.3.2
+## go-link HD 0.3.3
 
 https://github.com/lordbasex/golink-hd
 
